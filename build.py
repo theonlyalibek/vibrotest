@@ -422,54 +422,6 @@ def board_root(soup):
     return soup
 
 
-# ---------- calm layout ----------
-# Minimal look without cutting content: one background, text instead of boxed cards, no plates over photos.
-LIGHT_TO_DARK = [('#0B1220', '#EEF2F7'), ('#4A5565', '#8A96A6'), ('#DDE3EA', 'rgba(255,255,255,.1)'),
-                 ('#1C2433', '#D5DCE5'), ('#151B24', '#EEF2F7')]
-
-
-def _set(st, prop, val):
-    st = re.sub(r'(^|;)\s*' + prop + r'\s*:[^;]*', r'\1', st).strip('; ')
-    return (st + '; ' if st else '') + f'{prop}: {val}'
-
-
-def calm(soup, name):
-    for el in soup.find_all(style=True):
-        st = el['style']
-        if re.search(r'background:\s*#0E131A', st):  # alternating band -> base
-            el['style'] = re.sub(r'background:\s*#0E131A', 'background: transparent', st)
-        elif re.search(r'background:\s*#F3F5F8', st):  # light band -> dark, recolour its contents
-            el['style'] = re.sub(r'background:\s*#F3F5F8', 'background: transparent', st)
-            for d in [el] + el.find_all(style=True):
-                t = d['style']
-                for a_, b_ in LIGHT_TO_DARK:
-                    t = t.replace(a_, b_)
-                t = re.sub(r'background:\s*#FFFFFF', 'background: transparent', t)
-                d['style'] = t
-            for btn in el.select('.btn-d'):
-                btn['class'] = [c if c != 'btn-d' else 'btn-p' for c in btn['class']]
-    # text cards: drop the box, keep a hairline on top
-    for el in soup.find_all(style=re.compile(r'background:\s*#11161E|border:\s*1px solid rgba\(255,255,255')):
-        st = el['style']
-        if 'border-radius' not in st or el.find('img') or el.find('iframe') or el.name in ('img', 'button', 'span'):
-            continue
-        if not re.search(r'border:\s*1px solid', st) and '#11161E' not in st:
-            continue
-        if el.find(string=re.compile(r'Здесь будет живая карта')):
-            continue
-        st = re.sub(r'background:\s*#11161E', 'background: transparent', st)
-        st = _set(st, 'border', 'none')
-        st = _set(st, 'border-top', '1px solid rgba(255,255,255,.1)')
-        st = _set(st, 'border-radius', '0')
-        st = re.sub(r'padding:\s*([0-9]+px)(\s+[0-9]+px)?(\s+[0-9]+px)?(\s+[0-9]+px)?',
-                    lambda m: f'padding: {m.group(1)} 0 0', st)
-        el['style'] = st
-    # plates over photos (hero signal card)
-    for el in soup.find_all(style=re.compile(r'position:\s*absolute')):
-        if el.find('svg') and el.find(string=re.compile(r'Стойка стабилизатора')):
-            el.decompose()
-
-
 def short_desc(text, limit=130):
     """Meta description: whole sentences up to ~130 chars, so price and address still fit in ~160."""
     out = ''
@@ -486,7 +438,9 @@ def build_board(name, lang, scope, desktop, eager):
     css, body, title = parse_board(name)
     soup = BeautifulSoup(body, 'html.parser')
     strip_chrome(soup, not desktop)
-    calm(soup, name)
+    for svg in soup.find_all('svg'):  # sensor signal charts get a live animation (see JS)
+        if svg.find('polyline', stroke='#5AAEF2') and svg.find('rect', attrs={'stroke-dasharray': True}):
+            svg['class'] = svg.get('class', []) + ['sig']
     if not desktop:
         # one <h1> per page: the desktop board carries it, the phone copy is a styled paragraph
         for h in soup.find_all('h1'):
@@ -626,10 +580,6 @@ Header always set X-Frame-Options "SAMEORIGIN"
 
 BASE_CSS = r'''
 .dnav a,.dh-tel,.hbtn{white-space:nowrap}
-img[src*="/vt-00-"]{object-position:72% 50%}
-.dv .prow{color:#EEF2F7!important;border-bottom-color:rgba(255,255,255,.1)!important}
-.dv .srow{color:#EEF2F7!important;border-bottom-color:rgba(255,255,255,.1)!important}.dv .srow:hover{color:#5AAEF2!important}
-.dv .srow span[style*='#8A96A6']{color:#8A96A6}
 a.lnk,.ft nav a,.crumbs a,.ft a{position:relative}
 a.lnk::after,.ft nav a::after,.crumbs a::after,.ft a::after{content:'';position:absolute;inset:-13px -6px}
 html[lang=kk] .dv h1{font-size:clamp(34px,4.4vw,60px)!important;overflow-wrap:break-word}
@@ -720,6 +670,18 @@ var S=window.VT_SYM;if(S){
  })})}
 d.querySelectorAll('[data-rail]').forEach(function(r){var c=d.getElementById(r.dataset.rail);if(!c)return;var n=r.children.length;
  r.addEventListener('scroll',function(){var w=r.children[0].getBoundingClientRect().width+12;c.textContent=Math.min(n,Math.round(r.scrollLeft/w)+1)+' / '+n},{passive:true})});
+// live sensor signal: the baseline drifts, the knock inside the dashed box pulses; static chart stays as the resting frame
+if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){
+ var sigs=[].slice.call(d.querySelectorAll('svg.sig')).map(function(svg){var vb=svg.viewBox.baseVal,r=svg.querySelector('rect[stroke-dasharray]'),
+  rx=+r.getAttribute('x'),rw=+r.getAttribute('width'),ry=+r.getAttribute('y'),rh=+r.getAttribute('height');
+  return {pl:svg.querySelector('polyline'),W:vb.width,H:vb.height,c:rx+rw/2,w:rw/2.6,amp:rh/2-2,mid:ry+rh/2,on:false,svg:svg}});
+ var io=new IntersectionObserver(function(es){es.forEach(function(e){sigs.forEach(function(s){if(s.svg===e.target)s.on=e.isIntersecting})})});
+ sigs.forEach(function(s){io.observe(s.svg)});
+ var t=0;(function f(){t+=.045;sigs.forEach(function(s){if(!s.on)return;var p=[],st=s.W/240,bump=.55+.45*Math.pow(Math.max(0,Math.sin(t*1.3)),3);
+  for(var x=0;x<=s.W;x+=st){var g=Math.exp(-Math.pow((x-s.c)/s.w,2));
+   var y=s.mid+(Math.sin(x/s.W*38+t*2)*.10+Math.sin(x/s.W*91-t*3.1)*.05)*s.amp*(1-g)+Math.sin(x/s.w*7.5+t*9)*s.amp*.92*g*bump;
+   p.push(x.toFixed(1)+','+y.toFixed(1))}s.pl.setAttribute('points',p.join(' '))});requestAnimationFrame(f)})();
+}
 })();
 '''
 
