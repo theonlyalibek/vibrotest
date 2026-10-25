@@ -659,6 +659,7 @@ def org_schema(base, lang):
     return {
         '@type': 'AutoRepair', '@id': f'{base}/#vibrotest',
         'name': 'VibroTest.kz', 'description': HOME_META[lang][1],
+        'founder': {'@type': 'Person', 'name': 'Виктор Новиков'},
         'url': f'{base}/{lang}/', 'telephone': PHONE, 'image': f'{base}/img/vt-00.jpg', 'logo': f'{base}/img/logo-blue.png',
         'priceRange': '₸₸',
         'address': {'@type': 'PostalAddress', 'streetAddress': 'ул. Аносова, 91' if lang == 'ru' else 'Аносов к-сі, 91',
