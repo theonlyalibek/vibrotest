@@ -422,41 +422,59 @@ def board_root(soup):
     return soup
 
 
-# ---------- minimal home ----------
-# Sections dropped from the home page (desktop and phone): their content lives on service pages and the blog.
-HOME_DROP = ('Что беспокоит', 'Реставрируем рулевые рейки', 'Ремонтируем ходовую машин', 'Марки от 2010',
-             'Мастера ищут стук', 'Полезное', 'Частые вопросы')
+# ---------- calm layout ----------
+# Minimal look without cutting content: one background, text instead of boxed cards, no plates over photos.
+LIGHT_TO_DARK = [('#0B1220', '#EEF2F7'), ('#4A5565', '#8A96A6'), ('#DDE3EA', 'rgba(255,255,255,.1)'),
+                 ('#1C2433', '#D5DCE5'), ('#151B24', '#EEF2F7')]
 
 
-def minimize(soup, name):
-    if name not in ('Main.dc.html', 'Mobile.dc.html'):
-        return
-    for sec in list(soup.find_all('section')):
-        h = sec.find(['h1', 'h2'])
-        if h and h.get_text(' ', strip=True).startswith(HOME_DROP):
-            sec.decompose()
-    for a in soup.find_all('a', href='#symptom'):
-        a['href'] = '#services'
-        a.string = 'Услуги и цены'
-    # neighbour cards under the map: the footer already names Viton
-    for a in soup.find_all('a', href=re.compile(r'viton-kz\.vercel\.app')):
-        box = a.parent
-        if box is not None and 'g2' in (box.get('class') or []):
-            box.decompose()
-            break
-    diag = soup.find('section', id='diag')
-    if diag is not None:
-        # the noise-signal strip repeats the hero card
-        svg = diag.find('svg', attrs={'role': 'img'})
-        if svg is not None and svg.parent is not None:
-            svg.parent.decompose()
+def _set(st, prop, val):
+    st = re.sub(r'(^|;)\s*' + prop + r'\s*:[^;]*', r'\1', st).strip('; ')
+    return (st + '; ' if st else '') + f'{prop}: {val}'
+
+
+def calm(soup, name):
+    for el in soup.find_all(style=True):
+        st = el['style']
+        if re.search(r'background:\s*#0E131A', st):  # alternating band -> base
+            el['style'] = re.sub(r'background:\s*#0E131A', 'background: transparent', st)
+        elif re.search(r'background:\s*#F3F5F8', st):  # light band -> dark, recolour its contents
+            el['style'] = re.sub(r'background:\s*#F3F5F8', 'background: transparent', st)
+            for d in [el] + el.find_all(style=True):
+                t = d['style']
+                for a_, b_ in LIGHT_TO_DARK:
+                    t = t.replace(a_, b_)
+                t = re.sub(r'background:\s*#FFFFFF', 'background: transparent', t)
+                d['style'] = t
+            for btn in el.select('.btn-d'):
+                btn['class'] = [c if c != 'btn-d' else 'btn-p' for c in btn['class']]
+    # text cards: drop the box, keep a hairline on top
+    for el in soup.find_all(style=re.compile(r'background:\s*#11161E|border:\s*1px solid rgba\(255,255,255')):
+        st = el['style']
+        if 'border-radius' not in st or el.find('img') or el.find('iframe') or el.name in ('img', 'button', 'span'):
+            continue
+        if not re.search(r'border:\s*1px solid', st) and '#11161E' not in st:
+            continue
+        if el.find(string=re.compile(r'Здесь будет живая карта')):
+            continue
+        st = re.sub(r'background:\s*#11161E', 'background: transparent', st)
+        st = _set(st, 'border', 'none')
+        st = _set(st, 'border-top', '1px solid rgba(255,255,255,.1)')
+        st = _set(st, 'border-radius', '0')
+        st = re.sub(r'padding:\s*([0-9]+px)(\s+[0-9]+px)?(\s+[0-9]+px)?(\s+[0-9]+px)?',
+                    lambda m: f'padding: {m.group(1)} 0 0', st)
+        el['style'] = st
+    # plates over photos (hero signal card)
+    for el in soup.find_all(style=re.compile(r'position:\s*absolute')):
+        if el.find('svg') and el.find(string=re.compile(r'Стойка стабилизатора')):
+            el.decompose()
 
 
 def build_board(name, lang, scope, desktop, eager):
     css, body, title = parse_board(name)
     soup = BeautifulSoup(body, 'html.parser')
     strip_chrome(soup, not desktop)
-    minimize(soup, name)
+    calm(soup, name)
     root = board_root(soup)
     st = root.get('style', '')
     st = re.sub(r'width:\s*390px;?', 'width: 100%;', st)
@@ -591,6 +609,9 @@ Header always set X-Frame-Options "SAMEORIGIN"
 BASE_CSS = r'''
 .dnav a,.dh-tel,.hbtn{white-space:nowrap}
 img[src*="/vt-00-"]{object-position:72% 50%}
+.dv .prow{color:#EEF2F7!important;border-bottom-color:rgba(255,255,255,.1)!important}
+.dv .srow{color:#EEF2F7!important;border-bottom-color:rgba(255,255,255,.1)!important}.dv .srow:hover{color:#5AAEF2!important}
+.dv .srow span[style*='#8A96A6']{color:#8A96A6}
 html[lang=kk] .dv h1{font-size:clamp(34px,4.4vw,60px)!important;overflow-wrap:break-word}
 
 html{background:#0A0D12;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
