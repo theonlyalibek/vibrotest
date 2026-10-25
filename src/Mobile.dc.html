@@ -34,6 +34,18 @@ summary{list-style:none;cursor:pointer;display:flex;justify-content:space-betwee
 summary::-webkit-details-marker{display:none}
 details[open] .pm{transform:rotate(45deg)}
 .pm{transition:transform .2s;flex:none}
+.bf{display:flex;flex-direction:column;gap:8px;border:0;margin:0;padding:0;min-width:0}
+.bf>span,.bf legend{font-size:14px;color:#8A96A6;padding:0;margin-bottom:8px}
+.bf input[type=text],.bf select{width:100%;min-height:54px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:#0A0D12;color:#EEF2F7;font:500 16px 'Inter',system-ui,sans-serif;appearance:none;-webkit-appearance:none}
+.bf select{background-image:linear-gradient(45deg,transparent 50%,#8A96A6 50%),linear-gradient(135deg,#8A96A6 50%,transparent 50%);background-position:calc(100% - 22px) 24px,calc(100% - 16px) 24px;background-size:6px 6px;background-repeat:no-repeat;padding-right:44px}
+.bf input[type=text]::placeholder{color:#6F7B8B}
+.bf input[type=text]:focus,.bf select:focus{outline:2px solid #0071BC;outline-offset:1px;border-color:transparent}
+.bwhen{display:flex;gap:8px;flex-wrap:wrap}
+.bwhen label{position:relative;cursor:pointer}
+.bwhen input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.bwhen span{display:flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#D5DCE5;font-size:15px;font-weight:500}
+.bwhen input:checked+span{background:#0071BC;border-color:#0071BC;color:#FFFFFF}
+.bwhen input:focus-visible+span{outline:2px solid #5AAEF2;outline-offset:2px}
 </style>
 </helmet>
 
@@ -57,7 +69,7 @@ details[open] .pm{transform:rotate(45deg)}
 </div>
 <div style="padding: 28px 16px 0; display: flex; flex-direction: column; gap: 18px">
 <h1 class="hd" style="font-size: 38px; line-height: 1.04; font-weight: 800">Находим, что стучит в ходовой</h1>
-<p style="font-size: 16px; line-height: 1.55; color: #A9B4C2">Вибростенд под нагрузкой, 25–40 минут, распечатанное заключение. От 7 000 ₸.</p>
+<p style="font-size: 16px; line-height: 1.55; color: #A9B4C2">Вибростенд под нагрузкой, 25–40 минут, распечатанное заключение: что менять сейчас, а что подождёт.</p>
 <a class="btn btn-p" href="https://wa.me/77474956165">Записаться в WhatsApp</a>
 <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: #8A96A6"><span class="num" style="font-size: 18px; font-weight: 600; color: #EEF2F7">4,8</span><span style="color: #F5A524">★★★★★</span><span>143 оценки · Аносова 91</span></div>
 </div>
@@ -74,7 +86,6 @@ details[open] .pm{transform:rotate(45deg)}
 <div style="margin-top: 16px; padding: 22px 20px; border-radius: 16px; background: #11161E; border: 1px solid rgba(255,255,255,.08); display: flex; flex-direction: column; gap: 12px">
 <h3 class="hd" style="font-size: 22px; line-height: 1.15; font-weight: 700">{{rec.title}}</h3>
 <p style="font-size: 15px; line-height: 1.6; color: #A9B4C2">{{rec.text}}</p>
-<div class="num" style="font-size: 22px; font-weight: 600">{{rec.price}}</div>
 <a class="btn btn-p" href="{{rec.wa}}">Написать в WhatsApp</a>
 </div>
 </section>
@@ -90,26 +101,30 @@ details[open] .pm{transform:rotate(45deg)}
 </section>
 
 <section class="sec">
-<h2 class="hd h2">Услуги и цены</h2>
+<h2 class="hd h2">С чем приезжают</h2>
+<p style="margin-top: 10px; font-size: 15px; color: #A9B4C2">Начинаем с диагностики, ремонт только после согласования.</p>
 <div style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,.08)">
-<a class="li" href="Mobile-service.dc.html"><span style="font-size: 16px; font-weight: 600">Диагностика на вибростенде</span><span class="num" style="font-size: 14px; color: #A9B4C2; white-space: nowrap">от 7 000 ₸</span></a>
-<a class="li" href="svc-steering-rack.dc.html"><span style="font-size: 16px; font-weight: 600">Рулевые рейки, тяги</span><span class="num" style="font-size: 14px; color: #A9B4C2; white-space: nowrap">от 3 000 ₸</span></a>
-<a class="li" href="svc-suspension.dc.html"><span style="font-size: 16px; font-weight: 600">Ремонт подвески</span><span class="num" style="font-size: 14px; color: #A9B4C2; white-space: nowrap">от 3 000 ₸</span></a>
-<a class="li" href="svc-drive.dc.html"><span style="font-size: 16px; font-weight: 600">Ступицы, ШРУС, привод</span><span class="num" style="font-size: 14px; color: #A9B4C2; white-space: nowrap">от 5 000 ₸</span></a>
-<a class="li" href="svc-brakes.dc.html"><span style="font-size: 16px; font-weight: 600">Тормоза</span><span class="num" style="font-size: 14px; color: #A9B4C2; white-space: nowrap">от 5 000 ₸</span></a>
-<a class="li" href="svc-cooling.dc.html"><span style="font-size: 16px; font-weight: 600">Радиаторы и патрубки</span><span class="num" style="font-size: 14px; color: #A9B4C2; white-space: nowrap">от 3 000 ₸</span></a>
-<a class="li" href="svc-engine.dc.html"><span style="font-size: 16px; font-weight: 600">Диагностика двигателя</span><span class="num" style="font-size: 14px; color: #A9B4C2; white-space: nowrap">от 5 000 ₸</span></a>
+<a class="li" href="Mobile-service.dc.html"><span style="font-size: 16px; font-weight: 600">Диагностика на вибростенде</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7B8B" stroke-width="1.8" aria-hidden="true" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<a class="li" href="svc-steering-rack.dc.html"><span style="font-size: 16px; font-weight: 600">Рулевые рейки, тяги</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7B8B" stroke-width="1.8" aria-hidden="true" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<a class="li" href="svc-suspension.dc.html"><span style="font-size: 16px; font-weight: 600">Ремонт подвески</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7B8B" stroke-width="1.8" aria-hidden="true" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<a class="li" href="svc-drive.dc.html"><span style="font-size: 16px; font-weight: 600">Ступицы, ШРУС, привод</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7B8B" stroke-width="1.8" aria-hidden="true" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<a class="li" href="svc-brakes.dc.html"><span style="font-size: 16px; font-weight: 600">Тормоза</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7B8B" stroke-width="1.8" aria-hidden="true" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<a class="li" href="svc-cooling.dc.html"><span style="font-size: 16px; font-weight: 600">Радиаторы и патрубки</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7B8B" stroke-width="1.8" aria-hidden="true" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+<a class="li" href="svc-engine.dc.html"><span style="font-size: 16px; font-weight: 600">Диагностика двигателя</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F7B8B" stroke-width="1.8" aria-hidden="true" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
 </div>
+<a class="btn" href="Services.dc.html" style="margin-top: 18px; background: #1B2638; color: #EEF2F7">Все услуги и цены</a>
 </section>
 
 <section class="sec">
 <div style="height: 240px; border-radius: 18px; overflow: hidden; background: #11161E"><img class="cover" src="/_blob/a3a858e620930824e01597f6a6b22945" alt="Разобранная рулевая рейка на верстаке"></div>
 <h2 class="hd h2" style="margin-top: 22px">Реставрируем рулевые рейки</h2>
 <div style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,.08)">
-<div class="li"><span style="font-size: 16px">Механическая</span><span class="num" style="font-size: 15px; font-weight: 600">от 80 000 ₸</span></div>
-<div class="li"><span style="font-size: 16px">Гидравлическая</span><span class="num" style="font-size: 15px; font-weight: 600">от 120 000 ₸</span></div>
-<div class="li"><span style="font-size: 16px">Электрическая</span><span class="num" style="font-size: 15px; font-weight: 600">от 150 000 ₸</span></div>
+<div class="li"><span style="font-size: 16px">Механическая</span><span style="font-size: 14px; color: #8A96A6">без усилителя</span></div>
+<div class="li"><span style="font-size: 16px">Гидравлическая</span><span style="font-size: 14px; color: #8A96A6">ГУР</span></div>
+<div class="li"><span style="font-size: 16px">Электрическая</span><span style="font-size: 14px; color: #8A96A6">ЭУР</span></div>
 </div>
+<a class="btn btn-p" href="https://wa.me/77474956165" style="margin-top: 18px">Узнать цену для моей машины</a>
+<a href="svc-steering-rack.dc.html" style="margin-top: 14px; display: inline-block; font-size: 15px; font-weight: 600">Цены и сроки реставрации</a>
 </section>
 
 <section class="sec">
@@ -138,6 +153,24 @@ details[open] .pm{transform:rotate(45deg)}
 <details><summary>Обязательно ремонтировать у вас?<svg class="pm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary><p style="padding: 0 0 18px; font-size: 15px; line-height: 1.6; color: #A9B4C2">Нет. Заключение ваше, с ним можно поехать куда угодно.</p></details>
 <details><summary>Пройдёт ли большой джип?<svg class="pm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary><p style="padding: 0 0 18px; font-size: 15px; line-height: 1.6; color: #A9B4C2">Да, но въезд узкий. Напишите модель заранее, подскажем, как заехать.</p></details>
 </div>
+</section>
+
+<section class="sec" id="book">
+<h2 class="hd h2">Запишитесь за минуту</h2>
+<p style="margin-top: 10px; font-size: 15px; line-height: 1.55; color: #A9B4C2">Заполните три поля, и WhatsApp откроется с готовым сообщением. Мастер подтвердит время.</p>
+<form class="bform" data-book="" style="margin-top: 18px; display: flex; flex-direction: column; gap: 18px; padding: 20px; border-radius: 16px; background: #11161E; border: 1px solid rgba(255,255,255,.08)">
+<label class="bf"><span>Марка и модель</span><input name="car" type="text" autocomplete="off" placeholder="Например, Toyota Camry 2018" required=""></label>
+<label class="bf"><span>Что беспокоит</span><select name="sym">
+<option>Стук на кочках</option><option>Стук или люфт в руле</option><option>Руль тяжёлый, подклинивает</option><option>Хруст при повороте</option><option>Гул растёт со скоростью</option><option>Машину раскачивает</option><option>Скрип при торможении</option><option>Течёт антифриз</option><option>Горит Check Engine</option><option>Проверка перед покупкой</option><option>Другое</option>
+</select></label>
+<fieldset class="bf"><legend>Когда удобно</legend><div class="bwhen">
+<label><input type="radio" name="when" value="Сегодня" checked=""><span>Сегодня</span></label>
+<label><input type="radio" name="when" value="Завтра"><span>Завтра</span></label>
+<label><input type="radio" name="when" value="На этой неделе"><span>На этой неделе</span></label>
+</div></fieldset>
+<button type="submit" class="btn btn-p" style="border: 0; cursor: pointer; font-family: inherit; width: 100%">Отправить в WhatsApp</button>
+<p style="font-size: 14px; color: #8A96A6; text-align: center">или позвоните: <a href="tel:+77474956165" class="num" style="color: #EEF2F7; font-weight: 600">+7 747 495 61 65</a></p>
+</form>
 </section>
 
 <section class="sec" style="padding-bottom: 40px">

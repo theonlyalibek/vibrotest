@@ -35,6 +35,7 @@ BLOB = {
 # board -> (path under /<lang>/, kind)
 PAGES = {
     'Main.dc.html': ('', 'home'),
+    'Services.dc.html': ('services/', 'services'),
     'svc-vibrostand.dc.html': ('services/diagnostika-na-vibrostende/', 'service'),
     'svc-steering-rack.dc.html': ('services/rulevye-reyki/', 'service'),
     'svc-suspension.dc.html': ('services/remont-podveski/', 'service'),
@@ -54,7 +55,7 @@ PHONE_BOARD = {'Main.dc.html': 'Mobile.dc.html', 'svc-vibrostand.dc.html': 'Mobi
 
 UI = {
     'ru': {
-        'nav': [('svc-vibrostand.dc.html', 'Вибростенд'), ('Main.dc.html#services', 'Услуги и цены'),
+        'nav': [('svc-vibrostand.dc.html', 'Вибростенд'), ('Services.dc.html', 'Услуги и цены'),
                 ('svc-steering-rack.dc.html', 'Рулевые рейки'), ('Blog.dc.html', 'Полезное'), ('Main.dc.html#contacts', 'Контакты')],
         'book': 'Записаться', 'wa': 'Написать в WhatsApp', 'call': 'Позвонить', 'menu': 'Открыть меню', 'close': 'Закрыть меню',
         'home': 'VibroTest.kz, на главную', 'open': 'Открыто до 19:00', 'open_s': 'до 19:00',
@@ -64,14 +65,14 @@ UI = {
         'legal': '', 'map_title': 'Карта 2ГИС: VibroTest, Аносова 91', 'crumb_home': 'Главная', 'crumb_svc': 'Услуги',
         'crumb_blog': 'Полезное', 'skip': 'Перейти к содержанию', 'lang_name': 'РУС',
         'wa_msg': 'Здравствуйте! Хочу записаться в VibroTest на Аносова 91.',
-        'svc_menu': [('svc-vibrostand.dc.html', 'Вибростенд'), ('svc-steering-rack.dc.html', 'Рулевые рейки'),
+        'svc_menu': [('Services.dc.html', 'Услуги и цены'), ('svc-vibrostand.dc.html', 'Вибростенд'), ('svc-steering-rack.dc.html', 'Рулевые рейки'),
                      ('svc-suspension.dc.html', 'Подвеска'), ('svc-drive.dc.html', 'Ступицы и ШРУС'),
                      ('svc-brakes.dc.html', 'Тормоза'), ('svc-cooling.dc.html', 'Радиаторы'),
                      ('svc-engine.dc.html', 'Двигатель'), ('Blog.dc.html', 'Полезное')],
         'n404': ('Страница не найдена', 'Такой страницы нет. Перейдите на главную или напишите нам в WhatsApp.', 'На главную'),
     },
     'kk': {
-        'nav': [('svc-vibrostand.dc.html', 'Вибростенд'), ('Main.dc.html#services', 'Бағалар'),
+        'nav': [('svc-vibrostand.dc.html', 'Вибростенд'), ('Services.dc.html', 'Қызметтер мен бағалар'),
                 ('svc-steering-rack.dc.html', 'Рульдік рейкалар'), ('Blog.dc.html', 'Пайдалы'), ('Main.dc.html#contacts', 'Байланыс')],
         'book': 'Жазылу', 'wa': 'WhatsApp-қа жазу', 'call': 'Қоңырау шалу', 'menu': 'Мәзірді ашу', 'close': 'Мәзірді жабу',
         'home': 'VibroTest.kz, басты бет', 'open': '19:00-ге дейін ашық', 'open_s': '19:00-ге дейін',
@@ -81,7 +82,7 @@ UI = {
         'legal': '', 'map_title': '2ГИС картасы: VibroTest, Аносов 91', 'crumb_home': 'Басты бет', 'crumb_svc': 'Қызметтер',
         'crumb_blog': 'Пайдалы', 'skip': 'Мазмұнға өту', 'lang_name': 'ҚАЗ',
         'wa_msg': 'Сәлеметсіз бе! Аносов 91-дегі VibroTest-ке жазылғым келеді.',
-        'svc_menu': [('svc-vibrostand.dc.html', 'Вибростенд'), ('svc-steering-rack.dc.html', 'Рульдік рейкалар'),
+        'svc_menu': [('Services.dc.html', 'Қызметтер мен бағалар'), ('svc-vibrostand.dc.html', 'Вибростенд'), ('svc-steering-rack.dc.html', 'Рульдік рейкалар'),
                      ('svc-suspension.dc.html', 'Аспа'), ('svc-drive.dc.html', 'Күпшек және ШРУС'),
                      ('svc-brakes.dc.html', 'Тежегіштер'), ('svc-cooling.dc.html', 'Радиаторлар'),
                      ('svc-engine.dc.html', 'Қозғалтқыш'), ('Blog.dc.html', 'Пайдалы')],
@@ -235,11 +236,13 @@ def rewrite_links(soup, lang, page_board):
             txt = a.get_text(' ', strip=True)
             if ALIAS.get(board, board) == 'Main.dc.html' and not frag:
                 if txt in ('Услуги и цены', 'Услуги'):
-                    frag = '#services'
+                    board = 'Services.dc.html'
                 elif txt in ('Контакты',):
                     frag = '#contacts'
             a['href'] = url_for(lang, board, frag)
-        elif h.startswith('#') and page_board != 'Main.dc.html' and h in ('#contacts', '#services'):
+        elif h == '#services':
+            a['href'] = url_for(lang, 'Services.dc.html')
+        elif h.startswith('#') and page_board != 'Main.dc.html' and h == '#contacts':
             a['href'] = url_for(lang, 'Main.dc.html', h)
         elif 'viton-kz.vercel.app' in h:
             a['href'] = f'https://viton.kz/{lang}/'
@@ -670,6 +673,16 @@ var S=window.VT_SYM;if(S){
  })})}
 d.querySelectorAll('[data-rail]').forEach(function(r){var c=d.getElementById(r.dataset.rail);if(!c)return;var n=r.children.length;
  r.addEventListener('scroll',function(){var w=r.children[0].getBoundingClientRect().width+12;c.textContent=Math.min(n,Math.round(r.scrollLeft/w)+1)+' / '+n},{passive:true})});
+// booking: three fields -> WhatsApp with a ready message, in the page language
+var KKL=d.documentElement.lang==='kk';
+function wa(t){return 'https://wa.me/77474956165?text='+encodeURIComponent(t)}
+d.querySelectorAll('form[data-book]').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();
+ var car=f.car.value.trim(),sym=f.sym.options[f.sym.selectedIndex].text,w=f.querySelector('input[name=when]:checked'),wt=w?w.nextElementSibling.textContent:'';
+ var t=KKL?'Сәлеметсіз бе! VibroTest-ке жазылғым келеді. Көлік: '+car+'. Мазалайды: '+sym+'. Ыңғайлы уақыт: '+wt+'.'
+          :'Здравствуйте! Хочу записаться в VibroTest. Машина: '+car+'. Беспокоит: '+sym.toLowerCase()+'. Удобно: '+wt.toLowerCase()+'.';
+ location.href=wa(t)})});
+d.querySelectorAll('a.pbook').forEach(function(a){var n=a.parentNode.querySelector('span').textContent.trim();
+ a.href=wa(KKL?'Сәлеметсіз бе! VibroTest-ке жазылғым келеді: '+n+'.':'Здравствуйте! Хочу записаться в VibroTest: '+n.toLowerCase()+'.')});
 // live sensor signal: the baseline drifts, the knock inside the dashed box pulses; static chart stays as the resting frame
 if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){
  var sigs=[].slice.call(d.querySelectorAll('svg.sig')).map(function(svg){var vb=svg.viewBox.baseVal,r=svg.querySelector('rect[stroke-dasharray]'),
@@ -773,8 +786,11 @@ def page(lang, board, base, noindex, pages_meta):
             svc['offers'] = {'@type': 'Offer', 'priceCurrency': 'KZT', 'price': price,
                              'priceSpecification': {'@type': 'PriceSpecification', 'minPrice': price, 'priceCurrency': 'KZT'}}
         graph += [org_schema(base, lang), svc]
-        crumbs += [{'@type': 'ListItem', 'position': 2, 'name': u['crumb_svc'], 'item': f'{base}/{lang}/#services'},
+        crumbs += [{'@type': 'ListItem', 'position': 2, 'name': u['crumb_svc'], 'item': f'{base}/{lang}/services/'},
                    {'@type': 'ListItem', 'position': 3, 'name': h1t, 'item': url}]
+    elif kind == 'services':
+        graph += [org_schema(base, lang), {'@type': 'CollectionPage', 'name': h1t, 'url': url}]
+        crumbs.append({'@type': 'ListItem', 'position': 2, 'name': h1t, 'item': url})
     elif kind == 'blog':
         graph.append({'@type': 'CollectionPage', 'name': h1t, 'url': url})
         crumbs.append({'@type': 'ListItem', 'position': 2, 'name': u['crumb_blog'], 'item': url})
@@ -803,6 +819,9 @@ def page(lang, board, base, noindex, pages_meta):
         for it in data['items']:
             if it.get('href'):
                 it['url'] = url_for(lang, it['href'])
+        for it in data['items']:  # prices live on the services page, not on the home page
+            it.pop('price', None)
+            it.pop('priceNote', None)
         data['wa'] = WA + '?text='
         sym = '<script>window.VT_SYM=' + json.dumps(data, ensure_ascii=False) + '</script>'
 
@@ -887,7 +906,7 @@ def llms(base, metas):
              '- Часы: ежедневно 09:30–19:00. Телефон и WhatsApp: +7 747 495 61 65.',
              f'- 2ГИС: {GIS} (рейтинг 4,8, 143 оценки).',
              '- Оплата: карта и наличные. Легковые, кроссоверы, джипы, пикапы; грузовые и спецтехнику не обслуживаем.',
-             '- Цены указаны на странице каждой услуги («от», запчасти отдельно).',
+             f'- Цены: {base}/ru/services/ и на странице каждой услуги («от», запчасти отдельно).',
              '', '## Услуги']
     lines += [f'- [{m["h1"]}]({base}/ru/{m["path"]}): {m["desc"]}' for m in svc]
     lines += ['', '## Статьи']
