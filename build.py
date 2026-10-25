@@ -470,11 +470,29 @@ def calm(soup, name):
             el.decompose()
 
 
+def short_desc(text, limit=130):
+    """Meta description: whole sentences up to ~130 chars, so price and address still fit in ~160."""
+    out = ''
+    for sent in re.split(r'(?<=[.!?])\s+', text):
+        if out and len(out) + len(sent) + 1 > limit:
+            break
+        out = (out + ' ' + sent).strip()
+    if len(out) > limit + 20:
+        out = out[:limit + 17].rsplit(' ', 1)[0].rstrip(',;:—') + '…'
+    return out
+
+
 def build_board(name, lang, scope, desktop, eager):
     css, body, title = parse_board(name)
     soup = BeautifulSoup(body, 'html.parser')
     strip_chrome(soup, not desktop)
     calm(soup, name)
+    if not desktop:
+        # one <h1> per page: the desktop board carries it, the phone copy is a styled paragraph
+        for h in soup.find_all('h1'):
+            h.name = 'p'
+            h['role'] = 'heading'
+            h['aria-level'] = '1'
     root = board_root(soup)
     st = root.get('style', '')
     st = re.sub(r'width:\s*390px;?', 'width: 100%;', st)
@@ -612,6 +630,8 @@ img[src*="/vt-00-"]{object-position:72% 50%}
 .dv .prow{color:#EEF2F7!important;border-bottom-color:rgba(255,255,255,.1)!important}
 .dv .srow{color:#EEF2F7!important;border-bottom-color:rgba(255,255,255,.1)!important}.dv .srow:hover{color:#5AAEF2!important}
 .dv .srow span[style*='#8A96A6']{color:#8A96A6}
+a.lnk,.ft nav a,.crumbs a,.ft a{position:relative}
+a.lnk::after,.ft nav a::after,.crumbs a::after,.ft a::after{content:'';position:absolute;inset:-13px -6px}
 html[lang=kk] .dv h1{font-size:clamp(34px,4.4vw,60px)!important;overflow-wrap:break-word}
 
 html{background:#0A0D12;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
@@ -766,12 +786,12 @@ def page(lang, board, base, noindex, pages_meta):
         t = T(lang, title)
         if lang == 'kk' and t == title:
             t = h1t + ' — VibroTest'
-        desc = lead
+        desc = short_desc(lead)
         price = first_price(soup.get_text(' '))
         if kind == 'service' and price and str(price) not in desc.replace(' ', '').replace(' ', ''):
             desc += (f' От {price:,} ₸.' if lang == 'ru' else f' {price:,} ₸ бастап.').replace(',', ' ')
         desc += ' ' + ('Алматы, Аносова 91.' if lang == 'ru' else 'Алматы, Аносов 91.')
-    desc = desc[:300]
+    desc = desc[:200]
     url = f'{base}/{lang}/{path}'
     alts = ''.join(f'<link rel="alternate" hreflang="{l}" href="{base}/{l}/{path}">' for l in LANGS)
     alts += f'<link rel="alternate" hreflang="x-default" href="{base}/ru/{path}">'
