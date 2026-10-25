@@ -1,5 +1,5 @@
 {
- "buildCommand": "python3 -m pip install --user -q -r requirements.txt && python3 build.py --noindex --out public",
+ "buildCommand": "python3 -m venv /tmp/venv && /tmp/venv/bin/pip install -q -r requirements.txt && /tmp/venv/bin/python build.py --noindex --out public",
  "installCommand": "true",
  "outputDirectory": "public",
  "framework": null,
