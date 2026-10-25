@@ -590,6 +590,7 @@ Header always set X-Frame-Options "SAMEORIGIN"
 
 BASE_CSS = r'''
 .dnav a,.dh-tel,.hbtn{white-space:nowrap}
+img[src*="/vt-00-"]{object-position:72% 50%}
 html[lang=kk] .dv h1{font-size:clamp(34px,4.4vw,60px)!important;overflow-wrap:break-word}
 
 html{background:#0A0D12;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
