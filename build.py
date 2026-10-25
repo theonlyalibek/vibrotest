@@ -55,8 +55,8 @@ PHONE_BOARD = {'Main.dc.html': 'Mobile.dc.html', 'svc-vibrostand.dc.html': 'Mobi
 
 UI = {
     'ru': {
-        'nav': [('svc-vibrostand.dc.html', 'Вибростенд'), ('Services.dc.html', 'Услуги и цены'),
-                ('svc-steering-rack.dc.html', 'Рулевые рейки'), ('Blog.dc.html', 'Полезное'), ('Main.dc.html#contacts', 'Контакты')],
+        'nav': [('Services.dc.html', 'Услуги и цены'), ('svc-vibrostand.dc.html', 'Вибростенд'),
+                ('Blog.dc.html', 'Полезное'), ('Main.dc.html#contacts', 'Контакты')],
         'book': 'Записаться', 'wa': 'Написать в WhatsApp', 'call': 'Позвонить', 'menu': 'Открыть меню', 'close': 'Закрыть меню',
         'home': 'VibroTest.kz, на главную', 'open': 'Открыто до 19:00', 'open_s': 'до 19:00',
         'closed': 'Закрыто, откроемся в 09:30', 'closed_s': 'с 09:30',
@@ -72,8 +72,8 @@ UI = {
         'n404': ('Страница не найдена', 'Такой страницы нет. Перейдите на главную или напишите нам в WhatsApp.', 'На главную'),
     },
     'kk': {
-        'nav': [('svc-vibrostand.dc.html', 'Вибростенд'), ('Services.dc.html', 'Қызметтер мен бағалар'),
-                ('svc-steering-rack.dc.html', 'Рульдік рейкалар'), ('Blog.dc.html', 'Пайдалы'), ('Main.dc.html#contacts', 'Байланыс')],
+        'nav': [('Services.dc.html', 'Қызметтер мен бағалар'), ('svc-vibrostand.dc.html', 'Вибростенд'),
+                ('Blog.dc.html', 'Пайдалы'), ('Main.dc.html#contacts', 'Байланыс')],
         'book': 'Жазылу', 'wa': 'WhatsApp-қа жазу', 'call': 'Қоңырау шалу', 'menu': 'Мәзірді ашу', 'close': 'Мәзірді жабу',
         'home': 'VibroTest.kz, басты бет', 'open': '19:00-ге дейін ашық', 'open_s': '19:00-ге дейін',
         'closed': 'Жабық, 09:30-да ашыламыз', 'closed_s': '09:30-да ашылады',
@@ -524,7 +524,7 @@ def header_html(lang, board):
 <div id="menu" class="menu" hidden>
 <div class="menu-top"><a href="{home}" aria-label="{u["home"]}"><img src="/img/logo-white.png" alt="VibroTest.kz" width="107" height="30"></a>
 <a href="#" data-menu="close" class="ib" aria-label="{u["close"]}">{ICON_X}</a></div>
-<nav aria-label="Menu" class="menu-nav">{"".join(f'<a href="{url_for(lang, b)}">{l}</a>' for b, l in u["svc_menu"])}</nav>
+<nav aria-label="Menu" class="menu-nav">{"".join(f'<a href="{url_for(lang, b.partition("#")[0], "#" + b.partition("#")[2] if "#" in b else "")}">{l}</a>' for b, l in u["nav"])}</nav>
 <div class="menu-bot"><div class="menu-row">{status_html(lang)}{switch}</div>
 <p>{u["addr"]}</p><a href="tel:+77474956165" class="num menu-tel">{PHONE}</a>
 <a class="mbtn" href="{WA}?text={_q(u["wa_msg"])}">{ICON_WA}{u["wa"]}</a></div>
