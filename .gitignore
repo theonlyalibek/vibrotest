@@ -1,3 +1,4 @@
 dist/
 __pycache__/
 i18n/kk.missing.json
+public/

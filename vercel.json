@@ -1,0 +1,12 @@
+{
+ "buildCommand": "python3 -m pip install --user -q -r requirements.txt && python3 build.py --noindex --out public",
+ "installCommand": "true",
+ "outputDirectory": "public",
+ "framework": null,
+ "trailingSlash": true,
+ "redirects": [{"source": "/", "destination": "/ru/", "permanent": false}],
+ "headers": [
+  {"source": "/fonts/(.*)", "headers": [{"key": "Cache-Control", "value": "public, max-age=31536000, immutable"}]},
+  {"source": "/(.*)", "headers": [{"key": "X-Robots-Tag", "value": "noindex, nofollow"}]}
+ ]
+}
