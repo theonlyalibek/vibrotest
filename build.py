@@ -422,10 +422,41 @@ def board_root(soup):
     return soup
 
 
+# ---------- minimal home ----------
+# Sections dropped from the home page (desktop and phone): their content lives on service pages and the blog.
+HOME_DROP = ('Что беспокоит', 'Реставрируем рулевые рейки', 'Ремонтируем ходовую машин', 'Марки от 2010',
+             'Мастера ищут стук', 'Полезное', 'Частые вопросы')
+
+
+def minimize(soup, name):
+    if name not in ('Main.dc.html', 'Mobile.dc.html'):
+        return
+    for sec in list(soup.find_all('section')):
+        h = sec.find(['h1', 'h2'])
+        if h and h.get_text(' ', strip=True).startswith(HOME_DROP):
+            sec.decompose()
+    for a in soup.find_all('a', href='#symptom'):
+        a['href'] = '#services'
+        a.string = 'Услуги и цены'
+    # neighbour cards under the map: the footer already names Viton
+    for a in soup.find_all('a', href=re.compile(r'viton-kz\.vercel\.app')):
+        box = a.parent
+        if box is not None and 'g2' in (box.get('class') or []):
+            box.decompose()
+            break
+    diag = soup.find('section', id='diag')
+    if diag is not None:
+        # the noise-signal strip repeats the hero card
+        svg = diag.find('svg', attrs={'role': 'img'})
+        if svg is not None and svg.parent is not None:
+            svg.parent.decompose()
+
+
 def build_board(name, lang, scope, desktop, eager):
     css, body, title = parse_board(name)
     soup = BeautifulSoup(body, 'html.parser')
     strip_chrome(soup, not desktop)
+    minimize(soup, name)
     root = board_root(soup)
     st = root.get('style', '')
     st = re.sub(r'width:\s*390px;?', 'width: 100%;', st)
