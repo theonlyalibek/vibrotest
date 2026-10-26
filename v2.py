@@ -51,9 +51,10 @@ def link_rows(soup, current):
 
 T2 = {
     'h': ('Что не так с машиной?', 'Көлікте не ақау?'),
-    'sub': ('Нажмите на узел или выберите из списка: покажем частые симптомы и цену работы. Точно скажет только диагностика.',
-            'Түйінді басыңыз немесе тізімнен таңдаңыз: жиі белгілер мен жұмыс бағасын көрсетеміз. Нақтысын тек диагностика айтады.'),
+    'sub': ('Выберите узел: покажем частые симптомы и цену работы. Точно скажет только диагностика.',
+            'Түйінді таңдаңыз: жиі белгілер мен жұмыс бағасын көрсетеміз. Нақтысын тек диагностика айтады.'),
     'book': ('Записаться', 'Жазылу'),
+    'swipe': ('Листайте вправо', 'Оңға қарай сырғытыңыз'),
     'from': ('от {p}', '{p} бастап'),
     'unsure': ('Не знаете, где проблема? Начните с диагностики на вибростенде', 'Ақау қайда екенін білмейсіз бе? Вибростендтегі диагностикадан бастаңыз'),
     'wa': ('Здравствуйте! Хочу записаться в VibroTest: {x}.', 'Сәлеметсіз бе! VibroTest-ке жазылғым келеді: {x}.'),
@@ -94,8 +95,6 @@ NODES = [
      ('Ходовая на вибростенде и двигатель сканером за один приезд, заключение на руки.', 'Бір келгенде жүріс бөлігі вибростендте, қозғалтқыш сканермен, қорытынды қолға.'), 12000,
      [('l-pered-pokupkoy.dc.html', 'Проверка авто перед покупкой', 'Көлікті сатып алар алдында тексеру')]),
 ]
-
-CHEV = '<svg class="km-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
 
 CAR = '''<svg class="km-car" viewBox="0 0 1000 340" aria-hidden="true" focusable="false">
 <path class="km-body" d="M60,250 L60,200 Q64,182 96,176 L330,148 Q352,146 372,134 L470,84 Q484,76 504,76 L748,76 Q770,76 786,90 L866,150 Q880,160 905,164 L935,170 Q950,174 950,190 L950,250 L870,250 A80,80 0 0 0 710,250 L295,250 A80,80 0 0 0 135,250 Z"/>
@@ -155,37 +154,28 @@ CSS = '''
 .plink{color:inherit;border-bottom:1px solid currentColor;border-bottom-color:rgba(127,140,160,.45)}
 .plink:hover{color:#0071BC}
 .prow .plink:hover{color:#5AAEF2}
-.km-acc{display:none}
-@media (max-width:899px){.km{display:block}.km-list,.km-side{display:none}
+.km-swipe{display:none}
+@media (max-width:899px){.km{display:block}
 .km-fig{padding:14px 6px 8px}.km-dots{inset:14px 6px 8px;pointer-events:none}
 .km-dot{width:14px;height:14px;margin:-7px 0 0 -7px;font-size:0}.km-dot::before{inset:2px;box-shadow:none;opacity:.55}.km-dot::after{display:none}
 .km-dot[aria-pressed=true]{width:30px;height:30px;margin:-15px 0 0 -15px;font-size:11px}.km-dot[aria-pressed=true]::before{inset:5px;opacity:1;background:#FFFFFF;box-shadow:0 0 0 6px rgba(0,113,188,.35)}
 .km-dot[aria-pressed=true]::after{display:block;inset:5px}
-.km-unsure{margin-top:14px;font-size:14px}
-.km-acc{display:block;margin-top:18px;border-top:1px solid rgba(255,255,255,.1)}
-.km-item{border-bottom:1px solid rgba(255,255,255,.1)}
-.km-row{width:100%;min-height:62px;display:grid;grid-template-columns:30px minmax(0,1fr) auto 20px;align-items:center;gap:12px;padding:10px 0;border:0;background:none;color:#EEF2F7;font:600 16px/1.3 'Inter',system-ui,sans-serif;text-align:left;cursor:pointer}
-.km-row b{width:30px;height:30px;border-radius:50%;background:#0071BC;color:#fff;display:flex;align-items:center;justify-content:center;font:600 12px 'JetBrains Mono',monospace}
-.km-row em{font-style:normal;font-size:13px;color:#8A96A6;white-space:nowrap}
-.km-chev{color:#8A96A6;transition:transform .2s}.km-row[aria-expanded=true] .km-chev{transform:rotate(180deg)}
-.km-row[aria-expanded=true] b{background:#FFFFFF;color:#0071BC}
-.km-body{display:flex;flex-direction:column;gap:14px;padding:0 0 20px 42px}.km-body[hidden]{display:none}
-.km-body p{margin:0;color:#A9B4C2;font-size:15px;line-height:1.6}.km-body .btn{width:100%}
-.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
+.km-list{flex-wrap:nowrap;overflow-x:auto;margin:14px -16px 0;padding:0 16px 4px;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding:0 16px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+.km-list::-webkit-scrollbar{display:none}
+.km-chip{flex:none;min-height:48px;padding:0 18px;font-size:15px;scroll-snap-align:start}.km-chip b{font-size:13px}
+.km-swipe{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:#6F7B8B}
+.km-side{margin-top:14px}.km-panel{padding:22px 20px;gap:12px}.km-panel h3{font-size:22px}.km-price{font-size:24px}.km-panel .btn{width:100%}
+.km-unsure{margin-top:14px;font-size:14px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
 @media (prefers-reduced-motion:reduce){.km-dot::after,.km-fig::after{animation:none}.km-fig::after{display:none}}
 '''
 
 JS = r'''
-// car map: a dot or a chip picks the node, the matching panel shows; on phones a row opens in place and lights its dot
+// car map: a dot or a chip picks the node, the matching panel shows (on phones the drawing only lights the chosen part)
 [].forEach.call(document.querySelectorAll('[data-km]'),function(km){
- var btns=km.querySelectorAll('[data-node]'),panels=km.querySelectorAll('.km-panel'),rows=km.querySelectorAll('[data-row]');
+ var btns=km.querySelectorAll('[data-node]'),panels=km.querySelectorAll('.km-panel');
  function pick(id){[].forEach.call(btns,function(b){b.setAttribute('aria-pressed',b.getAttribute('data-node')===id?'true':'false')});
   [].forEach.call(panels,function(p){p.hidden=p.getAttribute('data-panel')!==id})}
  [].forEach.call(btns,function(b){b.addEventListener('click',function(){pick(b.getAttribute('data-node'))})});
- [].forEach.call(rows,function(r){r.addEventListener('click',function(){var open=r.getAttribute('aria-expanded')!=='true';
-  [].forEach.call(rows,function(o){var on=open&&o===r;o.setAttribute('aria-expanded',on?'true':'false');o.nextElementSibling.hidden=!on});
-  pick(open?r.getAttribute('data-row'):'');
-  if(open){var top=r.getBoundingClientRect().top;if(top<70)window.scrollBy(0,top-80)}})});
 });
 '''
 
@@ -193,7 +183,7 @@ JS = r'''
 def knock_map(lang, url_for, wa, phone=False, sid=''):
     i = 0 if lang == 'ru' else 1
     from urllib.parse import quote
-    dots, chips, panels, acc = [], [], [], []
+    dots, chips, panels = [], [], []
     for n, (key, x, y, title, text, price, links) in enumerate(NODES, 1):
         on = n == 1
         t = html.escape(title[i])
@@ -208,20 +198,14 @@ def knock_map(lang, url_for, wa, phone=False, sid=''):
         panels.append(f'<div class="km-panel" data-panel="{key}"{"" if on else " hidden"}><span class="k">{f"{n:02d}" if x is not None else "—"}</span><h3>{t}</h3>'
                       f'<p>{html.escape(text[i])}</p><div class="km-price">{T2["from"][i].format(p=p)}</div>'
                       f'<div class="km-links">{rows}</div><a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a></div>')
-        # phones: one big tappable row per node that opens in place
-        acc.append(f'<div class="km-item"><button type="button" class="km-row" data-row="{key}" aria-expanded="false">'
-                   f'<b>{n if x is not None else "+"}</b><span>{t}</span><em class="num">{T2["from"][i].format(p=p)}</em>{CHEV}</button>'
-                   f'<div class="km-body" hidden><p>{html.escape(text[i])}</p><div class="km-links">{rows}</div>'
-                   f'<a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a></div></div>')
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
     return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 0" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub"][i]}</p></div>'
             f'<div class="km"><div><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{"".join(dots)}</div></div>'
-            f'<div class="km-list">{"".join(chips)}</div>'
+            f'<div class="km-list">{"".join(chips)}</div><div class="km-swipe" aria-hidden="true">{T2["swipe"][i]} →</div>'
             f'<span class="km-unsure">{head}? <a href="{url_for(lang, "svc-vibrostand.dc.html")}">{tail.strip()}</a></span></div>'
-            f'<div class="km-side">{"".join(panels)}</div></div>'
-            f'<div class="km-acc">{"".join(acc)}</div></div></section>')
+            f'<div class="km-side">{"".join(panels)}</div></div></div></section>')
 
 
 def insert_map(soup, name, lang, url_for, wa):
