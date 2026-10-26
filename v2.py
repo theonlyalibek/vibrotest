@@ -50,12 +50,12 @@ def link_rows(soup, current):
 # ---------- «Где стучит?» ----------
 
 T2 = {
-    'h': ('Где стучит?', 'Қай жерде тықылдайды?'),
-    'sub': ('Нажмите на узел: покажем частые симптомы и цену работы. Точно скажет только стенд.',
-            'Түйінді басыңыз: жиі белгілер мен жұмыс бағасын көрсетеміз. Нақтысын тек стенд айтады.'),
+    'h': ('Что не так с машиной?', 'Көлікте не ақау?'),
+    'sub': ('Нажмите на узел или выберите из списка: покажем частые симптомы и цену работы. Точно скажет только диагностика.',
+            'Түйінді басыңыз немесе тізімнен таңдаңыз: жиі белгілер мен жұмыс бағасын көрсетеміз. Нақтысын тек диагностика айтады.'),
     'book': ('Записаться', 'Жазылу'),
     'from': ('от {p}', '{p} бастап'),
-    'unsure': ('Не уверены, что стучит? Начните с диагностики на вибростенде', 'Не тықылдайтынын білмейсіз бе? Вибростендтегі диагностикадан бастаңыз'),
+    'unsure': ('Не знаете, где проблема? Начните с диагностики на вибростенде', 'Ақау қайда екенін білмейсіз бе? Вибростендтегі диагностикадан бастаңыз'),
     'wa': ('Здравствуйте! Хочу записаться в VibroTest: {x}.', 'Сәлеметсіз бе! VibroTest-ке жазылғым келеді: {x}.'),
     'aria': ('Схема автомобиля с узлами ходовой', 'Жүріс бөлігі түйіндері бар көлік сызбасы'),
 }
@@ -89,6 +89,10 @@ NODES = [
     ('brakes', 790, 262, ('Тормоза', 'Тежегіштер'),
      ('Скрип, биение в руль или педаль при торможении.', 'Тежегенде шиқыл, рульге немесе педальға соғу.'), 5000,
      [('svc-brakes.dc.html', 'Колодки и диски', 'Төлкелер мен дискілер')]),
+    # not a part of the car: chip only, no dot on the drawing
+    ('buy', None, None, ('Проверка перед покупкой', 'Сатып алар алдында тексеру'),
+     ('Ходовая на вибростенде и двигатель сканером за один приезд, заключение на руки.', 'Бір келгенде жүріс бөлігі вибростендте, қозғалтқыш сканермен, қорытынды қолға.'), 12000,
+     [('l-pered-pokupkoy.dc.html', 'Проверка авто перед покупкой', 'Көлікті сатып алар алдында тексеру')]),
 ]
 
 CAR = '''<svg class="km-car" viewBox="0 0 1000 340" aria-hidden="true" focusable="false">
@@ -167,25 +171,27 @@ JS = r'''
 '''
 
 
-def knock_map(lang, url_for, wa, phone=False):
+def knock_map(lang, url_for, wa, phone=False, sid=''):
     i = 0 if lang == 'ru' else 1
     from urllib.parse import quote
     dots, chips, panels = [], [], []
     for n, (key, x, y, title, text, price, links) in enumerate(NODES, 1):
         on = n == 1
         t = html.escape(title[i])
-        dots.append(f'<button type="button" class="km-dot" data-node="{key}" aria-pressed="{"true" if on else "false"}" '
-                    f'aria-label="{t}" style="left:{x / 10:.1f}%;top:{y / 3.4:.1f}%"><span>{n}</span></button>')
-        chips.append(f'<button type="button" class="km-chip" data-node="{key}" aria-pressed="{"true" if on else "false"}"><b>{n}</b>{t}</button>')
+        if x is not None:
+            dots.append(f'<button type="button" class="km-dot" data-node="{key}" aria-pressed="{"true" if on else "false"}" '
+                        f'aria-label="{t}" style="left:{x / 10:.1f}%;top:{y / 3.4:.1f}%"><span>{n}</span></button>')
+        num = f'<b>{n}</b>' if x is not None else ''
+        chips.append(f'<button type="button" class="km-chip" data-node="{key}" aria-pressed="{"true" if on else "false"}">{num}{t}</button>')
         p = f'{price:,}'.replace(',', ' ') + ' ₸'
         rows = ''.join(f'<a href="{url_for(lang, b)}"><span>{html.escape(l[i])}</span><span aria-hidden="true">→</span></a>' for b, *l in links)
         msg = quote(T2['wa'][i].replace('{x}', title[i].lower() if lang == 'ru' else title[i]), safe='')
-        panels.append(f'<div class="km-panel" data-panel="{key}"{"" if on else " hidden"}><span class="k">{n:02d}</span><h3>{t}</h3>'
+        panels.append(f'<div class="km-panel" data-panel="{key}"{"" if on else " hidden"}><span class="k">{f"{n:02d}" if x is not None else "—"}</span><h3>{t}</h3>'
                       f'<p>{html.escape(text[i])}</p><div class="km-price">{T2["from"][i].format(p=p)}</div>'
                       f'<div class="km-links">{rows}</div><a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a></div>')
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
-    return (f'<section class="km-sec" data-km style="padding: {"56px 16px 0" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
+    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 0" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub"][i]}</p></div>'
             f'<div class="km"><div><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{"".join(dots)}</div></div>'
             f'<div class="km-list">{"".join(chips)}</div>'
@@ -194,7 +200,7 @@ def knock_map(lang, url_for, wa, phone=False):
 
 
 def insert_map(soup, name, lang, url_for, wa):
-    """Home: right after the symptom picker. Services: right after the hero."""
+    """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
     anchor = None
     if name in ('Main.dc.html', 'Mobile.dc.html'):
         chip = soup.find('button', class_='chip')
@@ -203,7 +209,12 @@ def insert_map(soup, name, lang, url_for, wa):
         anchor = soup.find('section')
     if anchor is None:
         return
-    anchor.insert_after(BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html'), 'html.parser'))
+    home = name in ('Main.dc.html', 'Mobile.dc.html')
+    new = BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html', 'symptom' if name == 'Main.dc.html' else ''), 'html.parser')
+    if home:
+        anchor.replace_with(new)
+    else:
+        anchor.insert_after(new)
 
 
 def prefix(doc):
