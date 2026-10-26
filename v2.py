@@ -20,6 +20,9 @@ ROW_LINK['Стенд и двигатель перед покупкой'] = 'l-pe
 ROW_LINK['Диагностика ходовой на вибростенде'] = 'svc-vibrostand.dc.html'
 ROW_LINK['Компьютерная диагностика двигателя'] = 'svc-engine.dc.html'
 
+_KK = json.loads((ROOT / 'i18n' / 'kk.json').read_text(encoding='utf-8'))
+SERVICES_H2 = {h for r in ('С чем приезжают', 'С чем приезжают к нам') for h in (r, _KK.get(r, r))}
+
 # symptom picker on the home page: send people to the narrow page when there is one
 SYM_HREF = {'Стук или люфт в руле': 'l-tyagi.dc.html', 'Хруст при повороте': 'l-shrus.dc.html',
             'Гул растёт со скоростью': 'l-stupica.dc.html', 'Машину раскачивает': 'l-amortizatory.dc.html',
@@ -55,6 +58,9 @@ T2 = {
             'Түйінді таңдаңыз: жиі белгілер мен жұмыс бағасын көрсетеміз. Нақтысын тек диагностика айтады.'),
     'book': ('Записаться', 'Жазылу'),
     'swipe': ('Листайте вправо', 'Оңға қарай сырғытыңыз'),
+    'sub_home': ('Выберите узел: покажем частые симптомы и чем мы поможем. Точно скажет только диагностика.',
+                 'Түйінді таңдаңыз: жиі белгілер мен қалай көмектесетінімізді көрсетеміз. Нақтысын тек диагностика айтады.'),
+    'all': ('Все услуги и цены', 'Барлық қызметтер мен бағалар'),
     'from': ('от {p}', '{p} бастап'),
     'unsure': ('Не знаете, где проблема? Начните с диагностики на вибростенде', 'Ақау қайда екенін білмейсіз бе? Вибростендтегі диагностикадан бастаңыз'),
     'wa': ('Здравствуйте! Хочу записаться в VibroTest: {x}.', 'Сәлеметсіз бе! VibroTest-ке жазылғым келеді: {x}.'),
@@ -151,6 +157,8 @@ CSS = '''
 .km-panel .btn{align-self:flex-start;margin-top:auto}
 .km-unsure{display:inline-block;margin-top:22px;color:#8A96A6;font-size:15px}
 .km-unsure a{color:#5AAEF2}
+.km-all{display:inline-flex;align-items:center;gap:8px;margin-top:32px;min-height:52px;padding:0 24px;border-radius:12px;background:#1B2638;color:#EEF2F7!important;font-weight:600;font-size:15px}
+.km-all:hover{background:#243248;color:#FFFFFF}
 .plink{color:inherit;border-bottom:1px solid currentColor;border-bottom-color:rgba(127,140,160,.45)}
 .plink:hover{color:#0071BC}
 .prow .plink:hover{color:#5AAEF2}
@@ -164,23 +172,44 @@ CSS = '''
 .km-list::-webkit-scrollbar{display:none}
 .km-chip{flex:none;min-height:48px;padding:0 18px;font-size:15px;scroll-snap-align:start}.km-chip b{font-size:13px}
 .km-swipe{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:#6F7B8B}
-.km-side{margin-top:14px}.km-panel{padding:22px 20px;gap:12px}.km-panel h3{font-size:22px}.km-price{font-size:24px}.km-panel .btn{width:100%}
+.km-side{margin:14px -16px 0;padding:0 16px 4px;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;scrollbar-width:none}
+.km-side::-webkit-scrollbar{display:none}
+.km-side .km-panel,.km-side .km-panel[hidden]{display:flex;flex:0 0 calc(100% - 28px);scroll-snap-align:start;min-height:0}
+.km-panel{padding:22px 20px;gap:12px}.km-panel h3{font-size:22px}.km-price{font-size:24px}.km-panel .btn{width:100%}
 .km-unsure{margin-top:14px;font-size:14px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
+.bb{transition:transform .25s ease,opacity .25s ease}
+.bb.bb-off{transform:translateY(110%);opacity:0;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.km-dot::after,.km-fig::after{animation:none}.km-fig::after{display:none}}
 '''
 
 JS = r'''
-// car map: a dot or a chip picks the node, the matching panel shows (on phones the drawing only lights the chosen part)
+// car map: a dot or a chip picks the node and its card shows. On phones the cards are a swipeable row:
+// swiping a card moves the chip row and the lit part on the drawing along with it.
 [].forEach.call(document.querySelectorAll('[data-km]'),function(km){
- var btns=km.querySelectorAll('[data-node]'),panels=km.querySelectorAll('.km-panel');
- function pick(id){[].forEach.call(btns,function(b){b.setAttribute('aria-pressed',b.getAttribute('data-node')===id?'true':'false')});
-  [].forEach.call(panels,function(p){p.hidden=p.getAttribute('data-panel')!==id})}
- [].forEach.call(btns,function(b){b.addEventListener('click',function(){pick(b.getAttribute('data-node'))})});
+ var btns=km.querySelectorAll('[data-node]'),panels=[].slice.call(km.querySelectorAll('.km-panel')),
+  side=km.querySelector('.km-side'),list=km.querySelector('.km-list'),mq=matchMedia('(max-width:899px)'),cur='';
+ function mark(id){if(id===cur)return;cur=id;
+  [].forEach.call(btns,function(b){var on=b.getAttribute('data-node')===id;b.setAttribute('aria-pressed',on?'true':'false');
+   if(on&&mq.matches&&b.classList.contains('km-chip'))list.scrollTo({left:b.offsetLeft-16,behavior:'smooth'})});
+  panels.forEach(function(p){p.hidden=p.getAttribute('data-panel')!==id})}
+ [].forEach.call(btns,function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-node');mark(id);
+  if(mq.matches){var p=km.querySelector('[data-panel="'+id+'"]');side.scrollTo({left:p.offsetLeft-side.offsetLeft-16,behavior:'smooth'})}})});
+ var t;side.addEventListener('scroll',function(){if(!mq.matches)return;clearTimeout(t);t=setTimeout(function(){
+  var x=side.scrollLeft+16,best=panels[0],d=1e9;panels.forEach(function(p){var dd=Math.abs(p.offsetLeft-side.offsetLeft-x);if(dd<d){d=dd;best=p}});
+  mark(best.getAttribute('data-panel'))},80)},{passive:true});
+ cur=(km.querySelector('[aria-pressed=true]')||btns[0]).getAttribute('data-node');
 });
+// phones: the bottom «Записаться / звонок» bar steps aside while another booking button is on screen
+(function(){var bb=document.querySelector('.bb');if(!bb||!('IntersectionObserver' in window))return;
+ var seen=new Set(),io=new IntersectionObserver(function(es){es.forEach(function(e){e.intersectionRatio>=.5?seen.add(e.target):seen.delete(e.target)});
+  bb.classList.toggle('bb-off',seen.size>0)},{threshold:[0,.5,1]});
+ [].forEach.call(document.querySelectorAll('main a[href*="wa.me"].btn, main .btn-p, main form[data-book] [type=submit], main .mbtn'),function(b){
+  if(b.offsetParent!==null||getComputedStyle(b).display!=='none')io.observe(b)});
+})();
 '''
 
 
-def knock_map(lang, url_for, wa, phone=False, sid=''):
+def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
     i = 0 if lang == 'ru' else 1
     from urllib.parse import quote
     dots, chips, panels = [], [], []
@@ -196,16 +225,18 @@ def knock_map(lang, url_for, wa, phone=False, sid=''):
         rows = ''.join(f'<a href="{url_for(lang, b)}"><span>{html.escape(l[i])}</span><span aria-hidden="true">→</span></a>' for b, *l in links)
         msg = quote(T2['wa'][i].replace('{x}', title[i].lower() if lang == 'ru' else title[i]), safe='')
         panels.append(f'<div class="km-panel" data-panel="{key}"{"" if on else " hidden"}><span class="k">{f"{n:02d}" if x is not None else "—"}</span><h3>{t}</h3>'
-                      f'<p>{html.escape(text[i])}</p><div class="km-price">{T2["from"][i].format(p=p)}</div>'
+                      f'<p>{html.escape(text[i])}</p>' + (f'<div class="km-price">{T2["from"][i].format(p=p)}</div>' if prices else '') +
                       f'<div class="km-links">{rows}</div><a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a></div>')
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
     return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 0" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
-            f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub"][i]}</p></div>'
+            f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub" if prices else "sub_home"][i]}</p></div>'
             f'<div class="km"><div><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{"".join(dots)}</div></div>'
             f'<div class="km-list">{"".join(chips)}</div><div class="km-swipe" aria-hidden="true">{T2["swipe"][i]} →</div>'
             f'<span class="km-unsure">{head}? <a href="{url_for(lang, "svc-vibrostand.dc.html")}">{tail.strip()}</a></span></div>'
-            f'<div class="km-side">{"".join(panels)}</div></div></div></section>')
+            f'<div class="km-side">{"".join(panels)}</div></div>'
+            + ('' if prices else f'<a class="km-all" href="{url_for(lang, "Services.dc.html")}">{T2["all"][i]} <span aria-hidden="true">→</span></a>')
+            + '</div></section>')
 
 
 def insert_map(soup, name, lang, url_for, wa):
@@ -219,9 +250,14 @@ def insert_map(soup, name, lang, url_for, wa):
     if anchor is None:
         return
     home = name in ('Main.dc.html', 'Mobile.dc.html')
-    new = BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html', 'symptom' if name == 'Main.dc.html' else ''), 'html.parser')
+    new = BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html', 'symptom' if name == 'Main.dc.html' else '', prices=not home), 'html.parser')
     if home:
         anchor.replace_with(new)
+        # «С чем приезжают» lists the same services: the map covers it now
+        for h in soup.find_all('h2'):
+            if h.get_text(' ', strip=True) in SERVICES_H2:
+                h.find_parent('section').decompose()
+                break
     else:
         anchor.insert_after(new)
 
