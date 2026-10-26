@@ -181,8 +181,6 @@ CSS = '''
 
 .ft-card{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;padding:48px;border-radius:24px;background:linear-gradient(160deg,#101826 0,#0D121A 70%);border:1px solid rgba(90,174,242,.22);box-shadow:0 30px 80px -40px rgba(0,113,188,.45)}
 .ft-main{display:flex;flex-direction:column;gap:22px}
-.ft-eye{display:inline-flex;align-self:flex-start;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(0,113,188,.16);color:#8CC6F6;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase}
-.ft-eye::before{content:'';width:6px;height:6px;border-radius:50%;background:#5AAEF2;box-shadow:0 0 0 4px rgba(90,174,242,.2)}
 .ft-main h2{font:800 clamp(30px,3.6vw,50px)/1.04 'Geologica',system-ui,sans-serif;letter-spacing:-.02em;margin:0}
 .ft-main>p{color:#A9B4C2;font-size:17px;line-height:1.65;margin:0}
 .ft-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1)}
@@ -194,8 +192,6 @@ CSS = '''
 .ft-side{display:flex;flex-direction:column;gap:16px}
 .ft-pic{position:relative;border-radius:18px;overflow:hidden;background:#11161E;aspect-ratio:16/10}
 .ft-pic img{width:100%;height:100%;object-fit:cover;display:block}
-.ft-wave{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:12px;background:rgba(10,13,18,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:6px}
-.ft-wave svg{display:block;width:100%;height:38px}.ft-wave span{font-size:12px;color:#D5DCE5}
 .ft-get{padding:20px 22px;border-radius:16px;background:#F3F5F8;color:#0B1220}
 .ft-get h3{font:700 18px 'Geologica',system-ui,sans-serif;margin:0 0 10px}
 .ft-get ul{list-style:none;margin:0;padding:0}
@@ -212,7 +208,7 @@ CSS = '''
 .ft-main{gap:16px}.ft-main>p{font-size:15px}.ft-fact b{font-size:22px}.ft-fact span{font-size:12px}.ft-fact+.ft-fact{padding-left:10px}
 .ft-cta{gap:14px}.ft-cta .btn{width:100%}.ft-get{padding:16px}.ft-st{min-width:112px}
 .ft-card{display:flex;flex-direction:column;gap:16px}.ft-main,.ft-side{display:contents}
-.ft-eye{order:1}.ft-main h2{order:2}.ft-main>p{order:3}.ft-pic{order:4}.ft-facts{order:5}.ft-cta{order:6;margin-top:4px}.ft-get{order:7}}
+.ft-main h2{order:2}.ft-main>p{order:3}.ft-pic{order:4}.ft-facts{order:5}.ft-cta{order:6;margin-top:4px}.ft-get{order:7}}
 .bb{transition:transform .25s ease,opacity .25s ease}
 .bb.bb-off{transform:translateY(110%);opacity:0;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.km-dot::after,.km-fig::after{animation:none}.km-fig::after{display:none}}
@@ -274,7 +270,7 @@ def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
     return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 0" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
-            f'<div class="km-hd">' + ('' if prices else f'<span class="ft-eye">{F["others"][i]}</span>') + f'<h2>{T2["h"][i]}</h2><p>{T2["sub" if prices else "sub_home"][i]}</p></div>'
+            f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub" if prices else "sub_home"][i]}</p></div>'
             f'<div class="km"><div><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{"".join(dots)}</div></div>'
             f'<div class="km-list">{"".join(chips)}</div><div class="km-swipe" aria-hidden="true">{T2["swipe"][i]} →</div>'
             f'<span class="km-unsure">{head}? <a href="{url_for(lang, "svc-vibrostand.dc.html")}">{tail.strip()}</a></span></div>'
@@ -287,7 +283,6 @@ def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
 # ---------- home: the stand comes first, like the injector card on viton.kz ----------
 
 F = {
-    'eye': ('Главная услуга', 'Басты қызмет'),
     'h': ('Диагностика ходовой на вибростенде', 'Вибростендте жүріс бөлігінің диагностикасы'),
     'p': ('Машина стоит на платформах своим весом, стенд раскачивает подвеску, как на кочках. Датчики шума на рычагах, стойках и тягах показывают, какой узел стучит.',
           'Көлік платформаларда өз салмағымен тұрады, стенд аспаны кедір-бұдырдағыдай тербетеді. Рычагтардағы, тіректер мен тартқыштардағы шу датчиктері қай түйін тықылдайтынын көрсетеді.'),
@@ -302,14 +297,7 @@ F = {
     'more': ('Как работает стенд', 'Стенд қалай жұмыс істейді'),
     'msg': ('Здравствуйте! Хочу записаться на диагностику на вибростенде.', 'Сәлеметсіз бе! Вибростендте диагностикаға жазылғым келеді.'),
     'alt': ('Колесо автомобиля на платформе вибростенда VibroTest', 'VibroTest вибростенд платформасындағы көлік дөңгелегі'),
-    'sig': ('Датчик шума: стук найден', 'Шу датчигі: тықыл табылды'),
-    'others': ('Не только вибростенд', 'Тек вибростенд емес'),
 }
-
-SIG = ('<svg class="sig ft-sig" viewBox="0 0 600 90" preserveAspectRatio="none" aria-hidden="true">'
-       '<polyline fill="none" stroke="#5AAEF2" stroke-width="2" points="0,45 600,45"></polyline>'
-       '<rect x="372" y="6" width="96" height="78" rx="6" fill="rgba(229,72,77,.12)" stroke="#E5484D" stroke-width="1.2" stroke-dasharray="4 4"></rect></svg>')
-
 
 def stand_feature(lang, url_for, wa, phone=False):
     from urllib.parse import quote
@@ -317,13 +305,13 @@ def stand_feature(lang, url_for, wa, phone=False):
     facts = ''.join(f'<div class="ft-fact"><b class="num">{f[i][0]}</b><span>{f[i][1]}</span></div>' for f in F['facts'])
     rows = ''.join(f'<li class="ft-row"><span class="ft-st {r[i][0]}">{r[i][1]}</span><span>{r[i][2]}</span></li>' for r in F['rows'])
     return (f'<section class="ft-sec" style="padding: {"40px 16px 0" if phone else "110px 0 0"}"><div class="{"" if phone else "w"}">'
-            f'<div class="ft-card"><div class="ft-main"><span class="ft-eye">{F["eye"][i]}</span><h2>{F["h"][i]}</h2><p>{F["p"][i]}</p>'
+            f'<div class="ft-card"><div class="ft-main"><h2>{F["h"][i]}</h2><p>{F["p"][i]}</p>'
             f'<div class="ft-facts">{facts}</div>'
             f'<div class="ft-cta"><a class="btn btn-p" href="{wa}?text={quote(F["msg"][i], safe="")}">{F["book"][i]}</a>'
             f'<a class="lnk" href="{url_for(lang, "svc-vibrostand.dc.html")}">{F["more"][i]}</a></div></div>'
             f'<div class="ft-side"><div class="ft-pic"><img src="/img/vt-01-800.webp" srcset="/img/vt-01-800.webp 800w, /img/vt-01-1600.webp 1600w" '
             f'sizes="(max-width: 900px) 100vw, 40vw" alt="{F["alt"][i]}" loading="lazy" decoding="async">'
-            f'<div class="ft-wave">{SIG}<span>{F["sig"][i]}</span></div></div>'
+            '</div>'
             f'<div class="ft-get"><h3>{F["get"][i]}</h3><ul>{rows}</ul><p>{F["cap"][i]}</p></div></div></div></div></section>')
 
 
@@ -372,6 +360,11 @@ def insert_map(soup, name, lang, url_for, wa):
     new = BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html', 'symptom' if name == 'Main.dc.html' else '', prices=not home), 'html.parser')
     if home:
         anchor.extract()
+        # the sensor signal is shown once, in the hero: drop the repeat in «Как проходит диагностика»
+        diag = soup.find('section', id='diag')
+        wave = diag.find('svg', class_='sig') if diag else None
+        if wave:
+            wave.parent.decompose()
         hero = soup.find('section')
         hero.insert_after(BeautifulSoup(stand_feature(lang, url_for, wa, phone), 'html.parser'))
         # the other services come after the stand story: desktop after the «на руки» block, phone after «Как проходит диагностика»
