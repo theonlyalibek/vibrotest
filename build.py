@@ -277,8 +277,12 @@ def rewrite_images(soup, first_eager):
 
 
 def map_iframe(lang):
-    return (f'<iframe src="/map/anosova/" loading="eager" title="{UI[lang]["map_title"]}" '
-            f'style="position:absolute;inset:0;width:100%;height:100%;border:0;display:block"></iframe>')
+    """Map facade: grid, pin and two actions. The 2GIS widget is heavy, so it loads only when asked."""
+    show, pin = 'Показать карту', 'VibroTest · Аносова, 91'  # translated with the page
+    return (f'<div class="mapf" data-map="/map/anosova/" data-title="{UI[lang]["map_title"]}">'
+            f'<span class="mapf-road h"></span><span class="mapf-road v"></span>'
+            f'<span class="mapf-pin"><span class="mapf-tag">{pin}</span><span class="mapf-dot"></span></span>'
+            f'<span class="mapf-act"><button type="button" class="mapf-btn">{show}</button></span></div>')
 
 
 def place_maps(soup, lang):
@@ -490,6 +494,7 @@ def status_html(lang, short=False):
 
 
 ICON_WA = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg>'
+ICON_TEL = '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>'
 ICON_MENU = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
 ICON_X = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 
@@ -543,8 +548,8 @@ def footer_html(lang):
 def bottom_bar(lang, price_line=''):
     u = UI[lang]
     return f'''<div class="bb m-only">{price_line}<div class="bb-row">
-<a class="mbtn" href="{WA}?text={_q(u["wa_msg"])}">{u["book"]}</a>
-<a class="bb-wa" href="{WA}?text={_q(u["wa_msg"])}" aria-label="{u["wa"]}">{ICON_WA}</a></div></div>'''
+<a class="mbtn" href="{WA}?text={_q(u["wa_msg"])}">{ICON_WA}{u["book"]}</a>
+<a class="bb-wa" href="tel:+77474956165" aria-label="{u["call"]}">{ICON_TEL}</a></div></div>'''
 
 
 HTACCESS = r'''Options -Indexes
@@ -582,6 +587,22 @@ Header always set X-Frame-Options "SAMEORIGIN"
 
 
 BASE_CSS = r'''
+[id]{scroll-margin-top:96px}
+@media (max-width:899px){[id]{scroll-margin-top:72px}.dv .btn-p{width:100%}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}*{transition:none!important}}
+.btn,.hbtn,.mbtn,.bb-wa,.chip,.pbook{transition:background .2s,border-color .2s,color .2s,transform .12s}
+.btn:active,.hbtn:active,.mbtn:active,.bb-wa:active,.chip:active{transform:scale(.97)}
+.dv .card{transition:border-color .2s}.dv .card:hover{border-color:rgba(90,174,242,.35)}
+.mv .rail{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent)}
+.mapf{position:absolute;inset:0;display:block;background-color:#151B24;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px}
+.mapf-road{position:absolute;background:rgba(255,255,255,.07)}.mapf-road.h{left:0;right:0;top:46%;height:14px}.mapf-road.v{top:0;bottom:0;left:58%;width:12px}
+.mapf-pin{position:absolute;left:50%;top:40%;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:8px}
+.mapf-tag{background:#0071BC;color:#fff;font-size:13px;font-weight:600;padding:8px 14px;border-radius:10px;white-space:nowrap}
+.mapf-dot{width:16px;height:16px;border-radius:50%;background:#0071BC;border:3px solid #fff;box-shadow:0 0 0 8px rgba(0,113,188,.25)}
+.mapf-act{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:10px;flex-wrap:wrap}
+.mapf-btn,.mapf-lnk{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 18px;border-radius:12px;font:600 14px 'Inter',system-ui,sans-serif;cursor:pointer}
+.mapf-btn{border:0;background:#EEF2F7;color:#0A0D12}.mapf-btn:hover{background:#fff}
+.mapf-lnk{background:rgba(10,13,18,.8);color:#EEF2F7;border:1px solid rgba(255,255,255,.14)}.mapf-lnk:hover{color:#fff;border-color:rgba(255,255,255,.4)}
 .dnav a,.dh-tel,.hbtn{white-space:nowrap}
 a.lnk,.ft nav a,.crumbs a,.ft a{position:relative}
 a.lnk::after,.ft nav a::after,.crumbs a::after,.ft a::after{content:'';position:absolute;inset:-13px -6px}
@@ -680,9 +701,12 @@ d.querySelectorAll('form[data-book]').forEach(function(f){f.addEventListener('su
  var car=f.car.value.trim(),sym=f.sym.options[f.sym.selectedIndex].text,w=f.querySelector('input[name=when]:checked'),wt=w?w.nextElementSibling.textContent:'';
  var t=KKL?'Сәлеметсіз бе! VibroTest-ке жазылғым келеді. Көлік: '+car+'. Мазалайды: '+sym+'. Ыңғайлы уақыт: '+wt+'.'
           :'Здравствуйте! Хочу записаться в VibroTest. Машина: '+car+'. Беспокоит: '+sym.toLowerCase()+'. Удобно: '+wt.toLowerCase()+'.';
+ var btn=f.querySelector('[type=submit]');if(btn){btn.dataset.t=btn.dataset.t||btn.innerHTML;btn.textContent=KKL?'WhatsApp ашылуда…':'Открываем WhatsApp…';setTimeout(function(){btn.innerHTML=btn.dataset.t},4000)}
  location.href=wa(t)})});
 d.querySelectorAll('a.pbook').forEach(function(a){var n=a.parentNode.querySelector('span').textContent.trim();
  a.href=wa(KKL?'Сәлеметсіз бе! VibroTest-ке жазылғым келеді: '+n+'.':'Здравствуйте! Хочу записаться в VibroTest: '+n.toLowerCase()+'.')});
+d.addEventListener('click',function(e){var b=e.target.closest('.mapf-btn');if(!b)return;var f=b.closest('.mapf');
+ var i=d.createElement('iframe');i.src=f.dataset.map;i.title=f.dataset.title;i.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;display:block';f.replaceWith(i)});
 // live sensor signal: the baseline drifts, the knock inside the dashed box pulses; static chart stays as the resting frame
 if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserver' in window){
  var sigs=[].slice.call(d.querySelectorAll('svg.sig')).map(function(svg){var vb=svg.viewBox.baseVal,r=svg.querySelector('rect[stroke-dasharray]'),
