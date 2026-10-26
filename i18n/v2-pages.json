@@ -1,0 +1,82 @@
+[
+ {
+  "board": "l-saylentbloki.dc.html",
+  "slug": "zamena-saylentblokov",
+  "name": "Замена сайлентблоков",
+  "price": 3000,
+  "rows": [
+   "Замена сайлентблока",
+   "Замена плавающего сайлентблока",
+   "Замена рычага"
+  ]
+ },
+ {
+  "board": "l-amortizatory.dc.html",
+  "slug": "zamena-amortizatorov",
+  "name": "Замена амортизаторов",
+  "price": 10000,
+  "rows": [
+   "Замена амортизатора и опорной чашки"
+  ]
+ },
+ {
+  "board": "l-stabilizator.dc.html",
+  "slug": "stoyki-i-vtulki-stabilizatora",
+  "name": "Стойки и втулки стабилизатора",
+  "price": 3000,
+  "rows": [
+   "Замена стоек стабилизатора",
+   "Замена втулок стабилизатора"
+  ]
+ },
+ {
+  "board": "l-rychagi.dc.html",
+  "slug": "zamena-rychagov",
+  "name": "Замена рычагов",
+  "price": 5000,
+  "rows": [
+   "Замена рычага",
+   "Замена сайлентблока"
+  ]
+ },
+ {
+  "board": "l-tyagi.dc.html",
+  "slug": "rulevye-tyagi-i-nakonechniki",
+  "name": "Рулевые тяги и наконечники",
+  "price": 3000,
+  "rows": [
+   "Замена рулевых наконечников",
+   "Замена рулевых тяг"
+  ]
+ },
+ {
+  "board": "l-shrus.dc.html",
+  "slug": "zamena-shrus",
+  "name": "Замена ШРУСа",
+  "price": 5000,
+  "rows": [
+   "Замена ШРУСа (гранаты)",
+   "Замена привода колеса"
+  ]
+ },
+ {
+  "board": "l-stupica.dc.html",
+  "slug": "podshipnik-stupicy",
+  "name": "Подшипник ступицы",
+  "price": 10000,
+  "rows": [
+   "Замена подшипника ступицы"
+  ]
+ },
+ {
+  "board": "l-pered-pokupkoy.dc.html",
+  "slug": "proverka-pered-pokupkoy",
+  "name": "Проверка перед покупкой",
+  "price": 12000,
+  "rows": [
+   "Диагностика ходовой на вибростенде",
+   "Компьютерная диагностика двигателя",
+   "Стенд и двигатель перед покупкой"
+  ]
+ }
+]

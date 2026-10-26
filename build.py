@@ -99,6 +99,7 @@ HOME_META = {
 
 KK = {}
 MISSING = {}
+V2 = None  # the v2 module when building with --v2
 
 
 KK_VALUES = None
@@ -479,9 +480,13 @@ def build_board(name, lang, scope, desktop, eager):
         cnt['id'] = f'rail{n}'
         cnt['aria-hidden'] = 'true'
         rail['data-rail'] = f'rail{n}'
+    if V2:
+        V2.link_rows(soup, ALIAS.get(name, name))
     rewrite_links(soup, lang, ALIAS.get(name, name))
     rewrite_images(soup, eager)
     translate_tree(soup, lang)
+    if V2:
+        V2.insert_map(soup, name, lang, url_for, WA)
     return scope_css(css, scope), str(soup), title
 
 
@@ -840,7 +845,10 @@ def page(lang, board, base, noindex, pages_meta):
     sym = ''
     if kind == 'home':
         data = symptom_data(lang)
-        for it in data['items']:
+        for n, it in enumerate(data['items']):
+            if V2:
+                ru_label = symptom_data('ru')['items'][n]['label']
+                it['href'] = V2.SYM_HREF.get(ru_label, it.get('href'))
             if it.get('href'):
                 it['url'] = url_for(lang, it['href'])
         for it in data['items']:  # prices live on the services page, not on the home page
@@ -873,7 +881,7 @@ def page(lang, board, base, noindex, pages_meta):
 <meta name="theme-color" content="#0A0D12">
 <link rel="icon" href="/favicon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 {preload}
-<style>{fonts}{BASE_CSS}{css}{phone_css}</style>
+<style>{fonts}{BASE_CSS}{V2.CSS if V2 else ''}{css}{phone_css}</style>
 {schema}
 </head>
 <body>
@@ -881,7 +889,7 @@ def page(lang, board, base, noindex, pages_meta):
 <main id="main">{main}</main>
 {footer_html(lang)}
 {bottom_bar(lang, price_line)}
-{sym}<script>{JS}</script>
+{sym}<script>{JS}{V2.JS if V2 else ''}</script>
 </body>
 </html>
 '''
@@ -944,10 +952,17 @@ def main():
     ap.add_argument('--out', default=str(ROOT / 'dist'))
     ap.add_argument('--base', default='https://vibrotest.kz')
     ap.add_argument('--noindex', action='store_true')
+    ap.add_argument('--v2', action='store_true', help='build the v2 preview (served under /v2/)')
     a = ap.parse_args()
     out = Path(a.out)
-    global KK
+    global KK, V2
     KK = json.loads((ROOT / 'i18n' / 'kk.json').read_text(encoding='utf-8'))
+    if a.v2:
+        import v2 as V2
+        KK.update({k: v for k, v in V2.KK_EXTRA.items() if k not in KK})
+        PAGES.update(V2.pages())
+        a.base += V2.PREFIX
+    fix = V2.prefix if V2 else (lambda d: d)
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
@@ -960,10 +975,10 @@ def main():
             doc = page(lang, board, a.base, a.noindex, metas)
             p = out / lang / PAGES[board][0] / 'index.html'
             p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(doc, encoding='utf-8')
+            p.write_text(fix(doc), encoding='utf-8')
     (out / 'map' / 'anosova').mkdir(parents=True)
     (out / 'map' / 'anosova' / 'index.html').write_text(map_page(), encoding='utf-8')
-    (out / '404.html').write_text(page_404(a.base), encoding='utf-8')
+    (out / '404.html').write_text(fix(page_404(a.base)), encoding='utf-8')
     (out / 'llms.txt').write_text(llms(a.base, metas), encoding='utf-8')
     urls = ''.join(f'<url><loc>{a.base}/{m["lang"]}/{m["path"]}</loc>'
                    + ''.join(f'<xhtml:link rel="alternate" hreflang="{l}" href="{a.base}/{l}/{m["path"]}"/>' for l in LANGS)
@@ -973,11 +988,11 @@ def main():
     robots = ('User-agent: *\nDisallow: /\n' if a.noindex else f'User-agent: *\nAllow: /\nDisallow: /map/\n\nSitemap: {a.base}/sitemap.xml\n')
     (out / 'robots.txt').write_text(robots, encoding='utf-8')
     # root: hosts without rewrites still land on the Russian home
-    (out / 'index.html').write_text(
+    (out / 'index.html').write_text(fix(
         f'<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>VibroTest</title>'
         f'<link rel="canonical" href="{a.base}/ru/"><meta http-equiv="refresh" content="0; url=/ru/">'
         f'{"<meta name=robots content=noindex>" if a.noindex else ""}</head>'
-        f'<body><a href="/ru/">VibroTest.kz</a></body></html>\n', encoding='utf-8')
+        f'<body><a href="/ru/">VibroTest.kz</a></body></html>\n'), encoding='utf-8')
     # Apache (ps.kz / Plesk): https without www, / -> /ru/, gzip, cache, headers
     host = a.base.split('://', 1)[-1].strip('/')
     (out / '.htaccess').write_text(HTACCESS.replace('{HOST}', host)
