@@ -9,6 +9,9 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parent
 LANDINGS = json.loads((ROOT / 'i18n' / 'v2-pages.json').read_text(encoding='utf-8'))
 KK_EXTRA = json.loads((ROOT / 'i18n' / 'kk-v2.json').read_text(encoding='utf-8'))
+# SEO articles written by tools/v2_articles.py
+ARTICLES = json.loads((ROOT / 'i18n' / 'v2-articles.json').read_text(encoding='utf-8'))
+KK_EXTRA.update(json.loads((ROOT / 'i18n' / 'kk-v2-art.json').read_text(encoding='utf-8')))
 PREFIX = '/v2'
 
 # price-row name -> landing board, so rows on the services and category pages link to the landing
@@ -41,7 +44,33 @@ SYM_HREF = {'Стук или люфт в руле': 'l-tyagi.dc.html', 'Хрус
 
 
 def pages():
-    return {p['board']: (f'services/{p["slug"]}/', 'service') for p in LANDINGS}
+    out = {p['board']: (f'services/{p["slug"]}/', 'service') for p in LANDINGS}
+    out.update({a['board']: (f'blog/{a["slug"]}/', 'article') for a in ARTICLES})
+    return out
+
+
+def art_date(board):
+    return next((a['date'] for a in ARTICLES if a['board'] == board), None)
+
+
+def blog_cards(soup, lang, url_for):
+    """Blog: the new articles go first in the card grid, in the same card markup."""
+    grid = soup.select_one('.g3')
+    first = grid.find('a', class_='card') if grid else None
+    if first is None:
+        return
+    i = 0 if lang == 'ru' else 1
+    old = re.search(r'/img/(vt-\d+)-800', first.img['src']).group(1)
+    for a in ARTICLES:
+        c = BeautifulSoup(str(first), 'html.parser').a
+        c['href'] = url_for(lang, a['board'])
+        img = c.img
+        img['src'] = img['src'].replace(old, a['img'])
+        img['srcset'] = img['srcset'].replace(old, a['img'])
+        img['alt'] = a['alt'] if lang == 'ru' else _KK.get(a['alt'], a['alt'])
+        c.find(class_='meta').string = f"{a['cat'][i] or _KK.get(a['cat'][0], a['cat'][0])} · {a['min']} минут"
+        c.h3.string = a['h1'][i]
+        first.insert_before(c)
 
 
 def link_rows(soup, current):
@@ -559,6 +588,8 @@ def insert_map(soup, name, lang, url_for, wa):
     if name not in ('Main.dc.html', 'Mobile.dc.html'):
         if name in ('svc-vibrostand.dc.html', 'Mobile-service.dc.html'):
             vibro_page(soup, lang, name == 'Mobile-service.dc.html')
+        if name == 'Blog.dc.html':
+            blog_cards(soup, lang, url_for)
         if name == 'Services.dc.html':
             h1 = soup.find('h1')
             lead = h1.find_next('p') if h1 else None

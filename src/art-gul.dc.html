@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Гул на скорости: подшипник ступицы или шины — VibroTest</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
+<style>
+html{background:#0A0D12}
+body{margin:0;background:#0A0D12;color:#EEF2F7;font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#5AAEF2;text-decoration:none}a:hover{color:#8CC6F6}
+h1,h2,h3,h4,p,ul,ol{margin:0}
+.w{width:100%;max-width:1280px;margin:0 auto;padding:0 48px}
+.hd{font-family:'Geologica',system-ui,sans-serif;letter-spacing:-.02em}
+.num{font-family:'JetBrains Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 26px;border-radius:12px;font-weight:600;font-size:15px;white-space:nowrap}
+.btn-p{background:#0071BC;color:#FFFFFF}.btn-p:hover{background:#0A84D6;color:#FFFFFF}
+.nav a{color:#B4BECB;font-size:14px;font-weight:500}.nav a:hover{color:#FFFFFF}
+.cover{width:100%;height:100%;object-fit:cover;display:block}
+.lay{display:grid;grid-template-columns:minmax(0,760px) 320px;gap:80px;justify-content:space-between;align-items:start}
+.art{display:flex;flex-direction:column;gap:22px}
+.art p,.art li{font-size:18px;line-height:1.75;color:#C9D1DB}
+.art h2{font-family:'Geologica',system-ui,sans-serif;letter-spacing:-.02em;font-size:32px;line-height:1.15;font-weight:700;color:#FFFFFF;margin-top:30px}
+.art ul{padding-left:22px;display:flex;flex-direction:column;gap:8px}
+.art b{color:#FFFFFF}
+.tw{overflow-x:auto;border-radius:14px;border:1px solid rgba(255,255,255,.1)}
+.tbl{width:100%;border-collapse:collapse;font-size:15px;min-width:560px}
+.tbl th{text-align:left;font-weight:600;color:#8A96A6;padding:14px 18px;background:#11161E;border-bottom:1px solid rgba(255,255,255,.1)}
+.tbl td{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06);color:#D5DCE5;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+details{border-top:1px solid rgba(255,255,255,.1)}
+details:last-child{border-bottom:1px solid rgba(255,255,255,.1)}
+summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:24px;padding:22px 0;font-size:18px;font-weight:600;font-family:'Geologica',system-ui,sans-serif;color:#EEF2F7}
+summary::-webkit-details-marker{display:none}
+details[open] .pm{transform:rotate(45deg)}
+.pm{transition:transform .2s;flex:none}
+.ans{padding:0 0 24px;color:#A9B4C2;font-size:16px;line-height:1.7}
+@media (max-width:900px){
+.w{padding:0 20px}
+.lay{grid-template-columns:minmax(0,1fr);gap:48px}
+.nav{display:none}
+}
+</style>
+</helmet>
+
+<div style="width: 100%; min-height: 100%; background: #0A0D12">
+
+<header style="border-bottom: 1px solid rgba(255,255,255,.07)">
+<div class="w" style="display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 84px">
+<a href="Main.dc.html" aria-label="VibroTest.kz, на главную" style="display: flex; align-items: center"><img src="/_blob/684a1cdce95a12ea5c591d69b4192412" alt="VibroTest.kz" style="height: 44px; width: auto; display: block"></a>
+<nav class="nav" aria-label="Основное меню" style="display: flex; gap: 30px">
+<a href="svc-vibrostand.dc.html">Вибростенд</a>
+<a href="Main.dc.html">Услуги и цены</a>
+<a href="svc-steering-rack.dc.html">Рулевые рейки</a>
+<a href="Blog.dc.html" style="color: #FFFFFF">Полезное</a>
+<a href="Main.dc.html">Контакты</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 20px">
+<a href="tel:+77474956165" class="num" style="display: flex; align-items: center; gap: 8px; color: #EEF2F7; font-size: 15px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 50%; background: #30A46C; display: inline-block"></span>+7 747 495 61 65</a>
+<a class="btn btn-p" href="https://wa.me/77474956165" style="min-height: 46px; padding: 0 20px; font-size: 14px">Записаться</a>
+</div>
+</div>
+</header>
+
+<section style="padding: 40px 0 0">
+<div class="w" style="display: flex; flex-direction: column; gap: 28px">
+<nav aria-label="Хлебные крошки" style="display: flex; gap: 10px; font-size: 14px; color: #6F7B8B"><a href="Main.dc.html" style="color: #8A96A6">Главная</a><span>/</span><a href="Blog.dc.html" style="color: #8A96A6">Полезное</a><span>/</span><span style="color: #C9D1DB">Гул на скорости</span></nav>
+<h1 class="hd" style="font-size: 60px; line-height: 1.04; font-weight: 800; max-width: 980px">Гул на скорости: подшипник ступицы или шины</h1>
+<div style="display: flex; align-items: center; gap: 14px"><span style="width: 44px; height: 44px; border-radius: 50%; background: #1B2638; color: #C9D1DB; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px">ВН</span><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Виктор Новиков</span><span style="font-size: 13px; color: #8A96A6">основатель VibroTest · 27 октября 2026 · 6 минут</span></div></div>
+<div style="height: 520px; border-radius: 20px; overflow: hidden; background: #11161E; margin-top: 8px"><img class="cover" src="/_blob/53252e69e1ea29c74e900b0ee85cfaf2" alt="Привод и ступица снизу автомобиля, мастер проверяет люфт"></div>
+</div>
+</section>
+
+<section style="padding: 64px 0 120px">
+<div class="w lay">
+<article class="art">
+<div style="padding: 28px 30px; border-radius: 16px; background: #11161E; border: 1px solid rgba(255,255,255,.08); display: flex; flex-direction: column; gap: 10px">
+<div class="hd" style="font-size: 20px; font-weight: 700; color: #FFFFFF">Коротко</div>
+<p style="font-size: 17px">Гул, который растёт вместе со скоростью, чаще всего дают подшипник ступицы или шины. Подшипник обычно меняет звук в повороте, когда на него ложится вес машины. Шины гудят ровно и звучат по-разному на разном асфальте. Замена подшипника ступицы стоит от 10 000 ₸, а найти, какой именно шумит, помогает вибростенд с датчиками шума.</p>
+</div>
+
+<h2>Почему гул так трудно найти?</h2>
+<p>Звук расходится по кузову. Водителю кажется, что гудит справа спереди, а изношен левый задний подшипник. Шум шин, подшипника и даже ШРУСа похож: все они растут со скоростью. Поэтому менять подшипник на слух, без проверки, это частая и дорогая ошибка.</p>
+<h2>Как отличить подшипник от шин?</h2>
+<div class="tw"><table class="tbl"><thead><tr><th>Признак</th><th>Скорее всего</th><th>Что сделать</th></tr></thead><tbody><tr><td>Гул меняется в плавном повороте влево или вправо</td><td>подшипник ступицы</td><td>проверить люфт и на стенде</td></tr><tr><td>Гул меняется на другом асфальте и на мокрой дороге</td><td>шины</td><td>осмотреть протектор</td></tr><tr><td>Гул появился сразу после смены резины</td><td>шины</td><td>сравнить с другим комплектом</td></tr><tr><td>Руль дрожит на 80–110 км/ч</td><td>балансировка или шина</td><td>сделать балансировку</td></tr><tr><td>Хруст или скрежет, а не ровный гул</td><td>подшипник в поздней стадии</td><td>не откладывать</td></tr></tbody></table></div>
+<h2>Простой тест в повороте</h2>
+<p>На ровной пустой дороге на 50–70 км/ч плавно поверните влево, потом вправо. В левом повороте вес машины ложится на правые колёса, в правом на левые. Если гул громче в левом повороте, подозрение на правый подшипник, и наоборот. Тест не точный, на некоторых машинах звук уходит по кузову, но он подсказывает, с какой стороны искать.</p>
+<h2>Почему гудят шины?</h2>
+<ul><li>Протектор изношен «пилой» или пятнами. Чаще всего это следствие слабых амортизаторов или сбитого схождения.</li><li>Агрессивный рисунок протектора и зимняя шипованная резина шумят сильнее летней.</li><li>Грыжа или неровный износ дают гул и вибрацию одновременно.</li></ul>
+<p>Если шины стёрлись пятнами, новый комплект тоже начнёт гудеть, пока не исправить подвеску. Поэтому при неровном износе стоит проверить амортизаторы и сайлентблоки.</p>
+<h2>Можно ли ездить с гудящим подшипником?</h2>
+<p>Какое-то время можно, но гул только растёт. Позже подшипник начинает греться, у колеса появляется люфт, может загореться ошибка ABS: датчик часто стоит прямо в ступице. В крайнем случае подшипник разрушается на ходу. Если к гулу добавились хруст, люфт или ошибка ABS, езжайте в сервис сразу.</p>
+<h2>Как мы ищем источник гула</h2>
+<p>Ставим датчики шума на ступицы и узлы подвески, колёса качаются на платформах вибростенда. Программа показывает, какой датчик слышит звук сильнее. Так видно, какой именно подшипник шумит, и исправный не меняют.</p>
+<p>Подробнее о ремонте: <a href="l-stupica.dc.html">Замена подшипника ступицы</a>, <a href="svc-drive.dc.html">Ступицы, ШРУС, привод</a>.</p>
+
+<h2>Частые вопросы</h2>
+<div>
+<details><summary>Подшипники ступицы меняют парой?<svg class="pm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary><p class="ans">Нет, меняют тот, что шумит. Если второй на той же оси тоже на пределе, мастер напишет об этом в заключении.</p></details>
+<details><summary>Гудит только зимой на шипах. Это подшипник?<svg class="pm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary><p class="ans">Скорее всего шины: шипованная резина шумит заметно сильнее. Если гул меняется в поворотах, подшипник всё же стоит проверить.</p></details>
+<details><summary>Сколько стоит замена подшипника ступицы?<svg class="pm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary><p class="ans">Работа от 10 000 ₸. Цена зависит от машины и от того, запрессован подшипник или идёт ступицей в сборе. Подшипник оплачивается отдельно.</p></details>
+</div>
+
+<div style="margin-top: 36px; padding: 32px; border-radius: 18px; background: #0E131A; border: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 14px">
+<h2 style="margin-top: 0; font-size: 28px">Где найти источник гула в Алматы?</h2>
+<p>В VibroTest на ул. Аносова, 91 (мкр Тастак-3). Диагностика на вибростенде от 7 000 ₸ покажет, какой подшипник шумит или что дело в шинах. Каждый день с 09:30 до 19:00, WhatsApp: <a href="https://wa.me/77474956165">+7 747 495 61 65</a>.</p>
+</div>
+</article>
+
+<aside style="position: sticky; top: 24px; display: flex; flex-direction: column; gap: 22px">
+<div style="padding: 28px; border-radius: 18px; background: #11161E; border: 1px solid rgba(255,255,255,.08); display: flex; flex-direction: column; gap: 16px">
+<a class="hd" href="l-stupica.dc.html" style="font-size: 22px; font-weight: 700; color: #FFFFFF">Подшипник ступицы</a>
+<div class="num" style="font-size: 28px; font-weight: 600"><span style="font-size: 15px; color: #8A96A6">от </span>10 000 ₸</div>
+<a class="btn btn-p" href="https://wa.me/77474956165">Записаться</a>
+<p style="font-size: 13px; color: #8A96A6">Алматы, Аносова 91 · 09:30–19:00</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px; font-size: 15px">
+<div style="color: #8A96A6">Ещё по теме</div>
+<a href="l-stupica.dc.html">Замена подшипника ступицы</a>
+<a href="art-knock.dc.html">Стук в подвеске на кочках: 7 частых причин</a>
+<a href="art-stand-vs-lift.dc.html">Вибростенд или подъёмник: что точнее находит стук</a>
+</div>
+</aside>
+</div>
+</section>
+
+<footer style="padding: 48px 0; border-top: 1px solid rgba(255,255,255,.06)">
+<div class="w" style="display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; font-size: 13px; color: #6F7B8B">
+<span>© 2026 VibroTest.kz · Алматы, ул. Аносова, 91</span>
+<span>[ИП и ИИН/БИН VibroTest]</span>
+</div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":6800}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

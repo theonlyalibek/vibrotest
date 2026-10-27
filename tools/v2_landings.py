@@ -29,6 +29,15 @@ ART = {
                                   ('Мастер-приёмщик отдаёт клиенту распечатанное заключение', None)),
 }
 
+# the SEO articles: landings link to the one on their symptom
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from v2_articles import ARTICLES as _ARTS, IMG as _AIMG
+for _a in _ARTS:
+    _h = _AIMG[_a['img']][0]
+    IMG.setdefault(_a['img'], _h)
+    ART[_a['board']] = (_a['h1'], (f'Статья · {_a["min"]} минут', f'Мақала · {_a["min"]} минут'), _a['img'], (_AIMG[_a['img']][2], None))
+
 # (ru, kk); kk=None means the string is already in i18n/kk.json
 PAGES = [
  {
@@ -88,7 +97,7 @@ PAGES = [
     ('Да. Стойку снимают целиком, поэтому после сборки углы колёс нужно выставить заново.',
      'Иә. Тіректі тұтас шешеді, сондықтан жинағаннан кейін дөңгелек бұрыштарын қайта қою керек.')),
   ],
-  'art': 'art-knock.dc.html',
+  'art': 'art-amortizatory.dc.html',
   'rel': ['l-saylentbloki.dc.html', 'l-stabilizator.dc.html', 'svc-vibrostand.dc.html', 'svc-suspension.dc.html'],
  },
  {
@@ -118,7 +127,7 @@ PAGES = [
      'Біраз уақыт болады, бұл апат емес. Бірақ тықыл алаңдатады, ал сынған тірек бұрылыстағы тұрақтылықты нашарлатады. Созбаған дұрыс.')),
    (('Можно привезти свои запчасти?', None), ('Да. Мастер проверит, что деталь подходит к вашей машине. Если нужно, подскажем, где купить или закажем сами.', None)),
   ],
-  'art': 'art-knock.dc.html',
+  'art': 'art-skrip.dc.html',
   'rel': ['l-saylentbloki.dc.html', 'l-amortizatory.dc.html', 'svc-vibrostand.dc.html', 'svc-suspension.dc.html'],
  },
  {
@@ -201,7 +210,7 @@ PAGES = [
    (('Меняете целиком привод или только ШРУС?', None), ('Как выгоднее для вас. Если вал целый, меняем только ШРУС и пыльник. Если износ сильный, привод в сборе выходит дешевле по работе.', None)),
    (('Можно привезти свои запчасти?', None), ('Да. Мастер проверит, что деталь подходит к вашей машине. Если нужно, подскажем, где купить или закажем сами.', None)),
   ],
-  'art': 'art-knock.dc.html',
+  'art': 'art-hrust.dc.html',
   'rel': ['l-stupica.dc.html', 'svc-drive.dc.html', 'svc-vibrostand.dc.html', 'svc-brakes.dc.html'],
  },
  {
@@ -229,7 +238,7 @@ PAGES = [
      'Ұзақ емес. Гуіл уақыт өте күшейеді, қатты тозған подшипник кептеліп қалуы мүмкін. Тықылдамай тұрып, гуілдеп тұрғанда ауыстырған дұрыс.')),
    (('Можно привезти свои запчасти?', None), ('Да. Мастер проверит, что деталь подходит к вашей машине. Если нужно, подскажем, где купить или закажем сами.', None)),
   ],
-  'art': 'art-knock.dc.html',
+  'art': 'art-gul.dc.html',
   'rel': ['l-shrus.dc.html', 'svc-drive.dc.html', 'svc-vibrostand.dc.html', 'svc-brakes.dc.html'],
  },
  {

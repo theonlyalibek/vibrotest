@@ -829,8 +829,9 @@ def page(lang, board, base, noindex, pages_meta):
         graph.append({'@type': 'CollectionPage', 'name': h1t, 'url': url})
         crumbs.append({'@type': 'ListItem', 'position': 2, 'name': u['crumb_blog'], 'item': url})
     elif kind == 'article':
+        day = (V2.art_date(board) if V2 else None) or '2026-10-25'
         graph.append({'@type': 'Article', 'headline': h1t, 'description': lead or desc, 'inLanguage': lang, 'url': url,
-                      'image': og_img, 'datePublished': '2026-10-25', 'dateModified': '2026-10-25',
+                      'image': og_img, 'datePublished': day, 'dateModified': day,
                       'author': {'@type': 'Person', 'name': 'Виктор Новиков', 'jobTitle': 'основатель VibroTest' if lang == 'ru' else 'VibroTest негізін қалаушы'},
                       'publisher': {'@id': f'{base}/#vibrotest'}, 'about': {'@id': f'{base}/#vibrotest'}})
         graph.append(org_schema(base, lang))
