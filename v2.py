@@ -131,7 +131,7 @@ CSS = '''
 .km-hd{display:flex;flex-direction:column;gap:14px;margin-bottom:32px}
 .km-hd h2{font:800 clamp(30px,3.4vw,46px)/1.06 'Geologica',system-ui,sans-serif;letter-spacing:-.02em;margin:0}
 .km-hd p{color:#A9B4C2;font-size:17px;line-height:1.6;margin:0;max-width:640px}
-.km-fig{position:relative;border-radius:18px;background:radial-gradient(120% 90% at 30% 70%,#122033 0,#0E131A 60%);border:1px solid rgba(255,255,255,.08);padding:28px 20px 18px}
+.km-fig{position:relative;border-radius:16px;background:#0E131A;border:1px solid rgba(255,255,255,.08);padding:28px 20px 18px}
 .km-car{display:block;width:100%;height:auto}
 .km-body{fill:#141B25;stroke:#3A4757;stroke-width:2.5}
 .km-glass{fill:#0E1520;stroke:#2B3644;stroke-width:2}
@@ -139,8 +139,6 @@ CSS = '''
 .km-wheel circle{fill:#0B1018;stroke:#56647A;stroke-width:3}
 .km-wheel circle:nth-child(2n){fill:none;stroke:#2B3644}
 .km-trim{fill:none;stroke:#252F3C;stroke-width:2}.km-light{fill:#5AAEF2;opacity:.5}
-.km-fig::after{content:'';position:absolute;top:0;bottom:0;left:0;width:22%;background:linear-gradient(90deg,transparent,rgba(90,174,242,.07),transparent);animation:kmScan 6s linear infinite;pointer-events:none}
-@keyframes kmScan{0%{transform:translateX(-100%)}100%{transform:translateX(560%)}}
 .km-fig{overflow:hidden}
 .km-road{stroke:#2B3644;stroke-width:2;stroke-dasharray:2 10}
 .km-dots{position:absolute;inset:28px 20px 18px}
@@ -220,7 +218,7 @@ CSS = '''
 .ft-card{display:flex;flex-direction:column;gap:16px}.ft-main,.ft-side{display:contents}
 .ft-main h2{order:1}.ft-main>p{order:2}.ft-pic{order:3}.ft-steps{order:4}.ft-cta{order:5;margin-top:4px}.ft-get{order:6}
 .stack{display:flex!important;flex-direction:column!important;gap:12px!important;overflow:visible!important;margin:16px 0 0!important;padding:0!important}.stack>*{width:auto!important;flex:none!important}
-.brands{margin-top:14px;font-size:17px;line-height:1.75;color:#EEF2F7;font-weight:600}.brands i{font-style:normal;color:#4A5568}.brands span{white-space:nowrap}.brands-h{margin-top:16px;font-size:14px;color:#8A96A6}
+.brands{margin-top:18px;font-size:17px;line-height:1.75;color:#EEF2F7;font-weight:600}.brands i{font-style:normal;color:#4A5568}.brands span{white-space:nowrap}.brands-h{margin-top:22px;margin-bottom:-10px;font-size:14px;color:#8A96A6}
 .tap{display:inline-block;padding:12px 0;margin:-12px 0}}
 .bb{transition:transform .25s ease,opacity .25s ease}
 .bb.bb-off{transform:translateY(110%);opacity:0;pointer-events:none}
@@ -280,20 +278,20 @@ def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
                         f'aria-label="{t}" style="left:{x / 10:.1f}%;top:{y / 3.4:.1f}%"></button>')
         chips.append(f'<button type="button" class="km-chip" data-node="{key}" aria-pressed="{"true" if on else "false"}">{t}</button>')
         p = f'{price:,}'.replace(',', ' ') + ' ₸'
-        rows = ''.join(f'<a href="{url_for(lang, b)}"><span>{html.escape(l[i])}</span><span aria-hidden="true">→</span></a>' for b, *l in links)
+        rows = ''.join(f'<a href="{url_for(lang, b)}"><span>{html.escape(l[i])}</span></a>' for b, *l in links)
         msg = quote(T2['wa'][i].replace('{x}', title[i].lower() if lang == 'ru' else title[i]), safe='')
         panels.append(f'<div class="km-panel" data-panel="{key}"{"" if on else " hidden"}><h3>{t}</h3>'
                       f'<p>{html.escape(text[i])}</p>' + (f'<div class="km-price">{T2["from"][i].format(p=p)}</div>' if prices else '') +
                       f'<div class="km-links">{rows}</div>' + (f'<a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a>' if prices else '') + '</div>')
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
-    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 0" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
+    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 48px" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub" if prices else "sub_home"][i]}</p></div>'
             f'<div class="km"><div><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{"".join(dots)}</div></div>'
-            f'<div class="km-list">{"".join(chips)}</div><div class="km-swipe" aria-hidden="true">{T2["swipe"][i]} →</div>'
+            f'<div class="km-list">{"".join(chips)}</div>'
             f'<span class="km-unsure">{head}? <a href="{url_for(lang, "svc-vibrostand.dc.html")}">{tail.strip()}</a></span></div>'
             f'<div class="km-side">{"".join(panels)}</div></div>'
-            + ('' if prices else f'<a class="km-all" href="{url_for(lang, "Services.dc.html")}">{T2["all"][i]} <span aria-hidden="true">→</span></a>')
+            + ('' if prices else f'<a class="km-all" href="{url_for(lang, "Services.dc.html")}">{T2["all"][i]}</a>')
             + '</div></section>')
 
 
@@ -327,7 +325,7 @@ def stand_feature(lang, url_for, wa, phone=False):
     i = 0 if lang == 'ru' else 1
     steps = ''.join(f'<li><b>{st[i]}</b><span>{st[2 + i]}</span></li>' for st in F['steps'])
     rows = ''.join(f'<li class="ft-row"><span class="ft-st {r[i][0]}">{r[i][1]}</span><span>{r[i][2]}</span></li>' for r in F['rows'])
-    return (f'<section class="ft-sec" style="padding: {"40px 16px 0" if phone else "110px 0 0"}"><div class="{"" if phone else "w"}">'
+    return (f'<section class="ft-sec" style="padding: {"40px 16px 48px" if phone else "110px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="ft-card"><div class="ft-main"><h2>{F["h"][i]}</h2><p>{F["p"][i]}</p>'
             f'<ol class="ft-steps">{steps}</ol>'
             f'<div class="ft-cta"><a class="btn btn-p" href="{wa}?text={quote(F["msg"][i], safe="")}">{F["book"][i]}</a>'
@@ -361,11 +359,11 @@ def brand_chips(soup, phone):
         t = p.get_text(' ', strip=True)
         if 'Toyota' in t and 'Lexus' in t:
             names = [x.strip() for x in t.split(',')]
-            p.replace_with(BeautifulSoup('<p class="brands">' + '\u00a0<i>·</i> '.join(f'<span>{html.escape(x)}</span>' for x in names) + '</p>', 'html.parser'))
+            p.replace_with(BeautifulSoup('<p class="brands">' + ', '.join(html.escape(x.replace('-', '\u2011')) for x in names) + '</p>', 'html.parser'))
         elif 'Li Auto' in t and 'Geely' in t:
             head, _, rest = t.partition(':')
             names = [x.strip() for x in rest.split(',')]
-            p.replace_with(BeautifulSoup(f'<p class="brands-h">{html.escape(head)}</p><p class="brands">' + '\u00a0<i>·</i> '.join(f'<span>{html.escape(x)}</span>' for x in names) + '</p>', 'html.parser'))
+            p.replace_with(BeautifulSoup(f'<p class="brands-h">{html.escape(head)}</p><p class="brands">' + ', '.join(html.escape(x.replace('-', '\u2011')) for x in names) + '</p>', 'html.parser'))
 
 def insert_map(soup, name, lang, url_for, wa):
     """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
@@ -441,10 +439,125 @@ def insert_map(soup, name, lang, url_for, wa):
                     continue
                 if a.get('href', '').startswith('tel:') or not a.parent.find(string=lambda x: x.strip() and x.parent is a.parent, recursive=False):
                     a['class'] = cls + ['tap']
+        theme_home(soup, phone)
     else:
         anchor.insert_after(new)
 
 
+# ---------- home: light paper between the dark moments (hero, the car map, the booking form) ----------
+
+DARK2LIGHT = [
+    (r'#(?:EEF2F7|FFFFFF|D5DCE5|E3E8EE)\b', '#0F1722'), (r'#(?:A9B4C2|B4BECB)\b', '#4A5566'), (r'#(?:8A96A6|6F7B8B)\b', '#5B6676'),
+    (r'#3A4556\b', '#C3CBD5'), (r'#(?:11161E|151B24)\b', 'var(--well)'), (r'#(?:0E131A|0A0D12)\b', 'var(--paper)'),
+    (r'#5AAEF2\b', '#0071BC'), (r'#FF9EA1\b', '#B4232A'), (r'rgba\(255,\s*255,\s*255,\s*\.(\d+)\)', r'rgba(15,23,34,.\1)'),
+]
+
+
+def lighten(sec, paper):
+    """Recolour a dark-board section for light paper: inline colours swap to their light pair, classes get .lt rules."""
+    sec['class'] = (sec.get('class') or []) + ['lt', 'lt-' + paper]
+    for el in [sec] + sec.find_all(style=True):
+        st = el.get('style')
+        if not st:
+            continue
+        for a, b in DARK2LIGHT:
+            st = re.sub(a, b, st, flags=re.I)
+        el['style'] = st
+    for el in sec.find_all(['path', 'svg', 'circle', 'rect', 'line', 'polyline']):
+        for k in ('stroke', 'fill'):
+            v = el.get(k)
+            if v and v.lower() in ('#6f7b8b', '#8a96a6', '#3a4556'):
+                el[k] = '#8C97A6'
+
+
+def theme_home(soup, phone):
+    """Dark only where it carries meaning: the hero with the live signal, the car map, the booking form.
+    Everything else sits on light paper, white and a cool grey taking turns."""
+    secs = [x for x in soup.find_all('section') if x.find_parent('section') is None]
+    turn = 0
+    gap = 'clamp(64px, 8vw, 112px)'
+    for k, sec in enumerate(secs[1:], 1):
+        # every section now changes paper at its edges, so none may start or end flush against the next one
+        m = re.match(r'\s*padding:\s*(\S+(?:\([^)]*\))?)\s+0(?:\s+(\S+(?:\([^)]*\))?))?', sec.get('style', ''))
+        if m and not phone:
+            top, bot = m.group(1), m.group(2) or m.group(1)
+            top = gap if top == '0' else top
+            bot = gap if bot == '0' else bot
+            sec['style'] = sec['style'][:m.start()] + f'padding: {top} 0 {bot}' + sec['style'][m.end():]
+    for k, sec in enumerate(secs):
+        cls = sec.get('class') or []
+        if k == 0 or 'km-sec' in cls or sec.get('id') == 'book':
+            continue
+        lighten(sec, 'white' if turn % 2 == 0 else 'grey')
+        turn += 1
+    # template punctuation and mono costume
+    for t in soup.find_all(string=re.compile(r'\s·\s')):
+        if t.parent.name not in ('script', 'style'):
+            t.replace_with(re.sub(r'\s·\s', ', ', t))
+    for t in soup.find_all(string=lambda x: x and x.strip() == '·'):
+        el = t.parent if t.parent.name == 'span' and t.parent.get_text(strip=True) == '·' else t
+        prev = el.previous_sibling
+        if isinstance(prev, str):
+            prev.replace_with(prev.rstrip())
+        el.replace_with(',')
+    for el in soup.find_all(class_='num'):
+        el['class'] = [c for c in el['class'] if c != 'num'] + ['fig']
+
+
+LIGHT_CSS = """
+.lt{--paper:#FFFFFF;--well:#F1F4F7;background:var(--paper)!important;color:#0F1722;border:0!important}
+.lt-grey{--paper:#F2F4F7;--well:#FFFFFF}
+.lt a:not(.btn){color:inherit}.lt p a,.lt a.tap,.lt .km-unsure a{color:#0067AC}.lt a.tap{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.lt .lnk{color:#0F1722!important;border-bottom-color:rgba(15,23,34,.3)!important}
+.lt .card,.lt details{border-color:rgba(15,23,34,.1)!important}
+.lt summary{color:#0F1722}
+.lt .ft-main>p,.lt .ft-steps span{color:#4A5566}.lt .ft-steps b{color:#0F1722}.lt .ft-steps,.lt .ft-steps li{border-color:rgba(15,23,34,.12)}
+.lt .ft-steps li::before{color:#0071BC}
+.lt .ft-get{background:#F1F4F7}.lt .ft-row{border-color:#DDE3EA}
+.lt .brands{color:#0F1722;font-weight:500}.lt .brands-h{color:#5B6676}
+.lt .btn-d{background:#0F1722;color:#FFFFFF}
+.lt .btn-p,.lt .btn-p:hover,.lt .btn-d,.lt .btn-d:hover{color:#FFFFFF!important}
+.lt .stack>*{background:var(--well)!important;border:0!important}
+.fig{font-family:'Geologica',system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+::selection{background:#0071BC;color:#FFFFFF}
+.num{font-family:'Geologica',system-ui,sans-serif!important;letter-spacing:0!important}
+a[href^="tel:"]{white-space:nowrap}
+@media (max-width:899px){.km-side{align-items:flex-start}.mv .brands{margin-top:16px!important}.mv .brands-h{margin:20px 0 -8px!important}.mv section.lt{padding-bottom:48px!important}}
+.lang{color:#6F7B8B}
+"""
+CSS += LIGHT_CSS
+
+
+def light_css(css):
+    """The boards colour some text through class rules (FAQ, row lists, labels): give each such rule a light twin under .lt."""
+    out = []
+    for sel, body in re.findall(r'([^{}@]+)\{([^{}]*)\}', css):
+        decls = []
+        for d in body.split(';'):
+            if ':' not in d:
+                continue
+            k, v = d.split(':', 1)
+            if k.strip() not in ('color', 'background', 'background-color', 'border-color', 'border', 'border-top', 'border-bottom'):
+                continue
+            nv = v
+            for a, b in DARK2LIGHT:
+                nv = re.sub(a, b, nv, flags=re.I)
+            if nv != v:
+                decls.append(f'{k.strip()}:{nv.strip()}!important')
+        if decls:
+            sels = []
+            for one in sel.split(','):
+                one = one.strip()
+                if not one or re.fullmatch(r'(\.(?:dv|mv)\s+)?a(:hover)?', one) or re.search(r'btn|chip|bwhen|mapf|pbook|hbtn|mbtn', one) or one.startswith(('.lt', ':root', 'html', 'body', '.bb', '.mh', '.dh', '.menu', '.ft ', '.ft{', '.ft-')):
+                    continue
+                m = re.match(r'(\.(?:dv|mv))\s+(.*)', one)
+                sels.append(f'{m.group(1)} .lt {m.group(2)}' if m else f'.lt {one}')
+            if sels:
+                out.append(','.join(sels) + '{' + ';'.join(decls) + '}')
+    return '\n'.join(out)
+
+
 def prefix(doc):
     """Serve the whole v2 build under /v2/: rewrite root-relative links and assets."""
+    doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)

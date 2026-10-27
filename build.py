@@ -881,7 +881,7 @@ def page(lang, board, base, noindex, pages_meta):
 <meta name="theme-color" content="#0A0D12">
 <link rel="icon" href="/favicon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 {preload}
-<style>{fonts}{BASE_CSS}{V2.CSS if V2 else ''}{css}{phone_css}</style>
+<style>{fonts}{BASE_CSS}{V2.CSS if V2 else ''}{css}{phone_css}{V2.light_css(css + phone_css) if V2 else ''}</style>
 {schema}
 </head>
 <body>
