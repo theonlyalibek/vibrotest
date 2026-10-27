@@ -365,8 +365,206 @@ def brand_chips(soup, phone):
             names = [x.strip() for x in rest.split(',')]
             p.replace_with(BeautifulSoup(f'<p class="brands-h">{html.escape(head)}</p><p class="brands">' + ', '.join(html.escape(x.replace('-', '\u2011')) for x in names) + '</p>', 'html.parser'))
 
+# ---------- the stand page: what you get, when not to drive, the questions competitors leave open ----------
+
+ASOF = (' Цены на октябрь 2026.', ' Бағалар 2026 жылғы қазандағы жағдай бойынша.')
+V = {
+    'get_h': ('Что вы получите на руки', 'Қолыңызға не беріледі'),
+    'get_p': ('Распечатанное заключение. Каждый проверенный узел в нём отмечен одним из трёх цветов: сразу видно, что чинить сейчас, а что подождёт.',
+              'Басып шығарылған қорытынды. Тексерілген әр түйін үш түстің бірімен белгіленеді: нені қазір жөндеу керек, нені күтуге болатыны бірден көрінеді.'),
+    'legend': ((('urgent', 'Срочно'), 'Люфт уже большой или узел влияет на управление. Лучше не откладывать.'),
+               (('later', 'Можно позже'), 'Износ есть, но ездить можно. Следите и планируйте замену.'),
+               (('ok', 'В норме'), 'Узел проверен и работает как надо.')),
+    'legend_kk': ((('urgent', 'Шұғыл'), 'Саңылау үлкен немесе түйін басқаруға әсер етеді. Кейінге қалдырмаған дұрыс.'),
+                  (('later', 'Кейінірек болады'), 'Тозу бар, бірақ жүруге болады. Бақылап, ауыстыруды жоспарлаңыз.'),
+                  (('ok', 'Қалыпты'), 'Түйін тексерілді, дұрыс жұмыс істейді.')),
+    'paper_h': ('Образец заключения', 'Қорытынды үлгісі'),
+    'rows': ((('urgent', 'Стойка стабилизатора, передняя левая', 'люфт'), ('urgent', 'Стабилизатор тірегі, алдыңғы сол жақ', 'саңылау')),
+             (('urgent', 'Рулевой наконечник, правый', 'люфт'), ('urgent', 'Рульдік ұштық, оң жақ', 'саңылау')),
+             (('later', 'Сайлентблок заднего рычага, левый', 'трещины резины'), ('later', 'Артқы рычагтың сайлентблогы, сол жақ', 'резеңке жарылған')),
+             (('later', 'Опора амортизатора, передняя правая', 'скрип'), ('later', 'Амортизатор тірегі, алдыңғы оң жақ', 'сықыр')),
+             (('ok', 'Шаровые опоры', ''), ('ok', 'Шар тіректер', '')),
+             (('ok', 'Рулевая рейка', ''), ('ok', 'Рульдік рейка', '')),
+             (('ok', 'Ступичные подшипники', ''), ('ok', 'Күпшек мойынтіректері', ''))),
+    'paper_cap': ('Образец: узлы и отметки условные. В вашем заключении будут узлы вашей машины.',
+                  'Үлгі: түйіндер мен белгілер шартты. Сіздің қорытындыңызда өз көлігіңіздің түйіндері болады.'),
+    'stop_h': ('Когда со стуком лучше не ехать', 'Тықылмен қашан жүрмеген дұрыс'),
+    'stop_p': ('С такими признаками узел может отказать на ходу. Лучше вызвать эвакуатор, чем ехать своим ходом.',
+               'Мұндай белгілермен түйін жолда істен шығуы мүмкін. Өз жүрісімен келгеннен гөрі эвакуатор шақырған дұрыс.'),
+    'stop': (('Руль стал свободным или машина перестала держать прямую', 'Руль бос болып қалды немесе көлік түзу жүрмейді'),
+             ('После удара колесо стоит криво, машину резко тянет в сторону', 'Соққыдан кейін дөңгелек қисық тұр, көлікті бір жаққа қатты тартады'),
+             ('Громкий металлический стук в повороте, с каждым днём сильнее', 'Бұрылыста қатты металл тықылы, күн сайын күшейеді'),
+             ('Гул или скрежет от колеса, диск после поездки сильно горячий', 'Дөңгелектен гуіл не қыжыр шығады, жүрістен кейін диск қатты ысиды'),
+             ('Машина просела на один угол: могла лопнуть пружина', 'Көлік бір бұрышына отырып қалды: серіппе сынуы мүмкін')),
+    'when_more': (('Весной, после зимних ям', 'Көктемде, қысқы шұңқырлардан кейін'),
+                  ('Перед поездкой в горы, на Медеу или Шымбулак', 'Тауға, Медеу не Шымбұлаққа барар алдында')),
+    'faq': ((('Стучит, а стенд ничего не нашёл. Так бывает?', 'Тықылдайды, бірақ стенд ештеңе таппады. Бола ма?'),
+             ('Бывает, если звук появляется только на холодную, на определённой скорости или на одной кочке. Тогда мастер едет с вами на короткий тест-драйв по тому маршруту, где стучит.',
+              'Болады, егер дыбыс тек суық күйде, белгілі бір жылдамдықта немесе бір ғана кедір-бұдырда шықса. Онда шебер сізбен бірге тықылдайтын жолмен қысқа тест-драйвқа шығады.')),
+            (('Что написать при записи?', 'Жазылғанда не жазу керек?'),
+             ('Марку и год машины, пробег и когда стучит: на кочках, в повороте, при торможении, на холодную. По марке и году скажем точную цену.',
+              'Көліктің маркасы мен жылын, жүрісін және қашан тықылдайтынын: кедір-бұдырда, бұрылыста, тежегенде, суық күйде. Маркасы мен жылы бойынша нақты бағасын айтамыз.'))),
+    'wa': ('Здравствуйте! Хочу на диагностику на вибростенде.\nМашина и год: \nПробег: \nКогда стучит: ',
+           'Сәлеметсіз бе! Вибростендте диагностикаға жазылғым келеді.\nКөлік және жылы: \nЖүрісі: \nҚашан тықылдайды: '),
+}
+
+# the header and bottom-bar booking message: a short form, so the first reply can already name a price
+WA_MSG = ('Здравствуйте! Хочу записаться в VibroTest на Аносова 91.\nМашина и год: \nЧто беспокоит: ',
+          'Сәлеметсіз бе! Аносов 91-дегі VibroTest-ке жазылғым келеді.\nКөлік және жылы: \nНе мазалайды: ')
+META = {
+    'svc-vibrostand.dc.html': (
+        ('Диагностика ходовой на вибростенде в Алматы — от 7 000 ₸, 25–40 минут',
+         'Стенд раскачивает подвеску под нагрузкой, датчики шума показывают, какой узел стучит. 25–40 минут, заключение на руки. От 7 000 ₸. Алматы, Аносова 91.'),
+        ('Алматыда вибростендте жүріс бөлігін диагностикалау — 7 000 ₸ бастап, 25–40 минут',
+         'Стенд аспаны жүктеме астында тербетеді, шу датчиктері қай түйін тықылдайтынын көрсетеді. 25–40 минут, қорытынды қолға. 7 000 ₸ бастап. Алматы, Аносов 91.')),
+}
+
+
+def patch_ui(ui):
+    ui['ru']['wa_msg'], ui['kk']['wa_msg'] = WA_MSG
+
+
+_PRICE_RU = {}
+
+
+def price(board, lang, p):
+    """The KK text has no «от N ₸», so the first «N ₸ бастап» can be a later row: take the RU page's starting price."""
+    if lang == 'ru':
+        _PRICE_RU[board] = p
+        return p
+    return _PRICE_RU.get(board, p)
+
+
+def meta(board, lang, t, desc, price=None):
+    m = META.get(board)
+    if m:
+        return m[0 if lang == 'ru' else 1]
+    # service pages: the starting price in the title, the way the landing pages already show it
+    if price and board.startswith(('svc-', 'l-')) and '₸' not in t and t.endswith(' — VibroTest'):
+        n = f'{price:,}'.replace(',', ' ') + ' ₸'
+        t = t[:-len(' — VibroTest')] + (f', от {n}' if lang == 'ru' else f', {n} бастап') + ' — VibroTest'
+    return t, desc
+
+
+def _faq_item(det, q, a):
+    new = BeautifulSoup(str(det), 'html.parser').find('details')
+    if new.has_attr('open'):
+        del new['open']
+    s = new.find('summary')
+    svg = s.find('svg')
+    s.clear()
+    s.append(q)
+    if svg:
+        s.append(svg)
+    new.find('p').string = a
+    return new
+
+
+def _sec_by_h2(soup, titles):
+    for h in soup.find_all('h2'):
+        if h.get_text(' ', strip=True) in titles:
+            return h.find_parent('section')
+    return None
+
+
+def vibro_page(soup, lang, phone):
+    from urllib.parse import quote
+    i = 0 if lang == 'ru' else 1
+    legend = V['legend'] if i == 0 else V['legend_kk']
+    leg = ''.join(f'<li><span class="ft-st {k}">{n}</span><span>{x}</span></li>' for (k, n), x in legend)
+    label = {k: n for (k, n), _ in legend}
+    rows = ''.join(f'<li class="ft-row"><span class="ft-st {r[i][0]}">{label[r[i][0]]}</span>'
+                   f'<span>{r[i][1]}{f"<em>, {r[i][2]}</em>" if r[i][2] else ""}</span></li>' for r in V['rows'])
+    paper = (f'<div class="ft-get vt-paper"><h3>{V["paper_h"][i]}</h3><ul>{rows}</ul><p>{V["paper_cap"][i]}</p></div>')
+    stop = ''.join(f'<li>{x[i]}</li>' for x in V['stop'])
+    if phone:
+        get = (f'<section class="sec"><h2 class="hd h2">{V["get_h"][i]}</h2><p class="vt-p">{V["get_p"][i]}</p>'
+               f'<ul class="vt-legend">{leg}</ul>{paper}</section>')
+        stop_sec = (f'<section class="sec"><h2 class="hd h2">{V["stop_h"][i]}</h2><p class="vt-p">{V["stop_p"][i]}</p>'
+                    f'<ul class="vt-stop">{stop}</ul></section>')
+    else:
+        get = (f'<section style="padding: clamp(54px, 8.33vw, 120px) 0 0"><div class="w g2" style="gap: clamp(36px, 5.56vw, 80px); align-items: start">'
+               f'<div style="display: flex; flex-direction: column; gap: 22px"><h2 class="hd" style="font-size: clamp(25px, 3.44vw, 44px); line-height: 1.06; font-weight: 800">{V["get_h"][i]}</h2>'
+               f'<p style="color: #A9B4C2; font-size: 17px; line-height: 1.65">{V["get_p"][i]}</p><ul class="vt-legend">{leg}</ul></div>{paper}</div></section>')
+        stop_sec = (f'<section style="padding: clamp(54px, 8.33vw, 120px) 0 0"><div class="w g2" style="gap: clamp(36px, 5.56vw, 80px); align-items: start">'
+                    f'<div style="display: flex; flex-direction: column; gap: 22px"><h2 class="hd" style="font-size: clamp(25px, 3.44vw, 44px); line-height: 1.06; font-weight: 800">{V["stop_h"][i]}</h2>'
+                    f'<p style="color: #A9B4C2; font-size: 17px; line-height: 1.65">{V["stop_p"][i]}</p></div><ul class="vt-stop">{stop}</ul></div></section>')
+    how = _sec_by_h2(soup, {_KK.get(x, x) if i else x for x in ('Как проходит диагностика', 'Как проходит')})
+    if how:
+        how.insert_after(BeautifulSoup(get, 'html.parser'))
+    when = _sec_by_h2(soup, {_KK.get(x, x) if i else x for x in ('Когда стоит приехать', 'Когда приехать')})
+    if when:
+        lis = when.find_all('li')
+        if lis:
+            for x in V['when_more']:
+                li = BeautifulSoup(str(lis[-1]), 'html.parser').find('li')
+                li.string = x[i]
+                when.find('ul').append(li)
+        when.insert_after(BeautifulSoup(stop_sec, 'html.parser'))
+    dets = soup.find_all('details')
+    if dets:
+        for q, a in V['faq']:
+            dets[-1].parent.append(_faq_item(dets[-1], q[i], a[i]))
+    price = _sec_by_h2(soup, {_KK.get(x, x) if i else x for x in ('Цены на диагностику', 'Цены')})
+    if price:
+        p = price.find('p')
+        if p:
+            p.append(ASOF[i])
+    for a in soup.find_all('a', href=re.compile(r'^https://wa\.me/')):
+        a['href'] = a['href'].split('?')[0] + '?text=' + quote(V['wa'][i], safe='')
+
+
+# ---------- every page in one navy tone: the light price panels go dark too ----------
+
+PRICE_DARK = [(r'solid #0B1220', 'solid rgba(255,255,255,.16)'), (r'#0B1220', '#EEF2F7'), (r'#4A5565', '#A9B4C2'),
+              (r'#5B6575', '#8A96A6'), (r'rgba\(11,\s*18,\s*32,\s*\.(\d+)\)', r'rgba(255,255,255,.\1)')]
+
+
+def one_tone(soup, lang):
+    for s in soup.find_all(string=re.compile(r'\s·\s')):
+        if s.parent.name not in ('script', 'style'):
+            s.replace_with(re.sub(r'\s·\s', ', ', s))
+    for sec in soup.find_all('section', style=re.compile(r'background:\s*#F3F5F8', re.I)):
+        st = re.sub(r'(?:^|;)\s*(?:background|color|margin-top)\s*:[^;]*', '', sec['style'])
+        sec['style'] = st.strip('; ')
+        sec['class'] = (sec.get('class') or []) + ['prdk']
+        for el in sec.find_all(style=True):
+            s = el['style']
+            for a, b in PRICE_DARK:
+                s = re.sub(a, b, s, flags=re.I)
+            el['style'] = s
+        p = sec.find('p')
+        if p and 'prow' in str(sec) and ASOF[0].strip() not in p.get_text() and ASOF[1].strip() not in p.get_text():
+            p.append(ASOF[0 if lang == 'ru' else 1])
+
+
+VT_CSS = """
+.vt-legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:12px 14px;align-items:baseline;font-size:15px;line-height:1.55;color:#A9B4C2}
+.vt-legend li{display:contents}.vt-legend .ft-st,.vt-paper .ft-st{white-space:nowrap}
+.vt-paper{padding:28px 30px}.vt-paper .ft-row{font-size:15px}.vt-paper em{font-style:normal;color:#5B6576}
+.vt-stop{list-style:none;margin:0;padding:0;border-top:1px solid rgba(255,255,255,.1)}
+.vt-stop li{position:relative;padding:20px 0 20px 28px;border-bottom:1px solid rgba(255,255,255,.1);font-size:17px;line-height:1.5;color:#D5DCE5}
+.vt-stop li::before{content:'';position:absolute;left:3px;top:28px;width:9px;height:9px;border-radius:50%;background:#F26B6B}
+.prdk .prow{color:#EEF2F7!important;border-bottom-color:rgba(255,255,255,.1)!important}
+.mv .vt-p{margin-top:10px;font-size:15px;line-height:1.6;color:#A9B4C2}
+.mv .vt-legend{margin:16px 0 18px;font-size:14px}
+.mv .vt-paper{padding:16px}.mv .vt-paper .ft-row{font-size:14px;align-items:flex-start}
+.mv .vt-stop{margin-top:14px}.mv .vt-stop li{font-size:15px;padding:14px 0 14px 24px}.mv .vt-stop li::before{top:21px}
+"""
+CSS += VT_CSS
+
+
 def insert_map(soup, name, lang, url_for, wa):
     """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
+    if name not in ('Main.dc.html', 'Mobile.dc.html'):
+        if name in ('svc-vibrostand.dc.html', 'Mobile-service.dc.html'):
+            vibro_page(soup, lang, name == 'Mobile-service.dc.html')
+        if name == 'Services.dc.html':
+            h1 = soup.find('h1')
+            lead = h1.find_next('p') if h1 else None
+            if lead:
+                lead.append(ASOF[0 if lang == 'ru' else 1])
+        one_tone(soup, lang)
     anchor = None
     if name in ('Main.dc.html', 'Mobile.dc.html'):
         chip = soup.find('button', class_='chip')

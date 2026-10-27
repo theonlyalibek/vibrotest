@@ -778,6 +778,9 @@ def page(lang, board, base, noindex, pages_meta):
     if board in PHONE_BOARD:
         phone_css, phone_body, _ = build_board(PHONE_BOARD[board], lang, '.mv', False, True)
     soup = BeautifulSoup(body, 'html.parser')
+    page_price = first_price(soup.get_text(' '))
+    if V2:
+        page_price = V2.price(board, lang, page_price)
     h1 = soup.find('h1')
     h1t = h1.get_text(' ', strip=True) if h1 else ''
     lead = ''
@@ -791,10 +794,12 @@ def page(lang, board, base, noindex, pages_meta):
         if lang == 'kk' and t == title:
             t = h1t + ' — VibroTest'
         desc = short_desc(lead)
-        price = first_price(soup.get_text(' '))
+        price = page_price
         if kind == 'service' and price and str(price) not in desc.replace(' ', '').replace(' ', ''):
             desc += (f' От {price:,} ₸.' if lang == 'ru' else f' {price:,} ₸ бастап.').replace(',', ' ')
         desc += ' ' + ('Алматы, Аносова 91.' if lang == 'ru' else 'Алматы, Аносов 91.')
+    if V2:
+        t, desc = V2.meta(board, lang, t, desc, page_price)
     desc = desc[:200]
     url = f'{base}/{lang}/{path}'
     alts = ''.join(f'<link rel="alternate" hreflang="{l}" href="{base}/{l}/{path}">' for l in LANGS)
@@ -808,7 +813,7 @@ def page(lang, board, base, noindex, pages_meta):
         graph.append(org_schema(base, lang))
         graph.append({'@type': 'WebSite', '@id': f'{base}/#site', 'name': 'VibroTest.kz', 'url': f'{base}/{lang}/', 'inLanguage': lang})
     elif kind == 'service':
-        price = first_price(soup.get_text(' '))
+        price = page_price
         svc = {'@type': 'Service', 'name': h1t, 'description': lead, 'url': url, 'areaServed': {'@type': 'City', 'name': 'Алматы'},
                'provider': {'@id': f'{base}/#vibrotest'}}
         if price:
@@ -961,6 +966,7 @@ def main():
         import v2 as V2
         KK.update({k: v for k, v in V2.KK_EXTRA.items() if k not in KK})
         PAGES.update(V2.pages())
+        V2.patch_ui(UI)
         a.base += V2.PREFIX
     fix = V2.prefix if V2 else (lambda d: d)
     if out.exists():
