@@ -476,30 +476,12 @@ def lighten(sec, paper):
 
 
 def theme_home(soup, phone):
-    """Long stretches, not a zebra: navy for the hero; light for the stand and the sample conclusion;
-    navy again for the car map and the rack; light for brands, masters, reviews, articles and FAQ;
-    navy from the booking form to the footer. Reviews and the sample sit on a cool grey well."""
-    secs = [x for x in soup.find_all('section') if x.find_parent('section') is None]
-    gap = 'clamp(64px, 8vw, 112px)'
-    for k, sec in enumerate(secs[1:], 1):
-        # sections that now change paper at an edge may not start or end flush against the next one
-        m = re.match(r'\s*padding:\s*(\S+(?:\([^)]*\))?)\s+0(?:\s+(\S+(?:\([^)]*\))?))?', sec.get('style', ''))
-        if m and not phone:
-            top, bot = m.group(1), m.group(2) or m.group(1)
-            top = gap if top == '0' else top
-            bot = gap if bot == '0' else bot
-            sec['style'] = sec['style'][:m.start()] + f'padding: {top} 0 {bot}' + sec['style'][m.end():]
-    km = next((k for k, x in enumerate(secs) if 'km-sec' in (x.get('class') or [])), -1)
-    book = next((k for k, x in enumerate(secs) if x.get('id') == 'book'), len(secs))
-    for k, sec in enumerate(secs):
-        if k == km + 1 and km > 0 and not phone:
-            # the rack follows the map on the same navy: no second full gap between them
-            sec['style'] = re.sub(r'padding:\s*(?:clamp\([^)]*\)|\S+)', 'padding: clamp(24px, 3vw, 40px)', sec.get('style', ''), count=1)
-        if k == 0 or k in (km, km + 1) or k >= book:
-            continue
-        h = sec.find('h2')
-        grey = sec.get('id') == 'reviews' or sec.find(class_='stack') or (h and h.get_text(' ', strip=True) in STORY_END)
-        lighten(sec, 'grey' if grey else 'white')
+    """One tone for the whole page: every section sits on the same navy, no panels of a second shade.
+    (The light-paper variant, lighten() and LIGHT_CSS, stays available but is not used.)"""
+    for sec in [x for x in soup.find_all('section') if x.find_parent('section') is None][1:]:
+        st = sec.get('style', '')
+        st = re.sub(r';?\s*(background|border-top|border-bottom)\s*:[^;]*', '', st)
+        sec['style'] = st.strip('; ')
     # template punctuation and mono costume
     for t in soup.find_all(string=re.compile(r'\s·\s')):
         if t.parent.name not in ('script', 'style'):
@@ -532,7 +514,7 @@ LIGHT_CSS = """
 ::selection{background:#0071BC;color:#FFFFFF}
 .num{font-family:'Geologica',system-ui,sans-serif!important;letter-spacing:0!important}
 a[href^="tel:"]{white-space:nowrap}
-@media (max-width:899px){.km-side{align-items:flex-start}.mv .brands{margin-top:16px!important}.mv .brands-h{margin:20px 0 -8px!important}.mv section.lt,.mv section.sec{padding-bottom:48px!important}}
+@media (max-width:899px){.km-side{align-items:flex-start}.mv .brands{margin-top:16px!important}.mv .brands-h{margin:20px 0 -8px!important}.mv section.lt{padding-bottom:48px!important}}
 .lang{color:#6F7B8B}
 """
 CSS += LIGHT_CSS
