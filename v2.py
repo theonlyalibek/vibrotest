@@ -23,6 +23,16 @@ ROW_LINK['Компьютерная диагностика двигателя'] =
 _KK = json.loads((ROOT / 'i18n' / 'kk.json').read_text(encoding='utf-8'))
 STORY_END = {h for r in ('Вы видите все неисправности и решаете сами, что менять', 'Как проходит диагностика') for h in (r, _KK.get(r, r))}
 SERVICES_H2 = {h for r in ('С чем приезжают', 'С чем приезжают к нам') for h in (r, _KK.get(r, r))}
+DIAG_H2 = {h for r in ('Как проходит диагностика',) for h in (r, _KK.get(r, r))}
+# home copy: plainer headings and one name for the booking button (ru, kk)
+RETITLE = {
+    'Запишитесь за минуту': ('Запись на диагностику', 'Диагностикаға жазылу'),
+    'Ремонтируем ходовую машин от 2010 года, включая новые китайские': ('Машины от 2010 года, в том числе китайские', '2010 жылдан бергі көліктер, оның ішінде қытайлық'),
+    'Мастера ищут стук руками и на слух, а не наугад': ('Мастера ищут стук руками и на слух', 'Шеберлер тықылды қолмен және құлақпен іздейді'),
+    'Записаться в WhatsApp': ('Записаться на диагностику', 'Диагностикаға жазылу'),
+}
+PRICE_FAQ = (('Сколько стоит диагностика?', 'Цена зависит от кузова: седан, кроссовер, джип или пикап. Все цены на странице', 'Услуги и цены'),
+             ('Диагностика қанша тұрады?', 'Баға шанаққа байланысты: седан, кроссовер, джип немесе пикап. Барлық бағалар мына бетте:', 'Қызметтер мен бағалар'))
 
 # symptom picker on the home page: send people to the narrow page when there is one
 SYM_HREF = {'Стук или люфт в руле': 'l-tyagi.dc.html', 'Хруст при повороте': 'l-shrus.dc.html',
@@ -169,9 +179,9 @@ CSS = '''
 .km-dot{width:14px;height:14px;margin:-7px 0 0 -7px;font-size:0}.km-dot::before{inset:2px;box-shadow:none;opacity:.55}.km-dot::after{display:none}
 .km-dot[aria-pressed=true]{width:30px;height:30px;margin:-15px 0 0 -15px;font-size:11px}.km-dot[aria-pressed=true]::before{inset:5px;opacity:1;background:#FFFFFF;box-shadow:0 0 0 6px rgba(0,113,188,.35)}
 .km-dot[aria-pressed=true]::after{display:block;inset:5px}
-.km-list{flex-wrap:nowrap;overflow-x:auto;margin:14px -16px 0;padding:0 16px 4px;scrollbar-width:none;scroll-snap-type:x proximity;scroll-padding:0 16px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+.km-list{flex-wrap:nowrap;overflow-x:auto;margin:14px -16px 0;padding:0 16px 4px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
 .km-list::-webkit-scrollbar{display:none}
-.km-chip{flex:none;min-height:48px;padding:0 18px;font-size:15px;scroll-snap-align:start}.km-chip b{font-size:13px}
+.km-chip{flex:none;min-height:48px;padding:0 18px;font-size:15px}.km-chip b{font-size:13px}
 .km-swipe{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:#6F7B8B}
 .km-side{margin:14px -16px 0;padding:0 16px 4px;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;scrollbar-width:none}
 .km-side::-webkit-scrollbar{display:none}
@@ -179,36 +189,39 @@ CSS = '''
 .km-panel{padding:22px 20px;gap:12px}.km-panel h3{font-size:22px}.km-price{font-size:24px}.km-panel .btn{width:100%}
 .km-unsure{margin-top:14px;font-size:14px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
 
-.ft-card{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;padding:48px;border-radius:24px;background:linear-gradient(160deg,#101826 0,#0D121A 70%);border:1px solid rgba(90,174,242,.22);box-shadow:0 30px 80px -40px rgba(0,113,188,.45)}
+.ft-card{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:64px;align-items:start}
 .ft-main{display:flex;flex-direction:column;gap:22px}
 .ft-main h2{font:800 clamp(30px,3.6vw,50px)/1.04 'Geologica',system-ui,sans-serif;letter-spacing:-.02em;margin:0}
 .ft-main>p{color:#A9B4C2;font-size:17px;line-height:1.65;margin:0}
-.ft-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1)}
-.ft-fact{display:flex;flex-direction:column;gap:6px;padding:18px 12px 18px 0}
-.ft-fact+.ft-fact{padding-left:16px;border-left:1px solid rgba(255,255,255,.1)}
-.ft-fact b{font-size:30px;font-weight:600;color:#EEF2F7}.ft-fact span{font-size:13px;line-height:1.4;color:#8A96A6}
+.ft-steps{list-style:none;margin:4px 0 0;padding:0;counter-reset:st;border-top:1px solid rgba(255,255,255,.1)}
+.ft-steps li{counter-increment:st;display:grid;grid-template-columns:28px 1fr;column-gap:12px;row-gap:4px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.ft-steps li::before{content:counter(st);grid-row:span 2;color:#5AAEF2;font-weight:600;font-size:16px;line-height:1.4}
+.ft-steps b{font-size:16px;color:#EEF2F7}.ft-steps span{font-size:15px;line-height:1.55;color:#A9B4C2}
 .ft-cta{display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-top:auto}
 .ft-cta .lnk{color:#EEF2F7;font-weight:600;font-size:15px;border-bottom:1px solid rgba(255,255,255,.28);padding-bottom:3px}
 .ft-side{display:flex;flex-direction:column;gap:16px}
-.ft-pic{position:relative;border-radius:18px;overflow:hidden;background:#11161E;aspect-ratio:16/10}
+.ft-pic{position:relative;border-radius:14px;overflow:hidden;background:#11161E;aspect-ratio:4/5}
 .ft-pic img{width:100%;height:100%;object-fit:cover;display:block}
 .ft-get{padding:20px 22px;border-radius:16px;background:#F3F5F8;color:#0B1220}
 .ft-get h3{font:700 18px 'Geologica',system-ui,sans-serif;margin:0 0 10px}
 .ft-get ul{list-style:none;margin:0;padding:0}
 .ft-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #DDE3EA;font-size:14px}
-.ft-st{flex:none;min-width:104px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;text-align:center}
+.ft-st{flex:none;min-width:104px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;text-align:center}
 .ft-st.urgent{background:#FDE8E8;color:#B42318}.ft-st.later{background:#FEF3D7;color:#8A5A00}.ft-st.ok{background:#DDF4E6;color:#17663A}
-.ft-get p{margin:10px 0 0;font-size:12px;color:#5B6576}
+.ft-get p{margin:10px 0 0;font-size:13px;color:#5B6576}
 .dots{display:flex;gap:6px;margin-top:14px}.dots span{width:6px;height:6px;border-radius:3px;background:#3A4556;transition:width .2s,background .2s}.dots span.on{width:18px;background:#5AAEF2}
 .chips{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .chips li{padding:8px 12px;border-radius:10px;background:#11161E;border:1px solid rgba(255,255,255,.08);font-size:14px;color:#D5DCE5}
 .chips.cn li{border-color:rgba(90,174,242,.35);color:#EEF2F7}
 .chips-h{margin:18px 0 0;font-size:13px;color:#8A96A6}
-@media (max-width:899px){.ft-card{grid-template-columns:minmax(0,1fr);gap:20px;padding:22px 18px;border-radius:20px}
-.ft-main{gap:16px}.ft-main>p{font-size:15px}.ft-fact b{font-size:22px}.ft-fact span{font-size:12px}.ft-fact+.ft-fact{padding-left:10px}
+@media (max-width:899px){.ft-card{grid-template-columns:minmax(0,1fr);gap:20px}
+.ft-main{gap:16px}.ft-main>p{font-size:15px}.ft-pic{aspect-ratio:16/10}
 .ft-cta{gap:14px}.ft-cta .btn{width:100%}.ft-get{padding:16px}.ft-st{min-width:112px}
 .ft-card{display:flex;flex-direction:column;gap:16px}.ft-main,.ft-side{display:contents}
-.ft-main h2{order:2}.ft-main>p{order:3}.ft-pic{order:4}.ft-facts{order:5}.ft-cta{order:6;margin-top:4px}.ft-get{order:7}}
+.ft-main h2{order:1}.ft-main>p{order:2}.ft-pic{order:3}.ft-steps{order:4}.ft-cta{order:5;margin-top:4px}.ft-get{order:6}
+.stack{display:flex!important;flex-direction:column!important;gap:12px!important;overflow:visible!important;margin:16px 0 0!important;padding:0!important}.stack>*{width:auto!important;flex:none!important}
+.brands{margin-top:14px;font-size:17px;line-height:1.75;color:#EEF2F7;font-weight:600}.brands i{font-style:normal;color:#4A5568}.brands span{white-space:nowrap}.brands-h{margin-top:16px;font-size:14px;color:#8A96A6}
+.tap{display:inline-block;padding:12px 0;margin:-12px 0}}
 .bb{transition:transform .25s ease,opacity .25s ease}
 .bb.bb-off{transform:translateY(110%);opacity:0;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.km-dot::after,.km-fig::after{animation:none}.km-fig::after{display:none}}
@@ -220,15 +233,21 @@ JS = r'''
 [].forEach.call(document.querySelectorAll('[data-km]'),function(km){
  var btns=km.querySelectorAll('[data-node]'),panels=[].slice.call(km.querySelectorAll('.km-panel')),
   side=km.querySelector('.km-side'),list=km.querySelector('.km-list'),mq=matchMedia('(max-width:899px)'),cur='';
- function mark(id){if(id===cur)return;cur=id;
+ function mark(id,follow){if(id===cur)return;cur=id;
   [].forEach.call(btns,function(b){var on=b.getAttribute('data-node')===id;b.setAttribute('aria-pressed',on?'true':'false');
-   if(on&&mq.matches&&b.classList.contains('km-chip'))list.scrollTo({left:b.offsetLeft-16,behavior:'smooth'})});
+   if(on&&!follow&&mq.matches&&b.classList.contains('km-chip'))list.scrollTo({left:b.offsetLeft-16,behavior:'smooth'})});
   panels.forEach(function(p){p.hidden=p.getAttribute('data-panel')!==id})}
  [].forEach.call(btns,function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-node');mark(id);
-  if(mq.matches){var p=km.querySelector('[data-panel="'+id+'"]');side.scrollTo({left:p.offsetLeft-side.offsetLeft-16,behavior:'smooth'})}})});
- var t;side.addEventListener('scroll',function(){if(!mq.matches)return;clearTimeout(t);t=setTimeout(function(){
-  var x=side.scrollLeft+16,best=panels[0],d=1e9;panels.forEach(function(p){var dd=Math.abs(p.offsetLeft-side.offsetLeft-x);if(dd<d){d=dd;best=p}});
-  mark(best.getAttribute('data-panel'))},80)},{passive:true});
+  if(mq.matches){var p=km.querySelector('[data-panel="'+id+'"]');jump=panels.indexOf(p);side.scrollTo({left:p.offsetLeft-side.offsetLeft-16,behavior:'smooth'})}})});
+ // the chip row moves with the finger, frame by frame, not after the swipe settles
+ var chips=panels.map(function(p){return list.querySelector('[data-node="'+p.getAttribute('data-panel')+'"]')}),raf=0,jump=-1;
+ function follow(){raf=0;if(!mq.matches||panels.length<2)return;
+  var max=side.scrollWidth-side.clientWidth,f=max>0?Math.max(0,Math.min(1,side.scrollLeft/max))*(panels.length-1):0,
+   i=Math.min(panels.length-2,Math.floor(f)),fr=f-i,a=chips[i],b=chips[i+1];
+  if(jump>=0){if(Math.abs(f-jump)>.02)return;jump=-1}  // a tap on a chip: let the cards catch up first
+  if(a&&b)list.scrollLeft=a.offsetLeft-16+(b.offsetLeft-a.offsetLeft)*fr;
+  mark(panels[Math.round(f)].getAttribute('data-panel'),true)}
+ side.addEventListener('scroll',function(){if(!raf)raf=requestAnimationFrame(follow)},{passive:true});
  cur=(km.querySelector('[aria-pressed=true]')||btns[0]).getAttribute('data-node');
 });
 // carousels with dots: the active dot follows the swipe
@@ -258,15 +277,14 @@ def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
         t = html.escape(title[i])
         if x is not None:
             dots.append(f'<button type="button" class="km-dot" data-node="{key}" aria-pressed="{"true" if on else "false"}" '
-                        f'aria-label="{t}" style="left:{x / 10:.1f}%;top:{y / 3.4:.1f}%"><span>{n}</span></button>')
-        num = f'<b>{n}</b>' if x is not None else ''
-        chips.append(f'<button type="button" class="km-chip" data-node="{key}" aria-pressed="{"true" if on else "false"}">{num}{t}</button>')
+                        f'aria-label="{t}" style="left:{x / 10:.1f}%;top:{y / 3.4:.1f}%"></button>')
+        chips.append(f'<button type="button" class="km-chip" data-node="{key}" aria-pressed="{"true" if on else "false"}">{t}</button>')
         p = f'{price:,}'.replace(',', ' ') + ' ₸'
         rows = ''.join(f'<a href="{url_for(lang, b)}"><span>{html.escape(l[i])}</span><span aria-hidden="true">→</span></a>' for b, *l in links)
         msg = quote(T2['wa'][i].replace('{x}', title[i].lower() if lang == 'ru' else title[i]), safe='')
-        panels.append(f'<div class="km-panel" data-panel="{key}"{"" if on else " hidden"}><span class="k">{f"{n:02d}" if x is not None else "—"}</span><h3>{t}</h3>'
+        panels.append(f'<div class="km-panel" data-panel="{key}"{"" if on else " hidden"}><h3>{t}</h3>'
                       f'<p>{html.escape(text[i])}</p>' + (f'<div class="km-price">{T2["from"][i].format(p=p)}</div>' if prices else '') +
-                      f'<div class="km-links">{rows}</div><a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a></div>')
+                      f'<div class="km-links">{rows}</div>' + (f'<a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a>' if prices else '') + '</div>')
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
     return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 0" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
@@ -286,33 +304,39 @@ F = {
     'h': ('Диагностика ходовой на вибростенде', 'Вибростендте жүріс бөлігінің диагностикасы'),
     'p': ('Машина стоит на платформах своим весом, стенд раскачивает подвеску, как на кочках. Датчики шума на рычагах, стойках и тягах показывают, какой узел стучит.',
           'Көлік платформаларда өз салмағымен тұрады, стенд аспаны кедір-бұдырдағыдай тербетеді. Рычагтардағы, тіректер мен тартқыштардағы шу датчиктері қай түйін тықылдайтынын көрсетеді.'),
-    'facts': ((('25–40', 'минут на стенде'), ('25–40', 'минут стендте')), (('3', 'статуса в заключении'), ('3', 'қорытындыда мәртебе')),
-              (('4,8', 'в 2ГИС, 143 оценки'), ('4,8', '2ГИС-те, 143 баға'))),
+    'steps': tuple((t, _KK.get(t, t), x, _KK.get(x, x)) for t, x in (
+        ('Заезд на стенд', 'Ставим колёса на платформы. Седан, кроссовер, джип или пикап. Грузовые и спецтехнику не берём.'),
+        ('Нагрузка и датчики', 'Платформы трясут подвеску, датчики шума стоят на узлах, рычаги давления нагружают их вручную.'),
+        ('Мастер показывает', 'Находим конкретный узел и показываем люфт вживую. Не «вроде бы рычаг», а та деталь, что стучит.'),
+        ('Заключение на руки', 'Срочно, можно позже, в норме. Ремонтировать у нас не обязательно.'))),
     'get': ('Что вы получите на руки', 'Қолыңызға не беріледі'),
     'rows': ((('urgent', 'Срочно', 'Стойка стабилизатора, передняя левая'), ('urgent', 'Шұғыл', 'Стабилизатор тірегі, алдыңғы сол жақ')),
              (('later', 'Можно позже', 'Сайлентблок заднего рычага'), ('later', 'Кейінірек болады', 'Артқы рычагтың сайлентблогы')),
              (('ok', 'В норме', 'Рулевая рейка, амортизаторы'), ('ok', 'Қалыпты', 'Рульдік рейка, амортизаторлар'))),
-    'cap': ('Пример заключения: каждый узел отмечен одним из трёх статусов.', 'Қорытынды үлгісі: әр түйін үш мәртебенің бірімен белгіленеді.'),
-    'book': ('Записаться на вибростенд', 'Вибростендке жазылу'),
+    'cap': ('Так выглядит заключение.', 'Қорытынды осылай көрінеді.'),
+    'book': ('Записаться на диагностику', 'Диагностикаға жазылу'),
     'more': ('Как работает стенд', 'Стенд қалай жұмыс істейді'),
     'msg': ('Здравствуйте! Хочу записаться на диагностику на вибростенде.', 'Сәлеметсіз бе! Вибростендте диагностикаға жазылғым келеді.'),
     'alt': ('Колесо автомобиля на платформе вибростенда VibroTest', 'VibroTest вибростенд платформасындағы көлік дөңгелегі'),
 }
 
 def stand_feature(lang, url_for, wa, phone=False):
+    """The stand and how a visit goes, in one block. The desktop page has the large paper sample right after it,
+    so the short «на руки» list stays only on phones."""
     from urllib.parse import quote
     i = 0 if lang == 'ru' else 1
-    facts = ''.join(f'<div class="ft-fact"><b class="num">{f[i][0]}</b><span>{f[i][1]}</span></div>' for f in F['facts'])
+    steps = ''.join(f'<li><b>{st[i]}</b><span>{st[2 + i]}</span></li>' for st in F['steps'])
     rows = ''.join(f'<li class="ft-row"><span class="ft-st {r[i][0]}">{r[i][1]}</span><span>{r[i][2]}</span></li>' for r in F['rows'])
     return (f'<section class="ft-sec" style="padding: {"40px 16px 0" if phone else "110px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="ft-card"><div class="ft-main"><h2>{F["h"][i]}</h2><p>{F["p"][i]}</p>'
-            f'<div class="ft-facts">{facts}</div>'
+            f'<ol class="ft-steps">{steps}</ol>'
             f'<div class="ft-cta"><a class="btn btn-p" href="{wa}?text={quote(F["msg"][i], safe="")}">{F["book"][i]}</a>'
             f'<a class="lnk" href="{url_for(lang, "svc-vibrostand.dc.html")}">{F["more"][i]}</a></div></div>'
             f'<div class="ft-side"><div class="ft-pic"><img src="/img/vt-01-800.webp" srcset="/img/vt-01-800.webp 800w, /img/vt-01-1600.webp 1600w" '
             f'sizes="(max-width: 900px) 100vw, 40vw" alt="{F["alt"][i]}" loading="lazy" decoding="async">'
             '</div>'
-            f'<div class="ft-get"><h3>{F["get"][i]}</h3><ul>{rows}</ul><p>{F["cap"][i]}</p></div></div></div></div></section>')
+            + (f'<div class="ft-get"><h3>{F["get"][i]}</h3><ul>{rows}</ul><p>{F["cap"][i]}</p></div>' if phone else '')
+            + '</div></div></div></section>')
 
 
 def to_dots(soup):
@@ -330,18 +354,18 @@ def to_dots(soup):
 
 
 def brand_chips(soup, phone):
-    """Phone home: the brand list as tags, Chinese brands in blue."""
+    """Phone home: the brand list as a line of names, the way the desktop page shows it."""
     if not phone:
         return
     for p in soup.find_all('p'):
         t = p.get_text(' ', strip=True)
         if 'Toyota' in t and 'Lexus' in t:
             names = [x.strip() for x in t.split(',')]
-            p.replace_with(BeautifulSoup('<ul class="chips">' + ''.join(f'<li>{html.escape(x)}</li>' for x in names) + '</ul>', 'html.parser'))
+            p.replace_with(BeautifulSoup('<p class="brands">' + '\u00a0<i>·</i> '.join(f'<span>{html.escape(x)}</span>' for x in names) + '</p>', 'html.parser'))
         elif 'Li Auto' in t and 'Geely' in t:
             head, _, rest = t.partition(':')
             names = [x.strip() for x in rest.split(',')]
-            p.replace_with(BeautifulSoup(f'<p class="chips-h">{html.escape(head)}</p><ul class="chips cn">' + ''.join(f'<li>{html.escape(x)}</li>' for x in names) + '</ul>', 'html.parser'))
+            p.replace_with(BeautifulSoup(f'<p class="brands-h">{html.escape(head)}</p><p class="brands">' + '\u00a0<i>·</i> '.join(f'<span>{html.escape(x)}</span>' for x in names) + '</p>', 'html.parser'))
 
 def insert_map(soup, name, lang, url_for, wa):
     """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
@@ -360,14 +384,21 @@ def insert_map(soup, name, lang, url_for, wa):
     new = BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html', 'symptom' if name == 'Main.dc.html' else '', prices=not home), 'html.parser')
     if home:
         anchor.extract()
-        # the sensor signal is shown once, in the hero: drop the repeat in «Как проходит диагностика»
+        i = 0 if lang == 'ru' else 1
+        # one block tells the stand story: the facts strip under the hero and «Как проходит диагностика» repeat it
+        facts = soup.find('div', class_='facts')
+        if facts and facts.find_parent('div', class_='w'):
+            facts.find_parent('div', class_='w').decompose()
         diag = soup.find('section', id='diag')
-        wave = diag.find('svg', class_='sig') if diag else None
-        if wave:
-            wave.parent.decompose()
+        if diag:
+            diag.decompose()
+        for h in soup.find_all('h2'):
+            if h.get_text(' ', strip=True) in DIAG_H2:
+                h.find_parent('section').decompose()
+                break
         hero = soup.find('section')
         hero.insert_after(BeautifulSoup(stand_feature(lang, url_for, wa, phone), 'html.parser'))
-        # the other services come after the stand story: desktop after the «на руки» block, phone after «Как проходит диагностика»
+        # the other services come after the stand story: desktop after the paper sample, phone right after the stand
         after = None
         for h in soup.find_all('h2'):
             if h.get_text(' ', strip=True) in STORY_END:
@@ -379,6 +410,37 @@ def insert_map(soup, name, lang, url_for, wa):
             if h.get_text(' ', strip=True) in SERVICES_H2:
                 h.find_parent('section').decompose()
                 break
+        # plainer headings, one name for the booking button
+        for ru, pair in RETITLE.items():
+            for t in soup.find_all(string=lambda x: x and x.strip() in (ru, _KK.get(ru, ru))):
+                t.replace_with(t.replace(t.strip(), pair[i]))
+        if phone:
+            # reviews read as a short list, not one more carousel
+            rail = soup.find(attrs={'data-dots': True})
+            if rail:
+                del rail['data-dots']
+                rail['class'] = ['stack']
+                for extra in rail.find_all(recursive=False)[3:]:
+                    extra.decompose()
+                d = rail.parent.find(class_='dots')
+                if d:
+                    d.decompose()
+            # the price question, answered with a link: prices live on the services page
+            faq = soup.find('details')
+            if faq:
+                q, a, link = PRICE_FAQ[i]
+                faq.parent.append(BeautifulSoup(
+                    f'<details><summary>{q}<svg class="pm" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></summary>'
+                    f'<p style="padding: 0 0 18px; font-size: 15px; line-height: 1.6; color: #A9B4C2">{a} <a href="{url_for(lang, "Services.dc.html")}">«{link}»</a>.</p></details>', 'html.parser'))
+            # small text up to 13px, and standalone links get a finger-sized hit area
+            for el in soup.find_all(style=re.compile(r'font-size:\s*12px')):
+                el['style'] = re.sub(r'font-size:\s*12px', 'font-size: 13px', el['style'])
+            for a in soup.find_all('a'):
+                cls = a.get('class') or []
+                if set(cls) - {'lnk', 'num'} or a.find_parent(class_=['km-links', 'bb', 'mh']):
+                    continue
+                if a.get('href', '').startswith('tel:') or not a.parent.find(string=lambda x: x.strip() and x.parent is a.parent, recursive=False):
+                    a['class'] = cls + ['tap']
     else:
         anchor.insert_after(new)
 
