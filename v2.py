@@ -453,6 +453,11 @@ DARK2LIGHT = [
 ]
 
 
+# the dark surfaces in navy, like the neighbour's site, instead of near-black
+NAVY = [(r'#0A0D12\b', '#0B1220'), (r'#0E131A\b', '#0F1829'), (r'#11161E\b', '#131E33'), (r'#151B24\b', '#17233A'),
+        (r'#141B25\b', '#17233A'), (r'#0E1520\b', '#101B30'), (r'#0B1018\b', '#0B1424'), (r'rgba\(10,\s*13,\s*18,', 'rgba(11,18,32,'), (r'#6F7B8B\b', '#7F8A9B')]
+
+
 def lighten(sec, paper):
     """Recolour a dark-board section for light paper: inline colours swap to their light pair, classes get .lt rules."""
     sec['class'] = (sec.get('class') or []) + ['lt', 'lt-' + paper]
@@ -471,25 +476,30 @@ def lighten(sec, paper):
 
 
 def theme_home(soup, phone):
-    """Dark only where it carries meaning: the hero with the live signal, the car map, the booking form.
-    Everything else sits on light paper, white and a cool grey taking turns."""
+    """Long stretches, not a zebra: navy for the hero; light for the stand and the sample conclusion;
+    navy again for the car map and the rack; light for brands, masters, reviews, articles and FAQ;
+    navy from the booking form to the footer. Reviews and the sample sit on a cool grey well."""
     secs = [x for x in soup.find_all('section') if x.find_parent('section') is None]
-    turn = 0
     gap = 'clamp(64px, 8vw, 112px)'
     for k, sec in enumerate(secs[1:], 1):
-        # every section now changes paper at its edges, so none may start or end flush against the next one
+        # sections that now change paper at an edge may not start or end flush against the next one
         m = re.match(r'\s*padding:\s*(\S+(?:\([^)]*\))?)\s+0(?:\s+(\S+(?:\([^)]*\))?))?', sec.get('style', ''))
         if m and not phone:
             top, bot = m.group(1), m.group(2) or m.group(1)
             top = gap if top == '0' else top
             bot = gap if bot == '0' else bot
             sec['style'] = sec['style'][:m.start()] + f'padding: {top} 0 {bot}' + sec['style'][m.end():]
+    km = next((k for k, x in enumerate(secs) if 'km-sec' in (x.get('class') or [])), -1)
+    book = next((k for k, x in enumerate(secs) if x.get('id') == 'book'), len(secs))
     for k, sec in enumerate(secs):
-        cls = sec.get('class') or []
-        if k == 0 or 'km-sec' in cls or sec.get('id') == 'book':
+        if k == km + 1 and km > 0 and not phone:
+            # the rack follows the map on the same navy: no second full gap between them
+            sec['style'] = re.sub(r'padding:\s*(?:clamp\([^)]*\)|\S+)', 'padding: clamp(24px, 3vw, 40px)', sec.get('style', ''), count=1)
+        if k == 0 or k in (km, km + 1) or k >= book:
             continue
-        lighten(sec, 'white' if turn % 2 == 0 else 'grey')
-        turn += 1
+        h = sec.find('h2')
+        grey = sec.get('id') == 'reviews' or sec.find(class_='stack') or (h and h.get_text(' ', strip=True) in STORY_END)
+        lighten(sec, 'grey' if grey else 'white')
     # template punctuation and mono costume
     for t in soup.find_all(string=re.compile(r'\s·\s')):
         if t.parent.name not in ('script', 'style'):
@@ -522,7 +532,7 @@ LIGHT_CSS = """
 ::selection{background:#0071BC;color:#FFFFFF}
 .num{font-family:'Geologica',system-ui,sans-serif!important;letter-spacing:0!important}
 a[href^="tel:"]{white-space:nowrap}
-@media (max-width:899px){.km-side{align-items:flex-start}.mv .brands{margin-top:16px!important}.mv .brands-h{margin:20px 0 -8px!important}.mv section.lt{padding-bottom:48px!important}}
+@media (max-width:899px){.km-side{align-items:flex-start}.mv .brands{margin-top:16px!important}.mv .brands-h{margin:20px 0 -8px!important}.mv section.lt,.mv section.sec{padding-bottom:48px!important}}
 .lang{color:#6F7B8B}
 """
 CSS += LIGHT_CSS
@@ -560,4 +570,6 @@ def light_css(css):
 def prefix(doc):
     """Serve the whole v2 build under /v2/: rewrite root-relative links and assets."""
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
+    for a, b in NAVY:
+        doc = re.sub(a, b, doc, flags=re.I)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
