@@ -232,13 +232,10 @@ CSS = '''
 .km-dot{width:14px;height:14px;margin:-7px 0 0 -7px;font-size:0}.km-dot::before{inset:2px;box-shadow:none;opacity:.55}.km-dot::after{display:none}
 .km-dot[aria-pressed=true]{width:30px;height:30px;margin:-15px 0 0 -15px;font-size:11px}.km-dot[aria-pressed=true]::before{inset:5px;opacity:1;background:#FFFFFF;box-shadow:0 0 0 6px rgba(0,113,188,.35)}
 .km-dot[aria-pressed=true]::after{display:block;inset:5px}
-.km-list{flex-wrap:nowrap;overflow-x:auto;margin:14px -16px 0;padding:0 16px 4px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
-.km-list::-webkit-scrollbar{display:none}
-.km-chip{flex:none;min-height:48px;padding:0 18px;font-size:15px}.km-chip b{font-size:13px}
+.km-list{gap:8px;margin-top:14px}
+.km-chip{min-height:44px;padding:0 16px;font-size:15px}.km-chip b{font-size:13px}
 .km-swipe{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:#6F7B8B}
-.km-side{margin:14px -16px 0;padding:0 16px 4px;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;scrollbar-width:none}
-.km-side::-webkit-scrollbar{display:none}
-.km-side .km-panel,.km-side .km-panel[hidden]{display:flex;flex:0 0 calc(100% - 28px);scroll-snap-align:start;min-height:0}
+.km-side{margin-top:14px}
 .km-panel{padding:22px 20px;gap:12px}.km-panel h3{font-size:22px}.km-price{font-size:24px}.km-panel .btn{width:100%}
 .km-unsure{margin-top:14px;font-size:14px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
 
@@ -281,27 +278,12 @@ CSS = '''
 '''
 
 JS = r'''
-// car map: a dot or a chip picks the node and its card shows. On phones the cards are a swipeable row:
-// swiping a card moves the chip row and the lit part on the drawing along with it.
+// car map: a dot or a chip picks the node and its card shows.
 [].forEach.call(document.querySelectorAll('[data-km]'),function(km){
- var btns=km.querySelectorAll('[data-node]'),panels=[].slice.call(km.querySelectorAll('.km-panel')),
-  side=km.querySelector('.km-side'),list=km.querySelector('.km-list'),mq=matchMedia('(max-width:899px)'),cur='';
- function mark(id,follow){if(id===cur)return;cur=id;
-  [].forEach.call(btns,function(b){var on=b.getAttribute('data-node')===id;b.setAttribute('aria-pressed',on?'true':'false');
-   if(on&&!follow&&mq.matches&&b.classList.contains('km-chip'))list.scrollTo({left:b.offsetLeft-16,behavior:'smooth'})});
-  panels.forEach(function(p){p.hidden=p.getAttribute('data-panel')!==id})}
- [].forEach.call(btns,function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-node');mark(id);
-  if(mq.matches){var p=km.querySelector('[data-panel="'+id+'"]');jump=panels.indexOf(p);side.scrollTo({left:p.offsetLeft-side.offsetLeft-16,behavior:'smooth'})}})});
- // the chip row moves with the finger, frame by frame, not after the swipe settles
- var chips=panels.map(function(p){return list.querySelector('[data-node="'+p.getAttribute('data-panel')+'"]')}),raf=0,jump=-1;
- function follow(){raf=0;if(!mq.matches||panels.length<2)return;
-  var max=side.scrollWidth-side.clientWidth,f=max>0?Math.max(0,Math.min(1,side.scrollLeft/max))*(panels.length-1):0,
-   i=Math.min(panels.length-2,Math.floor(f)),fr=f-i,a=chips[i],b=chips[i+1];
-  if(jump>=0){if(Math.abs(f-jump)>.02)return;jump=-1}  // a tap on a chip: let the cards catch up first
-  if(a&&b)list.scrollLeft=a.offsetLeft-16+(b.offsetLeft-a.offsetLeft)*fr;
-  mark(panels[Math.round(f)].getAttribute('data-panel'),true)}
- side.addEventListener('scroll',function(){if(!raf)raf=requestAnimationFrame(follow)},{passive:true});
- cur=(km.querySelector('[aria-pressed=true]')||btns[0]).getAttribute('data-node');
+ var btns=km.querySelectorAll('[data-node]'),panels=km.querySelectorAll('.km-panel');
+ [].forEach.call(btns,function(b){b.addEventListener('click',function(){var id=b.getAttribute('data-node');
+  [].forEach.call(btns,function(x){x.setAttribute('aria-pressed',x.getAttribute('data-node')===id?'true':'false')});
+  [].forEach.call(panels,function(p){p.hidden=p.getAttribute('data-panel')!==id})})});
 });
 // carousels with dots: the active dot follows the swipe
 [].forEach.call(document.querySelectorAll('[data-dots]'),function(r){var d=r.parentNode.querySelector('.dots');if(!d)return;var dots=d.children;
