@@ -1018,8 +1018,6 @@ def insert_map(soup, name, lang, url_for, wa):
     if name in ('Main.dc.html', 'Mobile.dc.html'):
         chip = soup.find('button', class_='chip')
         anchor = chip.find_parent('section') if chip else None
-    elif name == 'Services.dc.html':
-        anchor = soup.find('section')
     if anchor is None:
         return
     home = name in ('Main.dc.html', 'Mobile.dc.html')
