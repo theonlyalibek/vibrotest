@@ -94,6 +94,19 @@ def hero_photo(soup, name, lang):
         img['src'] = f'/img/ph-{stem}-800.webp'
         img['srcset'] = f'/img/ph-{stem}-800.webp 800w, /img/ph-{stem}-1600.webp 1600w'
         img['alt'] = PH[stem][lang != 'ru']
+    if img is None:
+        return
+    if name in PHONE_HERO:
+        img.parent['class'] = img.parent.get('class', []) + ['mfade']
+    elif stem in PH:
+        # phones: the photo goes first, edge to edge, and melts into the page (as on viton.kz)
+        box = img.parent
+        box['class'] = box.get('class', []) + ['hph']
+        pic = BeautifulSoup(f'<div class="mph mfade">{img}</div>', 'html.parser')
+        box.find_parent('section').insert(0, pic)
+
+
+PHONE_HERO = ('Mobile.dc.html', 'Mobile-service.dc.html')
 
 
 VIDEOS = {'art-lixiang-l7.dc.html': (
@@ -1022,14 +1035,26 @@ VT_CSS = """
 .mv .vt-stop{margin-top:14px}.mv .vt-stop li{font-size:15px;padding:14px 0 14px 24px}.mv .vt-stop li::before{top:21px}
 """
 CSS += VT_CSS
+CSS += """
+.mph{display:none}
+@media (max-width:899px){
+.mph{display:block;position:relative;height:300px;margin:calc(-1 * clamp(18px, 2.78vw, 40px)) 0 4px;overflow:hidden;background:#131E33}
+.mph img{width:100%;height:100%;object-fit:cover;display:block}
+.hph{display:none!important}
+.mfade{position:relative}
+.mfade>div{z-index:1}
+.mfade::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,18,32,0) 50%,#0B1220);pointer-events:none}
+}
+"""
 
 
 def insert_map(soup, name, lang, url_for, wa):
     """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
+    if name.startswith(('svc-', 'l-')) or name in PHONE_HERO:
+        hero_photo(soup, name, lang)
     if any(x[0] == name for x in ALL_ARTS):
         article_extras(soup, name, lang, url_for, wa)
     elif name.startswith(('svc-', 'l-')) or name == 'Mobile-service.dc.html':
-        hero_photo(soup, name, lang)
         service_extras(soup, 'svc-vibrostand.dc.html' if name == 'Mobile-service.dc.html' else name, lang, url_for)
     # the address block sits right above the booking form: its own «Записаться» button only repeats the form
     if soup.find('form', attrs={'data-book': True}):
