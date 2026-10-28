@@ -14,6 +14,11 @@
    "Кейс"
   ],
   "min": 4,
+  "svc": [
+   "art-rack.dc.html",
+   "l-rychagi.dc.html",
+   "l-tyagi.dc.html"
+  ],
   "src": "/media/lixiang-l7-hero.jpg",
   "alt2": [
    "Рулевая рейка LiXiang L7 на верстаке во время реставрации",
@@ -34,7 +39,12 @@
    "Подвеска",
    "Аспа"
   ],
-  "min": 5
+  "min": 5,
+  "svc": [
+   "l-rychagi.dc.html",
+   "l-tyagi.dc.html",
+   "svc-suspension.dc.html"
+  ]
  },
  {
   "board": "art-gul.dc.html",
@@ -50,7 +60,11 @@
    "Ступицы и шины",
    "Күпшектер мен шиналар"
   ],
-  "min": 6
+  "min": 6,
+  "svc": [
+   "l-stupica.dc.html",
+   "svc-drive.dc.html"
+  ]
  },
  {
   "board": "art-amortizatory.dc.html",
@@ -66,7 +80,11 @@
    "Подвеска",
    "Аспа"
   ],
-  "min": 6
+  "min": 6,
+  "svc": [
+   "l-amortizatory.dc.html",
+   "svc-suspension.dc.html"
+  ]
  },
  {
   "board": "art-uvodit.dc.html",
@@ -82,7 +100,12 @@
    "Подвеска",
    "Аспа"
   ],
-  "min": 6
+  "min": 6,
+  "svc": [
+   "svc-suspension.dc.html",
+   "l-saylentbloki.dc.html",
+   "l-tyagi.dc.html"
+  ]
  },
  {
   "board": "art-hrust.dc.html",
@@ -98,7 +121,11 @@
    "Привод",
    "Жетек"
   ],
-  "min": 5
+  "min": 5,
+  "svc": [
+   "l-shrus.dc.html",
+   "svc-drive.dc.html"
+  ]
  },
  {
   "board": "art-tormoza.dc.html",
@@ -114,7 +141,11 @@
    "Тормоза",
    null
   ],
-  "min": 5
+  "min": 5,
+  "svc": [
+   "svc-brakes.dc.html",
+   "l-saylentbloki.dc.html"
+  ]
  },
  {
   "board": "art-skrip.dc.html",
@@ -130,6 +161,10 @@
    "Подвеска",
    "Аспа"
   ],
-  "min": 5
+  "min": 5,
+  "svc": [
+   "l-stabilizator.dc.html",
+   "l-saylentbloki.dc.html"
+  ]
  }
 ]

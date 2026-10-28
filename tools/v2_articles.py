@@ -582,7 +582,7 @@ def main():
         add((ru, k))
     (ROOT / 'i18n' / 'kk-v2-art.json').write_text(json.dumps(kk, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
     meta = [{'board': a['board'], 'slug': a['slug'], 'date': a.get('iso', ISO_DATE), 'img': IMG[a['img']][1], 'alt': IMG[a['img']][2],
-             'h1': a['h1'], 'cat': a['cat'], 'min': a['min'],
+             'h1': a['h1'], 'cat': a['cat'], 'min': a['min'], 'svc': [t for b in a['body'] if b[0] == 'more' for t in b[2]],
              **({'src': a['hero'][0], 'alt2': a['hero'][1]} if a.get('hero') else {})} for a in ARTICLES]
     (ROOT / 'i18n' / 'v2-articles.json').write_text(json.dumps(meta, ensure_ascii=False, indent=1) + '\n', encoding='utf-8')
     print(f'{len(ARTICLES)} articles, {len(kk)} KK strings')

@@ -844,6 +844,8 @@ def page(lang, board, base, noindex, pages_meta):
     faq = faq_from(soup)
     if faq:
         graph.append({'@type': 'FAQPage', 'mainEntity': faq})
+    if V2:
+        graph = V2.patch_graph(graph, base, lang)
     schema = jsonld({'@context': 'https://schema.org', '@graph': graph})
 
     price_line = ''

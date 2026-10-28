@@ -12,6 +12,7 @@ KK_EXTRA = json.loads((ROOT / 'i18n' / 'kk-v2.json').read_text(encoding='utf-8')
 # SEO articles written by tools/v2_articles.py
 ARTICLES = json.loads((ROOT / 'i18n' / 'v2-articles.json').read_text(encoding='utf-8'))
 KK_EXTRA.update(json.loads((ROOT / 'i18n' / 'kk-v2-art.json').read_text(encoding='utf-8')))
+KK_EXTRA.update(json.loads((ROOT / 'i18n' / 'kk-v2-extra.json').read_text(encoding='utf-8')))
 PREFIX = '/v2'
 
 # price-row name -> landing board, so rows on the services and category pages link to the landing
@@ -46,6 +47,7 @@ SYM_HREF = {'Стук или люфт в руле': 'l-tyagi.dc.html', 'Хрус
 def pages():
     out = {p['board']: (f'services/{p["slug"]}/', 'service') for p in LANDINGS}
     out.update({a['board']: (f'blog/{a["slug"]}/', 'article') for a in ARTICLES})
+    out.update({'contacts.dc.html': ('contacts/', 'page'), 'privacy.dc.html': ('privacy/', 'page')})
     return out
 
 
@@ -443,6 +445,94 @@ BRANDS = {
 }
 
 
+# every article: (board, slug, ru title, related service boards); the five older ones come from the root build
+_OLD_ARTS = (('art-knock.dc.html', 'stuk-v-podveske-na-kochkah', 'Стук в подвеске на кочках: 7 частых причин', ('svc-suspension.dc.html', 'l-stabilizator.dc.html', 'svc-vibrostand.dc.html')),
+             ('art-steering-knock.dc.html', 'stuk-v-rule', 'Стучит в руле: рейка, тяги или наконечники', ('svc-steering-rack.dc.html', 'l-tyagi.dc.html')),
+             ('art-rack.dc.html', 'restavraciya-rulevoy-reyki', 'Реставрация рулевой рейки или замена: что выбрать', ('svc-steering-rack.dc.html',)),
+             ('art-stand-vs-lift.dc.html', 'vibrostend-ili-podemnik', 'Вибростенд или подъёмник: что точнее находит стук', ('svc-vibrostand.dc.html',)),
+             ('art-before-buying.dc.html', 'hodovaya-pered-pokupkoy', 'Как проверить ходовую перед покупкой машины', ('l-pered-pokupkoy.dc.html',)))
+ALL_ARTS = [(x['board'], x['slug'], tuple(x['h1']), tuple(x.get('svc', ()))) for x in ARTICLES] + \
+           [(b, sl, (t, _KK.get(t, t)), svc) for b, sl, t, svc in _OLD_ARTS]
+EXTRA_T = {
+    'toc': ('Содержание', 'Мазмұны'),
+    'read': ('Что ещё почитать', 'Тағы не оқуға болады'),
+    'wa': ('Здравствуйте! Пишу с сайта по теме «{t}».', 'Сәлеметсіз бе! Сайттан «{t}» тақырыбы бойынша жазып отырмын.'),
+    'arts': ('Статьи по теме', 'Тақырып бойынша мақалалар'),
+    'nohelp_h': ('Когда стенд не поможет', 'Стенд қашан көмектеспейді'),
+    'nohelp': (('Вибрация на скорости 80–120 км/ч. Чаще всего это балансировка колёс или развал-схождение: их проверяют на балансировочном станке и стенде сход-развала.',
+                '80–120 км/сағ жылдамдықтағы діріл. Көбіне бұл дөңгелек теңгерімі немесе развал-схождение: оларды теңгерім станогында және сход-развал стендінде тексереді.'),
+               ('Шум двигателя, коробки или выхлопа. Стенд проверяет ходовую и рулевое, для мотора нужна отдельная диагностика.',
+                'Қозғалтқыштың, қораптың немесе шығару жүйесінің шуы. Стенд жүріс бөлігі мен рульді тексереді, моторға бөлек диагностика керек.'),
+               ('Звук появляется только на холодную или на одной скорости. Тогда мастер едет с вами на короткий тест-драйв.',
+                'Дыбыс тек суық күйде немесе бір жылдамдықта шығады. Онда шебер сізбен бірге қысқа тест-драйвқа шығады.')),
+}
+
+
+def article_extras(soup, name, lang, url_for, wa):
+    """Articles: a contents list, «Что ещё почитать» after the answer box, and a WhatsApp link that names the topic."""
+    i = 0 if lang == 'ru' else 1
+    art = soup.find('article', class_='art')
+    me = next((x for x in ALL_ARTS if x[0] == name), None)
+    if art is None or me is None:
+        return
+    hs = [h for h in art.find_all('h2', recursive=False)]
+    if len(hs) >= 3:
+        for n, h in enumerate(hs, 1):
+            h['id'] = f's{n}'
+        toc = BeautifulSoup(f'<nav class="toc" aria-label="{EXTRA_T["toc"][i]}"><b>{EXTRA_T["toc"][i]}</b><ol>'
+                            + ''.join(f'<li><a href="#s{n}">{html.escape(h.get_text(" ", strip=True))}</a></li>' for n, h in enumerate(hs, 1))
+                            + '</ol></nav>', 'html.parser')
+        hs[0].insert_before(toc)
+    from urllib.parse import quote
+    for a in art.find_all('a', href=re.compile(r'wa\.me')):
+        a['href'] = re.sub(r'\?.*$', '', a['href']) + '?text=' + quote(EXTRA_T['wa'][i].format(t=me[2][i]), safe='')
+    same = [x for x in ALL_ARTS if x[0] != name and set(x[3]) & set(me[3])]
+    rest = [x for x in ALL_ARTS if x[0] != name and x not in same]
+    pick = (same + rest)[:3]
+    art.append(BeautifulSoup(f'<div class="readmore"><h2>{EXTRA_T["read"][i]}</h2><ul>'
+                             + ''.join(f'<li><a href="{url_for(lang, x[0])}">{html.escape(x[2][i])}</a></li>' for x in pick)
+                             + '</ul></div>', 'html.parser'))
+
+
+def service_extras(soup, name, lang, url_for):
+    """Service pages: articles that answer the same question; the stand page also says honestly what it will not find."""
+    i = 0 if lang == 'ru' else 1
+    faq = next((d.find_parent('section') for d in soup.find_all('details') if 'km-it' not in (d.get('class') or [])), None)
+    if faq is None:
+        return
+    arts = [x for x in ALL_ARTS if name in x[3]][:4]
+    if name == 'svc-vibrostand.dc.html':
+        faq.insert_before(BeautifulSoup(
+            f'<section class="vt-x" style="padding: 0 0 72px"><div class="w"><h2>{EXTRA_T["nohelp_h"][i]}</h2><ul class="nohelp">'
+            + ''.join(f'<li>{html.escape(t[i])}</li>' for t in EXTRA_T['nohelp'])
+            + f'</ul><p><a href="{url_for(lang, "svc-engine.dc.html")}">{("Диагностика двигателя", "Қозғалтқыш диагностикасы")[i]}</a></p></div></section>', 'html.parser'))
+    if arts:
+        faq.insert_before(BeautifulSoup(
+            f'<section class="vt-x" style="padding: 0 0 72px"><div class="w"><h2>{EXTRA_T["arts"][i]}</h2><ul class="artlist">'
+            + ''.join(f'<li><a href="{url_for(lang, x[0])}">{html.escape(x[2][i])}</a></li>' for x in arts)
+            + '</ul></div></section>', 'html.parser'))
+
+
+def patch_graph(graph, base, lang):
+    """One Person for Viktor on every page, tied to both of his services; the shop gets its 2GIS map."""
+    pid = f'{base}/#viktor'
+    used = False
+    for n in graph:
+        if n.get('@type') == 'Article' and n.get('author', {}).get('@type') == 'Person':
+            n['author'] = {'@id': pid}
+            used = True
+        if n.get('@type') == 'AutoRepair' and n.get('@id', '').endswith('#vibrotest'):
+            n['founder'] = {'@id': pid}
+            n['hasMap'] = 'https://2gis.kz/almaty/firm/70000001104923303'
+            used = True
+    if used:
+        graph.append({'@type': 'Person', '@id': pid, 'name': 'Виктор Новиков',
+                      'jobTitle': 'основатель VibroTest и Viton.kz' if lang == 'ru' else 'VibroTest және Viton.kz негізін қалаушы',
+                      'worksFor': [{'@id': f'{base}/#vibrotest'}, {'@type': 'AutoRepair', 'name': 'Viton.kz', 'url': 'https://viton.kz/ru/'}],
+                      'knowsAbout': ['диагностика ходовой', 'вибростенд', 'ремонт подвески', 'рулевое управление', 'чистка форсунок']})
+    return graph
+
+
 def merge_contacts(soup, phone):
     """Home: the «Ждём на Аносова» block goes; address, phone and hours sit in the footer, as on viton.kz."""
     book = soup.find(id='book')
@@ -523,6 +613,8 @@ META = {
 
 def patch_ui(ui):
     ui['ru']['wa_msg'], ui['kk']['wa_msg'] = WA_MSG
+    for lg in ('ru', 'kk'):
+        ui[lg]['nav'] = [('contacts.dc.html', l) if b == 'Main.dc.html#contacts' else (b, l) for b, l in ui[lg]['nav']]
 
 
 _PRICE_RU = {}
@@ -704,6 +796,20 @@ def one_tone(soup, lang):
 VT_CSS = """
 .psub{color:#8792A3!important}
 .mh-r .st,.dh-tel .st{display:none!important}
+.ft-arts{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,.06)}
+.ft-arts>div{margin-top:10px;columns:3;column-gap:40px}.ft-arts a{display:block;break-inside:avoid;padding:4px 0;font-size:14px;color:#A9B4C2}.ft-arts a:hover{color:#EEF2F7}
+@media (max-width:899px){.ft-arts>div{columns:1}}
+.toc{margin:8px 0 4px!important;padding:20px 24px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#0F1829}
+.toc b{display:block;font-size:15px;margin-bottom:8px;color:#EEF2F7}.toc ol{margin:0!important;padding-left:20px!important;display:flex;flex-direction:column;gap:6px}
+.toc a{color:#5AAEF2;font-size:15px}
+.readmore{margin-top:36px}.readmore h2{margin-top:0}.readmore ul,.artlist{list-style:none!important;padding:0!important;margin:16px 0 0!important;display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.1)}
+.readmore li,.artlist li{margin:0!important;padding:0!important;border-bottom:1px solid rgba(255,255,255,.1)}.readmore a,.artlist a{display:block;padding:14px 0;color:#EEF2F7!important;font-weight:600;font-size:16px}
+.readmore a:hover,.artlist a:hover{color:#5AAEF2!important}
+.vt-x h2{font:800 clamp(26px,2.6vw,36px)/1.1 'Geologica',system-ui,sans-serif;margin:0}
+.nohelp{margin:18px 0 0!important;padding:0!important;list-style:none!important;display:flex;flex-direction:column;gap:10px;color:#A9B4C2;font-size:16px;line-height:1.6;max-width:820px}
+.nohelp li{position:relative;padding-left:22px}.nohelp li::before{content:'';position:absolute;left:4px;top:.65em;width:7px;height:7px;border-radius:50%;background:#5AAEF2}
+.vt-x p{margin:16px 0 0!important}.vt-x p a{color:#5AAEF2;font-weight:600}
+@media (max-width:899px){.vt-x{padding:0 16px 48px!important}.toc{padding:16px 18px}}
 .ft-ct{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 40px;margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.06);scroll-margin-top:100px}
 .fc-col{display:flex;flex-direction:column;gap:6px;font-size:15px;color:#D5DCE5;line-height:1.5}
 .fc-h{font-size:13px;color:#8792A3;margin-bottom:2px}.fc-m{font-size:14px;color:#8792A3}
@@ -779,6 +885,10 @@ CSS += VT_CSS
 
 def insert_map(soup, name, lang, url_for, wa):
     """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
+    if any(x[0] == name for x in ALL_ARTS):
+        article_extras(soup, name, lang, url_for, wa)
+    elif name.startswith(('svc-', 'l-')) or name == 'Mobile-service.dc.html':
+        service_extras(soup, 'svc-vibrostand.dc.html' if name == 'Mobile-service.dc.html' else name, lang, url_for)
     # the address block sits right above the booking form: its own «Записаться» button only repeats the form
     if soup.find('form', attrs={'data-book': True}):
         for route in soup.find_all('a', href=re.compile(r'2gis\.kz/almaty/firm/')):
@@ -1002,5 +1112,11 @@ def prefix(doc):
     bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
-    doc = doc.replace('<div class="ft-bot">', footer_contacts(kk) + '<div class="ft-bot">', 1)
+    lg = 'kk' if kk else 'ru'
+    doc = re.sub(r'(<div class="ft-bot">.*?)(</div>)', lambda m: m.group(1) + f'<a href="/{lg}/privacy/">{"Құпиялылық саясаты" if kk else "Политика конфиденциальности"}</a>' + m.group(2), doc, count=1, flags=re.S)
+    arts = ''.join(f'<a href="/{lg}/blog/{x[1]}/">{html.escape(x[2][1 if kk else 0])}</a>' for x in ALL_ARTS)
+    doc = doc.replace('<div class="ft-bot">', f'<div class="ft-arts"><span class="fc-h">{"Пайдалы" if kk else "Полезное"}</span><div>{arts}</div></div>'
+                      + footer_contacts(kk) + '<div class="ft-bot">', 1)
+    # hreflang with the region, as the search engines read it best
+    doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
