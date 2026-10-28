@@ -6,6 +6,7 @@ import html, json, re
 from pathlib import Path
 from bs4 import BeautifulSoup
 from v2_svc import SVC
+from v2_art import ART, DO_H
 
 ROOT = Path(__file__).resolve().parent
 LANDINGS = json.loads((ROOT / 'i18n' / 'v2-pages.json').read_text(encoding='utf-8'))
@@ -499,6 +500,22 @@ EXTRA_T = {
 }
 
 
+def art_more(soup, art, c, i):
+    """A short «what to do now» plan right before the FAQ, and more questions in it."""
+    e = html.escape
+    faq_h = {'Частые вопросы', _KK.get('Частые вопросы', 'Жиі қойылатын сұрақтар')}
+    fh = next((h for h in art.find_all('h2', recursive=False) if h.get_text(' ', strip=True) in faq_h), None)
+    plan = BeautifulSoup(f'<h2>{DO_H[i]}</h2><ol class="doit">' + ''.join(f'<li>{e(x[i])}</li>' for x in c['do']) + '</ol>', 'html.parser')
+    if fh is not None:
+        fh.insert_before(plan)
+    box = next((d.parent for d in art.find_all('details')), None)
+    if box is None:
+        return
+    pm = box.find('svg')
+    for q in c['faq']:
+        box.append(BeautifulSoup(f'<details><summary>{e(q[0][i])}{pm or ""}</summary><p class="ans">{e(q[1][i])}</p></details>', 'html.parser'))
+
+
 def article_extras(soup, name, lang, url_for, wa):
     """Articles: a contents list, «Что ещё почитать» after the answer box, and a WhatsApp link that names the topic."""
     i = 0 if lang == 'ru' else 1
@@ -506,6 +523,8 @@ def article_extras(soup, name, lang, url_for, wa):
     me = next((x for x in ALL_ARTS if x[0] == name), None)
     if art is None or me is None:
         return
+    if name in ART:
+        art_more(soup, art, ART[name], i)
     hs = [h for h in art.find_all('h2', recursive=False)]
     if len(hs) >= 3:
         for n, h in enumerate(hs, 1):
@@ -579,6 +598,7 @@ def patch_graph(graph, base, lang):
     for n in graph:
         if n.get('@type') == 'Article' and n.get('author', {}).get('@type') == 'Person':
             n['author'] = {'@id': pid}
+            n['dateModified'] = max(n.get('dateModified', ''), '2026-10-28')
             used = True
         if n.get('@type') == 'AutoRepair' and n.get('@id', '').endswith('#vibrotest'):
             n['founder'] = {'@id': pid}
@@ -881,6 +901,7 @@ VT_CSS = """
 .vt-x h2{font:800 clamp(26px,2.6vw,36px)/1.1 'Geologica',system-ui,sans-serif;margin:0}
 .nohelp{margin:18px 0 0!important;padding:0!important;list-style:none!important;display:flex;flex-direction:column;gap:10px;color:#A9B4C2;font-size:16px;line-height:1.6;max-width:820px}
 .nohelp li{position:relative;padding-left:22px}.nohelp li::before{content:'';position:absolute;left:4px;top:.65em;width:7px;height:7px;border-radius:50%;background:#5AAEF2}
+.doit{margin:16px 0 0!important;padding:0 0 0 22px!important;display:flex;flex-direction:column;gap:10px}.doit li{margin:0!important;padding-left:4px;line-height:1.6}.doit li::marker{color:#5AAEF2;font-weight:700}
 .svx p{max-width:820px;color:#A9B4C2;font-size:17px;line-height:1.65}.svx h2+p{margin-top:20px!important}
 .svx-t{width:100%;max-width:960px;margin:24px 0 0!important;border-collapse:collapse;font-size:16px;line-height:1.55}
 .svx-t th{text-align:left;font-size:13px;font-weight:500;color:#8792A3;padding:0 16px 10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
