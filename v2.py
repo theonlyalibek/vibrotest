@@ -640,6 +640,9 @@ def one_tone(soup, lang):
 VT_CSS = """
 .psub{color:#8792A3!important}
 .mh-r .st,.dh-tel .st{display:none!important}
+.topbar{background:#080E1A;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:#A9B4C2}
+.tb-in{max-width:1280px;margin:0 auto;padding:7px 48px;display:flex;gap:24px}
+@media (max-width:899px){.tb-in{padding:6px 16px;justify-content:space-between;gap:12px;font-size:12px}}
 .vt-legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:12px 14px;align-items:baseline;font-size:15px;line-height:1.55;color:#A9B4C2}
 .vt-legend li{display:contents}.vt-legend .ft-st,.vt-paper .ft-st{white-space:nowrap}
 .vt-case .vc-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,4vw,56px);align-items:center;padding:clamp(22px,3vw,40px);border-radius:20px;background:#11161E;border:1px solid rgba(255,255,255,.08)}
@@ -891,4 +894,8 @@ def prefix(doc):
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
     for a, b in NAVY:
         doc = re.sub(a, b, doc, flags=re.I)
+    kk = '<html lang="kk"' in doc[:400]
+    bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
+           f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
+    doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
