@@ -799,6 +799,20 @@ VT_CSS = """
 .ft-arts{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,.06)}
 .ft-arts>div{margin-top:10px;columns:3;column-gap:40px}.ft-arts a{display:block;break-inside:avoid;padding:4px 0;font-size:14px;color:#A9B4C2}.ft-arts a:hover{color:#EEF2F7}
 @media (max-width:899px){.ft-arts,.ft-ct,.ft-bot{display:none!important}}
+.ftm{display:none}
+@media (max-width:899px){.ftm{display:block;margin-top:14px}.ft-top nav{display:none!important}
+.fm-tag{margin:0 0 22px!important;font-size:14px;line-height:1.5;color:#A9B4C2}
+.fm-ct{display:grid!important;gap:4px;padding:0 0 22px!important;margin:0!important;font-size:15px;color:#EEF2F7}
+.fm-ct .fc-h{margin-bottom:4px}.fm-tel{font-size:19px;font-weight:700;color:#fff!important;text-decoration:none}
+.fm-g{border-top:1px solid rgba(255,255,255,.08);margin:0!important}.fm-g:last-of-type{border-bottom:1px solid rgba(255,255,255,.08)}
+.fm-g summary{display:flex!important;align-items:center;justify-content:space-between;padding:17px 0!important;font-size:16px;font-weight:600;color:#EEF2F7;cursor:pointer;list-style:none}
+.fm-g summary::-webkit-details-marker{display:none}
+.fm-g summary i{position:relative;width:14px;height:14px;flex:none}
+.fm-g summary i:before,.fm-g summary i:after{content:"";position:absolute;left:0;top:6px;width:14px;height:2px;border-radius:1px;background:#A9B4C2;transition:transform .2s}
+.fm-g summary i:after{transform:rotate(90deg)}.fm-g[open] summary i:after{transform:rotate(0)}
+.fm-g>div{display:grid!important;gap:2px;padding:0 0 16px!important}
+.fm-g>div a{display:block;padding:7px 0;font-size:15px;line-height:1.4;color:#A9B4C2;text-decoration:none}
+.fm-bot{display:grid!important;gap:6px;padding:22px 0 0!important;font-size:13px;color:#7E8A9A}.fm-bot a{color:#A9B4C2}}
 .toc{margin:8px 0 4px!important;padding:20px 24px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#0F1829}
 .toc b{display:block;font-size:15px;margin-bottom:8px;color:#EEF2F7}.toc ol{margin:0!important;padding-left:20px!important;display:flex;flex-direction:column;gap:6px}
 .toc a{color:#5AAEF2;font-size:15px}
@@ -1103,6 +1117,25 @@ def footer_contacts(kk):
             + '</div>')
 
 
+def footer_mobile(doc, kk, lg, arts):
+    """Phone footer in the viton.kz shape: contacts, then folded link groups, then the legal line."""
+    t = lambda ru, k: k if kk else ru
+    nav = re.search(r'<nav aria-label="Footer">(.*?)</nav>', doc, re.S)
+    svc = ''.join(a for a in re.findall(r'<a [^>]*>.*?</a>', nav.group(1) if nav else '') if '/blog/' not in a)
+    menu = re.search(r'<nav class="dnav"[^>]*>(.*?)</nav>', doc, re.S)
+    grp = lambda h, links: f'<details class="fm-g"><summary>{h}<i aria-hidden="true"></i></summary><div>{links}</div></details>'
+    return ('<div class="ftm">'
+            f'<p class="fm-tag">{t("Диагностика подвески на вибростенде в Алматы", "Алматыдағы вибростендте аспа диагностикасы")}</p>'
+            f'<div class="fm-ct"><span class="fc-h">{t("Автосервис", "Автосервис")}</span>'
+            f'<span>{t("Алматы, Аносова 91", "Алматы, Аносов к-сі 91")}</span>'
+            '<a class="num fm-tel" href="tel:+77474956165">+7 747 495 61 65</a>'
+            f'<span class="fc-m">{t("Ежедневно 09:30–19:00", "Күн сайын 09:30–19:00")}</span></div>'
+            + grp(t('Услуги', 'Қызметтер'), svc) + grp(t('Полезное', 'Пайдалы'), arts)
+            + grp(t('Разделы', 'Бөлімдер'), menu.group(1) if menu else '')
+            + f'<div class="fm-bot"><span>© 2026 VibroTest.kz</span><span>{t("Алматы, Аносова 91", "Алматы, Аносов к-сі 91")}</span>'
+            f'<a href="/{lg}/privacy/">{t("Политика конфиденциальности", "Құпиялылық саясаты")}</a></div></div>')
+
+
 def prefix(doc):
     """Serve the whole v2 build under /v2/: rewrite root-relative links and assets."""
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
@@ -1117,6 +1150,7 @@ def prefix(doc):
     arts = ''.join(f'<a href="/{lg}/blog/{x[1]}/">{html.escape(x[2][1 if kk else 0])}</a>' for x in ALL_ARTS)
     doc = doc.replace('<div class="ft-bot">', f'<div class="ft-arts"><span class="fc-h">{"Пайдалы" if kk else "Полезное"}</span><div>{arts}</div></div>'
                       + footer_contacts(kk) + '<div class="ft-bot">', 1)
+    doc = doc.replace('<div class="ft-bot">', footer_mobile(doc, kk, lg, arts) + '<div class="ft-bot">', 1)
     # hreflang with the region, as the search engines read it best
     doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
