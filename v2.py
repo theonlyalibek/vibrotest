@@ -639,6 +639,7 @@ def one_tone(soup, lang):
 
 VT_CSS = """
 .psub{color:#8792A3!important}
+.mh-r .st,.dh-tel .st{display:none!important}
 .vt-legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:12px 14px;align-items:baseline;font-size:15px;line-height:1.55;color:#A9B4C2}
 .vt-legend li{display:contents}.vt-legend .ft-st,.vt-paper .ft-st{white-space:nowrap}
 .vt-case .vc-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,4vw,56px);align-items:center;padding:clamp(22px,3vw,40px);border-radius:20px;background:#11161E;border:1px solid rgba(255,255,255,.08)}
