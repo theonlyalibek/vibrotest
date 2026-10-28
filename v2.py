@@ -132,7 +132,7 @@ def services_list(soup, lang):
             continue
         if link:
             link.unwrap()
-        row.append(BeautifulSoup(f'<a class="pgo" href="{href}">{more}<span aria-hidden="true"> →</span></a>', 'html.parser'))
+        row.append(BeautifulSoup(f'<a class="pgo" href="{href}">{more}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>', 'html.parser'))
         row['class'] = row.get('class', []) + ['prow-go']
     h1 = soup.find('h1')
     lead = h1.find_next('p') if h1 else None
@@ -883,7 +883,7 @@ VT_CSS = """
 @media (max-width:899px){.vt-brands h2{font-size:22px}.vt-brands ul{margin-top:16px!important;gap:6px}.vt-brands li{padding:6px 11px;font-size:13.5px}}
 .prow .plink{color:#EEF2F7!important;border-bottom-color:rgba(238,242,247,.25)}
 .prow-go{grid-template-columns:minmax(0,1fr) auto!important}
-.pgo{font-size:15px;font-weight:600;color:#5AAEF2!important;white-space:nowrap;text-decoration:none}.pgo:hover{color:#8CC8FF!important}
+.pgo{display:inline-flex;align-items:center;gap:2px;font-size:15px;font-weight:600;color:#5AAEF2!important;white-space:nowrap;text-decoration:none}.pgo:hover{color:#8CC8FF!important}
 @media (max-width:899px){.bb{position:fixed;left:0;right:0}footer,.ft{padding-bottom:110px!important}}
 .topbar{background:#080E1A;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:#A9B4C2}
 .tb-in{max-width:1280px;margin:0 auto;padding:7px 48px;display:flex;gap:24px}
