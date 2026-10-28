@@ -5,6 +5,7 @@ build.py imports this only with --v2; the current site at the root stays as it i
 import html, json, re
 from pathlib import Path
 from bs4 import BeautifulSoup
+from v2_svc import SVC
 
 ROOT = Path(__file__).resolve().parent
 LANDINGS = json.loads((ROOT / 'i18n' / 'v2-pages.json').read_text(encoding='utf-8'))
@@ -531,6 +532,8 @@ def service_extras(soup, name, lang, url_for):
     if faq is None:
         return
     arts = [x for x in ALL_ARTS if name in x[3]][:4]
+    if name in SVC:
+        long_text(soup, faq, SVC[name], i)
     if name == 'svc-vibrostand.dc.html':
         faq.insert_before(BeautifulSoup(
             f'<section class="vt-x" style="padding: 0 0 72px"><div class="w"><h2>{EXTRA_T["nohelp_h"][i]}</h2><ul class="nohelp">'
@@ -541,6 +544,32 @@ def service_extras(soup, name, lang, url_for):
             f'<section class="vt-x" style="padding: 0 0 72px"><div class="w"><h2>{EXTRA_T["arts"][i]}</h2><ul class="artlist">'
             + ''.join(f'<li><a href="{url_for(lang, x[0])}">{html.escape(x[2][i])}</a></li>' for x in arts)
             + '</ul></div></section>', 'html.parser'))
+
+
+def long_text(soup, faq, c, i):
+    """Full description before the prices: what the part is, why it wears, a self-check, what moves the price."""
+    e = html.escape
+    sec = lambda body, last=False: (f'<section class="vt-x svx{" svx-end" if last else ""}" style="padding: clamp(36px, 4.5vw, 64px) 0 {"clamp(45px, 6.94vw, 100px)" if last else "0"}">'
+                                    f'<div class="w">{body}</div></section>')
+    (h, paras), (wh, wp), (ch, ci, items), (th, rows) = c['d'], c['w'], c['c'], c['t']
+    out = sec(f'<h2>{e(h[i])}</h2>' + ''.join(f'<p>{e(p[i])}</p>' for p in paras))
+    out += sec(f'<h2>{e(wh[i])}</h2>' + ''.join(f'<p>{e(p[i])}</p>' for p in wp))
+    out += sec(f'<h2>{e(ch[i])}</h2><p>{e(ci[i])}</p><ul class="nohelp">' + ''.join(f'<li>{e(x[i])}</li>' for x in items) + '</ul>')
+    if 'p' in c:
+        ph, pi = c['p']
+        out += sec(f'<h2>{e(ph[i])}</h2><ul class="nohelp">' + ''.join(f'<li>{e(x[i])}</li>' for x in pi) + '</ul>')
+    head = (('Что влияет', 'Не әсер етеді'), ('Как именно', 'Қалай'))
+    out += sec(f'<h2>{e(th[i])}</h2><table class="svx-t"><thead><tr><th>{head[0][i]}</th><th>{head[1][i]}</th></tr></thead><tbody>'
+               + ''.join(f'<tr><td>{e(r[i])}</td><td>{e(r[2 + i])}</td></tr>' for r in rows) + '</tbody></table>', last=True)
+    price = soup.find('section', class_='prdk')
+    (price or faq).insert_before(BeautifulSoup(out, 'html.parser'))
+    box = next((d.parent for d in faq.find_all('details')), None)
+    if box is None:
+        return
+    pm = box.find('svg', class_='pm')
+    for q in c['f']:
+        d = BeautifulSoup(f'<details><summary>{e(q[i])}{pm or ""}</summary><p class="ans">{e(q[2 + i])}</p></details>', 'html.parser')
+        box.append(d)
 
 
 def patch_graph(graph, base, lang):
@@ -852,6 +881,11 @@ VT_CSS = """
 .vt-x h2{font:800 clamp(26px,2.6vw,36px)/1.1 'Geologica',system-ui,sans-serif;margin:0}
 .nohelp{margin:18px 0 0!important;padding:0!important;list-style:none!important;display:flex;flex-direction:column;gap:10px;color:#A9B4C2;font-size:16px;line-height:1.6;max-width:820px}
 .nohelp li{position:relative;padding-left:22px}.nohelp li::before{content:'';position:absolute;left:4px;top:.65em;width:7px;height:7px;border-radius:50%;background:#5AAEF2}
+.svx p{max-width:820px;color:#A9B4C2;font-size:17px;line-height:1.65}.svx h2+p{margin-top:20px!important}
+.svx-t{width:100%;max-width:960px;margin:24px 0 0!important;border-collapse:collapse;font-size:16px;line-height:1.55}
+.svx-t th{text-align:left;font-size:13px;font-weight:500;color:#8792A3;padding:0 16px 10px 0;border-bottom:1px solid rgba(255,255,255,.12)}
+.svx-t td{padding:14px 16px 14px 0;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;color:#A9B4C2}.svx-t td:first-child{color:#EEF2F7;font-weight:600;width:34%}
+@media (max-width:899px){.svx{padding:44px 0 0!important}.svx-end{padding-bottom:44px!important}.svx-t thead{display:none}.svx-t tr,.svx-t td{display:block;width:auto!important}.svx-t td{border:0;padding:0 0 4px}.svx-t tr{padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)}}
 .vt-x p{margin:16px 0 0!important}.vt-x p a{color:#5AAEF2;font-weight:600}
 @media (max-width:899px){.vt-x{padding:0 16px 48px!important}.toc{padding:16px 18px}}
 .ft-ct{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 40px;margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.06);scroll-margin-top:100px}
