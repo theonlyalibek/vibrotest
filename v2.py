@@ -160,7 +160,7 @@ T2 = {
     'swipe': ('Листайте вправо', 'Оңға қарай сырғытыңыз'),
     'sub_home': ('Выберите узел: покажем частые симптомы и чем мы поможем. Точно скажет только диагностика.',
                  'Түйінді таңдаңыз: жиі белгілер мен қалай көмектесетінімізді көрсетеміз. Нақтысын тек диагностика айтады.'),
-    'all': ('Все услуги и цены', 'Барлық қызметтер мен бағалар'),
+    'all': ('Все услуги', 'Барлық қызметтер'),
     'from': ('от {p}', '{p} бастап'),
     'unsure': ('Не знаете, где проблема? Начните с диагностики на вибростенде', 'Ақау қайда екенін білмейсіз бе? Вибростендтегі диагностикадан бастаңыз'),
     'wa': ('Здравствуйте! Хочу записаться в VibroTest: {x}.', 'Сәлеметсіз бе! VibroTest-ке жазылғым келеді: {x}.'),
@@ -331,8 +331,8 @@ JS = r'''
 });
 // carousels with dots: the active dot follows the swipe
 [].forEach.call(document.querySelectorAll('[data-dots]'),function(r){var d=r.parentNode.querySelector('.dots');if(!d)return;var dots=d.children;
- r.addEventListener('scroll',function(){var w=r.children[0].getBoundingClientRect().width+12,k=Math.min(dots.length-1,Math.round(r.scrollLeft/w));
-  [].forEach.call(dots,function(s,j){s.classList.toggle('on',j===k)})},{passive:true})});
+ r.addEventListener('scroll',function(){var w=r.children[0].getBoundingClientRect().width+(parseFloat(getComputedStyle(r).columnGap)||12),k=r.scrollLeft>=r.scrollWidth-r.clientWidth-4?dots.length-1:Math.min(dots.length-1,Math.round(r.scrollLeft/w));
+  [].forEach.call(dots,function(s,j){s.classList.toggle('on',j===k)});r.parentNode.classList.toggle('at-end',k===dots.length-1)},{passive:true})});
 // the bottom «Записаться» opens the three-field form when the page has one
 (function(){var b=document.querySelector('.bb .mbtn');if(!b)return;b.addEventListener('click',function(e){
  var f=[].filter.call(document.querySelectorAll('form[data-book]'),function(x){return x.offsetParent!==null})[0];if(!f)return;
@@ -367,7 +367,8 @@ def km_phone(lang, url_for, wa, sid, prices, dots, head, tail):
     return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec km-m" data-km-m style="padding: 48px 0 24px"><div>'
             f'<div class="km-hd" style="padding: 0 16px"><h2>{T2["h"][i]}</h2></div>'
             f'<div style="padding: 0 16px"><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{dots_off}</div></div></div>'
-            f'<div class="km-rail">{"".join(cards)}</div>'
+            f'<div class="km-rw"><div class="km-rail" data-dots>{"".join(cards)}</div>'
+            f'<div class="dots km-rd" aria-hidden="true">{"".join("<span class=on></span>" if n == 0 else "<span></span>" for n in range(len(cards)))}</div></div>'
             f'<div style="padding: 0 16px">{"".join(panels)}'
             f'<span class="km-unsure">{head}? <a href="{url_for(lang, "svc-vibrostand.dc.html")}">{tail.strip()}</a></span>'
             + ('' if prices else f'<a class="km-all" href="{url_for(lang, "Services.dc.html")}">{T2["all"][i]}</a>')
@@ -918,6 +919,8 @@ VT_CSS = """
 .km-m .km-fig{padding:10px 6px 4px}.km-m .km-dots{inset:10px 6px 4px}
 .km-rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;padding:14px 16px 4px;scrollbar-width:none}
 .km-rail::-webkit-scrollbar{display:none}
+.km-rw{position:relative}.km-rw::after{content:'';position:absolute;top:14px;right:0;bottom:4px;width:36px;background:linear-gradient(90deg,rgba(11,18,32,0),#0B1220);pointer-events:none;transition:opacity .2s}.km-rw.at-end::after{opacity:0}
+.km-rd{justify-content:center;margin:12px 0 0!important}
 .km-cd{flex:0 0 68%;scroll-snap-align:start;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border-radius:14px;background:#131E33;border:1px solid rgba(255,255,255,.08);color:#EEF2F7;font-family:inherit;cursor:pointer;min-height:112px}
 .km-cd b{font-size:16px;font-weight:600;line-height:1.25}.km-cd span{font-size:13.5px;line-height:1.45;color:#8792A3}
 .km-cd[aria-expanded=true]{border-color:#0071BC;background:#0F2A4A}.km-cd[aria-expanded=true] b{color:#5AAEF2}
@@ -1234,7 +1237,15 @@ SVC_NAMES = [('Услуги и цены на ремонт ходовой в Ал
              ('Жүріс бөлігін жөндеу қызметтері мен бағалары', 'Жүріс бөлігін жөндеу қызметтері'),
              ('Жұмыс бағасы «бастап», қосалқы бөлшектер бөлек. Нақты соманы шебер диагностикадан кейін, жөндеу басталғанға дейін айтады. Алматы, Аносов 91.',
               'Вибростендте диагностика, рульдік рейкалар, аспа, күпшек және ШРУС, тежегіштер, радиаторлар және қозғалтқыш. Бағалар мен толық сипаттама әр қызмет бетінде. Алматы, Аносов 91.'),
-             ('>Услуги и цены<', '>Услуги<'), ('>Қызметтер мен бағалар<', '>Қызметтер<')]
+             ('>Услуги и цены<', '>Услуги<'), ('>Қызметтер мен бағалар<', '>Қызметтер<'),
+             ('>Все услуги и цены<', '>Все услуги<'), ('>Барлық қызметтер мен бағалар<', '>Барлық қызметтер<'),
+             # «where are the prices»: the stand page has them now, the services list only links
+             ('на странице <a href="/ru/services/">«Услуги и цены»</a>', 'на странице <a href="/ru/services/diagnostika-na-vibrostende/">«Диагностика на вибростенде»</a>'),
+             ('на странице «Услуги и цены»', 'на странице «Диагностика на вибростенде»'),
+             ('Все цены собраны на странице', 'Все цены на странице'),
+             ('мына бетте жиналған: <a href="/kk/services/">«Қызметтер мен бағалар»</a>', 'мына бетте: <a href="/kk/services/diagnostika-na-vibrostende/">«Вибростендте диагностика»</a>'),
+             ('мына бетте: <a href="/kk/services/">«Қызметтер мен бағалар»</a>', 'мына бетте: <a href="/kk/services/diagnostika-na-vibrostende/">«Вибростендте диагностика»</a>'),
+             ('мына бетте жиналған: «Қызметтер мен бағалар»', 'мына бетте: «Вибростендте диагностика»')]
 
 
 def prefix(doc):
