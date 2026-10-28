@@ -57,6 +57,43 @@ def copy_media(out):
     """Real photos and videos from the shop, served only by the v2 build."""
     import shutil
     shutil.copytree(ROOT / 'media', out / 'media', dirs_exist_ok=True)
+    from PIL import Image
+    for p in sorted((ROOT / 'img' / 'svc').glob('*.jpg')):
+        im = Image.open(p).convert('RGB')
+        for w in (800, 1600):
+            r = im if im.width <= w else im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
+            r.save(out / 'img' / f'ph-{p.stem}-{w}.webp', 'WEBP', quality=78, method=6)
+        im.resize((1200, round(im.height * 1200 / im.width)), Image.LANCZOS).save(out / 'img' / f'ph-{p.stem}.jpg', 'JPEG', quality=82, optimize=True)
+
+
+# hero illustrations for the service pages (generated, so the alt never calls them our work)
+PH = {
+    'svc-vibrostand': ('LiXiang L6 на подъёмнике над двумя мобильными блоками вибростенда', 'LiXiang L6 көтергіште, астында вибростендтің екі жылжымалы блогы'),
+    'svc-engine': ('Сканер подключён к диагностическому разъёму под рулём', 'Сканер руль астындағы диагностикалық ұяшыққа қосылған'),
+    'l-pered-pokupkoy': ('Мастер отдаёт покупателю лист с результатами проверки', 'Шебер сатып алушыға тексеру нәтижелері жазылған парақты береді'),
+    'svc-steering-rack': ('Рулевая рейка разобрана на верстаке: вал, корпус, сальники и втулки', 'Рульдік рейка верстакта бөлшектелген: білік, корпус, тығыздағыштар мен втулкалар'),
+    'l-tyagi': ('Мастер проверяет рулевой наконечник на машине на подъёмнике', 'Шебер көтергіштегі көліктің рульдік ұшын тексереді'),
+    'svc-suspension': ('Мастер затягивает болт рычага передней подвески', 'Шебер алдыңғы аспа рычагының болтын тартады'),
+    'l-amortizatory': ('Старая и новая стойка амортизатора, пружина в стяжке', 'Ескі және жаңа амортизатор тірегі, серіппе тартқышта'),
+    'l-rychagi': ('Старый и новый рычаг подвески на верстаке', 'Верстактағы ескі және жаңа аспа рычагы'),
+    'l-saylentbloki': ('Рычаг под прессом, рядом изношенный сайлентблок', 'Рычаг пресс астында, жанында тозған сайлентблок'),
+    'l-stabilizator': ('Старая и новая стойка стабилизатора в руках мастера', 'Шебердің қолында ескі және жаңа тұрақтандырғыш тірегі'),
+    'svc-drive': ('Мастер проверяет ступицу и привод при снятом колесе', 'Шебер дөңгелек алынған кезде ступица мен жетекті тексереді'),
+    'l-stupica': ('Новая ступица с подшипником и старая, ржавая, на верстаке', 'Мойынтірегі бар жаңа ступица және верстактағы ескі, тот басқан ступица'),
+    'l-shrus': ('Старый ШРУС в грязной смазке и новый в руках мастера', 'Ластанған майдағы ескі ШРУС және шебердің қолындағы жаңасы'),
+    'svc-brakes': ('Мастер замеряет толщину тормозного диска микрометром', 'Шебер тежегіш дискінің қалыңдығын микрометрмен өлшейді'),
+    'svc-cooling': ('Снятие радиатора охлаждения, капает антифриз', 'Салқындату радиаторын шешу, антифриз тамып тұр'),
+}
+
+
+def hero_photo(soup, name, lang):
+    """Swap the service page's hero picture for its own illustration."""
+    stem = 'svc-vibrostand' if name == 'Mobile-service.dc.html' else name.removesuffix('.dc.html')  # the stand page's phone layout
+    img = soup.find('img', class_='cover')
+    if stem in PH and img is not None:
+        img['src'] = f'/img/ph-{stem}-800.webp'
+        img['srcset'] = f'/img/ph-{stem}-800.webp 800w, /img/ph-{stem}-1600.webp 1600w'
+        img['alt'] = PH[stem][lang != 'ru']
 
 
 VIDEOS = {'art-lixiang-l7.dc.html': (
@@ -992,6 +1029,7 @@ def insert_map(soup, name, lang, url_for, wa):
     if any(x[0] == name for x in ALL_ARTS):
         article_extras(soup, name, lang, url_for, wa)
     elif name.startswith(('svc-', 'l-')) or name == 'Mobile-service.dc.html':
+        hero_photo(soup, name, lang)
         service_extras(soup, 'svc-vibrostand.dc.html' if name == 'Mobile-service.dc.html' else name, lang, url_for)
     # the address block sits right above the booking form: its own «Записаться» button only repeats the form
     if soup.find('form', attrs={'data-book': True}):

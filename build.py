@@ -804,7 +804,7 @@ def page(lang, board, base, noindex, pages_meta):
     url = f'{base}/{lang}/{path}'
     alts = ''.join(f'<link rel="alternate" hreflang="{l}" href="{base}/{l}/{path}">' for l in LANGS)
     alts += f'<link rel="alternate" hreflang="x-default" href="{base}/ru/{path}">'
-    og_img = f'{base}/img/' + (re.search(r'/img/(vt-\d\d)-', body).group(1) + '.jpg' if re.search(r'/img/(vt-\d\d)-', body) else 'vt-00.jpg')
+    og_img = f'{base}/img/' + (re.search(r'/img/(vt-\d\d|ph-[a-z-]+)-\d', body).group(1) + '.jpg' if re.search(r'/img/(vt-\d\d|ph-[a-z-]+)-\d', body) else 'vt-00.jpg')
 
     u = UI[lang]
     graph = []
