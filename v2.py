@@ -232,19 +232,19 @@ CSS = '''
 .km-dot{width:14px;height:14px;margin:-7px 0 0 -7px;font-size:0}.km-dot::before{inset:2px;box-shadow:none;opacity:.55}.km-dot::after{display:none}
 .km-dot[aria-pressed=true]{width:30px;height:30px;margin:-15px 0 0 -15px;font-size:11px}.km-dot[aria-pressed=true]::before{inset:5px;opacity:1;background:#FFFFFF;box-shadow:0 0 0 6px rgba(0,113,188,.35)}
 .km-dot[aria-pressed=true]::after{display:block;inset:5px}
-.km-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
-.km-chip{min-height:40px;padding:6px 10px;font-size:13.5px;line-height:1.2;justify-content:center;text-align:center;border-radius:10px}.km-chip b{font-size:13px}
+.km-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.km-chip{min-height:46px;padding:8px 12px;font-size:14px;line-height:1.25;justify-content:center;text-align:center;border-radius:12px}.km-chip b{font-size:13px}
 .km-swipe{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:#6F7B8B}
-.km-side{margin-top:12px}
+.km-side{margin-top:16px}
 .km-panel{padding:22px 20px;gap:12px}.km-panel h3{font-size:22px}.km-price{font-size:24px}.km-panel .btn{width:100%}
-.km-unsure{margin-top:12px;font-size:14px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
+.km-unsure{margin-top:16px;font-size:14px}.km-all{margin-top:20px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
 
 .ft-card{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:64px;align-items:start}
 .ft-main{display:flex;flex-direction:column;gap:22px}
 .ft-main h2{font:800 clamp(30px,3.6vw,50px)/1.04 'Geologica',system-ui,sans-serif;letter-spacing:-.02em;margin:0}
 .ft-main>p{color:#A9B4C2;font-size:17px;line-height:1.65;margin:0}
 .ft-steps{list-style:none;margin:4px 0 0;padding:0;counter-reset:st;border-top:1px solid rgba(255,255,255,.1)}
-.ft-steps li{counter-increment:st;display:grid;grid-template-columns:28px 1fr;column-gap:12px;row-gap:4px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.ft-steps li{counter-increment:st;display:grid;grid-template-columns:28px 1fr;column-gap:12px;row-gap:6px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.1)}
 .ft-steps li::before{content:counter(st);grid-row:span 2;color:#5AAEF2;font-weight:600;font-size:16px;line-height:1.4}
 .ft-steps b{font-size:16px;color:#EEF2F7}.ft-steps span{font-size:15px;line-height:1.55;color:#A9B4C2}
 .ft-cta{display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-top:auto}
@@ -252,13 +252,14 @@ CSS = '''
 .ft-side{display:flex;flex-direction:column;gap:16px}
 .ft-pic{position:relative;border-radius:14px;overflow:hidden;background:#11161E;aspect-ratio:4/5}
 .ft-pic img{width:100%;height:100%;object-fit:cover;display:block}
-.ft-get{padding:20px 22px;border-radius:16px;background:#F3F5F8;color:#0B1220}
-.ft-get h3{font:700 18px 'Geologica',system-ui,sans-serif;margin:0 0 10px}
+.ft-get{padding:22px;border-radius:16px;background:#FFFFFF;color:#0B1220;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.ft-get h3{font:700 19px 'Geologica',system-ui,sans-serif;margin:0 0 8px}
 .ft-get ul{list-style:none;margin:0;padding:0}
-.ft-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #DDE3EA;font-size:14px}
+.ft-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #E6EAF0;font-size:15px;line-height:1.45}
 .ft-st{flex:none;min-width:104px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;text-align:center}
 .ft-st.urgent{background:#FDE8E8;color:#B42318}.ft-st.later{background:#FEF3D7;color:#8A5A00}.ft-st.ok{background:#DDF4E6;color:#17663A}
-.ft-get p{margin:10px 0 0;font-size:13px;color:#5B6576}
+.ft-get .ft-st{width:142px;min-width:0;padding:5px 8px}.ft-get .ft-row:last-child{border-bottom:0;padding-bottom:6px}.ft-get h3{padding-bottom:12px;border-bottom:1px solid #E6EAF0}
+.ft-get p{margin:8px 0 0;padding-top:12px;border-top:1px solid #E6EAF0;font-size:13px;color:#5B6576}
 .dots{display:flex;gap:6px;margin-top:14px}.dots span{width:6px;height:6px;border-radius:3px;background:#3A4556;transition:width .2s,background .2s}.dots span.on{width:18px;background:#5AAEF2}
 .chips{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .chips li{padding:8px 12px;border-radius:10px;background:#11161E;border:1px solid rgba(255,255,255,.08);font-size:14px;color:#D5DCE5}
@@ -266,7 +267,7 @@ CSS = '''
 .chips-h{margin:18px 0 0;font-size:13px;color:#8A96A6}
 @media (max-width:899px){.ft-card{grid-template-columns:minmax(0,1fr);gap:20px}
 .ft-main{gap:16px}.ft-main>p{font-size:15px}.ft-pic{aspect-ratio:16/10}
-.ft-cta{gap:14px}.ft-cta .btn{width:100%}.ft-get{padding:16px}.ft-st{min-width:112px}
+.ft-cta{gap:18px}.ft-cta .btn{width:100%}.ft-get{padding:20px 18px;margin-top:12px}.ft-st{min-width:112px}
 .ft-card{display:flex;flex-direction:column;gap:16px}.ft-main,.ft-side{display:contents}
 .ft-main h2{order:1}.ft-main>p{order:2}.ft-pic{order:3}.ft-steps{order:4}.ft-cta{order:5;margin-top:4px}.ft-get{order:6}
 .stack{display:flex!important;flex-direction:column!important;gap:12px!important;overflow:visible!important;margin:16px 0 0!important;padding:0!important}.stack>*{width:auto!important;flex:none!important}
@@ -322,7 +323,7 @@ def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
                       f'<div class="km-links">{rows}</div>' + (f'<a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a>' if prices else '') + '</div>')
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
-    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 48px" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
+    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 16px" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub" if prices else "sub_home"][i]}</p></div>'
             f'<div class="km"><div><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{"".join(dots)}</div></div>'
             f'<div class="km-list">{"".join(chips)}</div>'
@@ -339,11 +340,15 @@ F = {
     'h': ('Диагностика ходовой на вибростенде', 'Вибростендте жүріс бөлігінің диагностикасы'),
     'p': ('Машина стоит на платформах своим весом, стенд раскачивает подвеску, как на кочках. Датчики шума на рычагах, стойках и тягах показывают, какой узел стучит.',
           'Көлік платформаларда өз салмағымен тұрады, стенд аспаны кедір-бұдырдағыдай тербетеді. Рычагтардағы, тіректер мен тартқыштардағы шу датчиктері қай түйін тықылдайтынын көрсетеді.'),
-    'steps': tuple((t, _KK.get(t, t), x, _KK.get(x, x)) for t, x in (
-        ('Заезд на стенд', 'Ставим колёса на платформы. Седан, кроссовер, джип или пикап. Грузовые и спецтехнику не берём.'),
-        ('Нагрузка и датчики', 'Платформы трясут подвеску, датчики шума стоят на узлах, рычаги давления нагружают их вручную.'),
-        ('Мастер показывает', 'Находим конкретный узел и показываем люфт вживую. Не «вроде бы рычаг», а та деталь, что стучит.'),
-        ('Заключение на руки', 'Срочно, можно позже, в норме. Ремонтировать у нас не обязательно.'))),
+    'steps': (
+        ('Ставим машину на стенд', 'Көлікті стендке қоямыз',
+         'Колёса встают на платформы. Подходит седан, кроссовер, джип и пикап.', 'Дөңгелектер платформаларға тұрады. Седан, кроссовер, джип және пикап сияды.'),
+        ('Стенд трясёт подвеску', 'Стенд аспаны тербетеді',
+         'Как на плохой дороге, только на месте. Датчики слушают каждый узел.', 'Нашар жолдағыдай, бірақ бір орында. Датчиктер әр түйінді тыңдайды.'),
+        ('Мастер показывает, что стучит', 'Шебер не тықылдайтынын көрсетеді',
+         'Люфт видно своими глазами, без «вроде бы рычаг».', 'Саңылауды өз көзіңізбен көресіз, «рычаг сияқты» деген болжамсыз.'),
+        ('Вы получаете акт', 'Сіз акт аласыз',
+         'Что срочно, что можно позже, что в норме. Ремонт у нас не обязателен.', 'Не шұғыл, не кейінірек, не қалыпты. Жөндеуді бізде жасау міндетті емес.')),
     'get': ('Что вы получите на руки', 'Қолыңызға не беріледі'),
     'rows': ((('urgent', 'Срочно', 'Стойка стабилизатора, передняя левая'), ('urgent', 'Шұғыл', 'Стабилизатор тірегі, алдыңғы сол жақ')),
              (('later', 'Можно позже', 'Сайлентблок заднего рычага'), ('later', 'Кейінірек болады', 'Артқы рычагтың сайлентблогы')),
@@ -362,7 +367,7 @@ def stand_feature(lang, url_for, wa, phone=False):
     i = 0 if lang == 'ru' else 1
     steps = ''.join(f'<li><b>{st[i]}</b><span>{st[2 + i]}</span></li>' for st in F['steps'])
     rows = ''.join(f'<li class="ft-row"><span class="ft-st {r[i][0]}">{r[i][1]}</span><span>{r[i][2]}</span></li>' for r in F['rows'])
-    return (f'<section class="ft-sec" style="padding: {"40px 16px 48px" if phone else "110px 0 0"}"><div class="{"" if phone else "w"}">'
+    return (f'<section class="ft-sec" style="padding: {"40px 16px 8px" if phone else "110px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="ft-card"><div class="ft-main"><h2>{F["h"][i]}</h2><p>{F["p"][i]}</p>'
             f'<ol class="ft-steps">{steps}</ol>'
             f'<div class="ft-cta"><a class="btn btn-p" href="{wa}?text={quote(F["msg"][i], safe="")}">{F["book"][i]}</a>'
@@ -640,6 +645,8 @@ def one_tone(soup, lang):
 VT_CSS = """
 .psub{color:#8792A3!important}
 .mh-r .st,.dh-tel .st{display:none!important}
+.prow .plink{color:#EEF2F7!important;border-bottom-color:rgba(238,242,247,.25)}
+@media (max-width:899px){.bb{position:fixed;left:0;right:0}footer,.ft{padding-bottom:110px!important}}
 .topbar{background:#080E1A;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:#A9B4C2}
 .tb-in{max-width:1280px;margin:0 auto;padding:7px 48px;display:flex;gap:24px}
 @media (max-width:899px){.tb-in{padding:6px 16px;justify-content:space-between;gap:12px;font-size:12px}}
