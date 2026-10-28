@@ -287,11 +287,13 @@ JS = r'''
   [].forEach.call(panels,function(p){p.hidden=p.getAttribute('data-panel')!==id})})});
 });
 [].forEach.call(document.querySelectorAll('[data-km-m]'),function(km){
- var its=[].slice.call(km.querySelectorAll('.km-it')),dots=km.querySelectorAll('.km-dot'),more=km.querySelector('.km-more');
- its.forEach(function(d){d.addEventListener('toggle',function(){if(!d.open){if(!its.some(function(x){return x.open}))[].forEach.call(dots,function(b){b.setAttribute('aria-pressed','false')});return}
-  its.forEach(function(x){if(x!==d)x.open=false});
-  [].forEach.call(dots,function(b){b.setAttribute('aria-pressed',b.getAttribute('data-node')===d.getAttribute('data-node')?'true':'false')})})});
- if(more)more.addEventListener('click',function(){km.classList.add('km-all-on');more.remove()});
+ var cds=km.querySelectorAll('.km-cd'),pns=km.querySelectorAll('.km-pn'),dots=km.querySelectorAll('.km-dot'),cur='';
+ function show(id){cur=id;
+  [].forEach.call(cds,function(c){c.setAttribute('aria-expanded',c.getAttribute('data-node')===id?'true':'false')});
+  [].forEach.call(pns,function(p){p.hidden=p.getAttribute('data-panel')!==id});
+  [].forEach.call(dots,function(d){d.setAttribute('aria-pressed',d.getAttribute('data-node')===id?'true':'false')})}
+ [].forEach.call(cds,function(c){c.addEventListener('click',function(){var id=c.getAttribute('data-node');show(cur===id?'':id)})});
+ [].forEach.call(km.querySelectorAll('.km-x'),function(x){x.addEventListener('click',function(){show('')})});
 });
 // carousels with dots: the active dot follows the swipe
 [].forEach.call(document.querySelectorAll('[data-dots]'),function(r){var d=r.parentNode.querySelector('.dots');if(!d)return;var dots=d.children;
@@ -312,29 +314,30 @@ JS = r'''
 
 
 def km_phone(lang, url_for, wa, sid, prices, dots, head, tail):
-    """Phones: the drawing on top, then a short list of parts; a tapped row opens in place, five rows show first."""
+    """Phones: the drawing on top, a swipeable row of part cards; a tapped card opens its panel below the row."""
     i = 0 if lang == 'ru' else 1
     from urllib.parse import quote
-    items = []
-    for n, (key, x, y, title, text, price, links) in enumerate(NODES):
+    cards, panels = [], []
+    for key, x, y, title, text, price, links in NODES:
         t = html.escape(title[i])
+        cards.append(f'<button type="button" class="km-cd" data-node="{key}" aria-expanded="false"><b>{t}</b><span>{html.escape(text[i])}</span></button>')
         rows = ''.join(f'<a href="{url_for(lang, b)}">{html.escape(l[i])}</a>' for b, *l in links)
         msg = quote(T2['wa'][i].replace('{x}', title[i].lower() if lang == 'ru' else title[i]), safe='')
         extra = ''
         if prices:
             p = f'{price:,}'.replace(',', ' ') + ' ₸'
             extra = f'<div class="km-pb"><span class="km-price">{T2["from"][i].format(p=p)}</span><a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a></div>'
-        items.append(f'<details class="km-it{" km-x" if n >= 5 else ""}" data-node="{key}"><summary><span class="km-t">{t}</span>'
-                     f'<span class="km-s">{html.escape(text[i])}</span></summary><div class="km-bd">{rows}{extra}</div></details>')
-    more = ('Показать все узлы', 'Барлық түйіндерді көрсету')[i]
+        panels.append(f'<div class="km-pn" data-panel="{key}" hidden><div class="km-pn-h"><b>{t}</b>'
+                      f'<button type="button" class="km-x" aria-label="{("Закрыть", "Жабу")[i]}"></button></div>{rows}{extra}</div>')
     dots_off = ''.join(dots).replace('aria-pressed="true"', 'aria-pressed="false"')
-    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec km-m" data-km-m style="padding: 48px 16px 24px"><div>'
-            f'<div class="km-hd"><h2>{T2["h"][i]}</h2></div>'
-            f'<div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{dots_off}</div></div>'
-            f'<div class="km-acc">{"".join(items)}<button type="button" class="km-more">{more}</button></div>'
+    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec km-m" data-km-m style="padding: 48px 0 24px"><div>'
+            f'<div class="km-hd" style="padding: 0 16px"><h2>{T2["h"][i]}</h2></div>'
+            f'<div style="padding: 0 16px"><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{dots_off}</div></div></div>'
+            f'<div class="km-rail">{"".join(cards)}</div>'
+            f'<div style="padding: 0 16px">{"".join(panels)}'
             f'<span class="km-unsure">{head}? <a href="{url_for(lang, "svc-vibrostand.dc.html")}">{tail.strip()}</a></span>'
             + ('' if prices else f'<a class="km-all" href="{url_for(lang, "Services.dc.html")}">{T2["all"][i]}</a>')
-            + '</div></section>')
+            + '</div></div></section>')
 
 
 def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
@@ -441,40 +444,11 @@ BRANDS = {
 
 
 def merge_contacts(soup, phone):
-    """Home: the booking form and the «Ждём на Аносова» block become one section, address next to the form."""
+    """Home: the «Ждём на Аносова» block goes; address, phone and hours sit in the footer, as on viton.kz."""
     book = soup.find(id='book')
     addr = book.find_next_sibling('section') if book else None
-    if addr is None:
-        return
-    if phone:
-        ps = addr.find_all('p', recursive=False)
-        intro = book.find('p')
-        for p in reversed(ps):
-            intro.insert_after(p)
-        form = book.find('form')
-        for el in reversed([c for c in addr.find_all(recursive=False) if c.name != 'h2']):
-            form.insert_after(el)
-    else:
-        cols = addr.select('.g2 > div')
-        h2 = cols[0].find('h2')
-        rows = h2.find_next_sibling('div')
-        acts = rows.find_next_sibling('div')
-        for row in rows.find_all('div', recursive=False):
-            if row.find('a', href=re.compile('wa\\.me')):
-                row.decompose()
-        ol = book.find('ol')
-        if ol:
-            ol.replace_with(rows)
-        if acts:
-            rows.insert_after(acts)
-        wrap = soup.new_tag('div', attrs={'class': 'w', 'id': 'contacts', 'style': 'margin-top: 56px'})
-        cols[1]['style'] = 'display: flex; flex-direction: column; gap: 18px'
-        m = cols[1].find('div', style=re.compile(r'height: [^;]*460px'))
-        if m:
-            m['style'] = re.sub(r'height: [^;]*460px\)?', 'height: 340px', m['style'])
-        wrap.append(cols[1])
-        book.find(class_='g2').insert_after(wrap)
-    addr.decompose()
+    if addr is not None and addr.find('a', href=re.compile(r'2gis\.kz/almaty/firm/')):
+        addr.decompose()
 
 
 def brand_chips(soup, lang, phone):
@@ -730,22 +704,26 @@ def one_tone(soup, lang):
 VT_CSS = """
 .psub{color:#8792A3!important}
 .mh-r .st,.dh-tel .st{display:none!important}
+.ft-ct{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 40px;margin-top:32px;padding-top:28px;border-top:1px solid rgba(255,255,255,.06);scroll-margin-top:100px}
+.fc-col{display:flex;flex-direction:column;gap:6px;font-size:15px;color:#D5DCE5;line-height:1.5}
+.fc-h{font-size:13px;color:#8792A3;margin-bottom:2px}.fc-m{font-size:14px;color:#8792A3}
+.fc-col a{color:#5AAEF2;font-weight:600;font-size:15px}.fc-col a.fc-tel{color:#EEF2F7;font-size:18px}
+@media (max-width:899px){.ft-ct{grid-template-columns:minmax(0,1fr);gap:22px}}
 .km-m .km-hd{margin-bottom:16px}
 .km-m .km-fig{padding:10px 6px 4px}.km-m .km-dots{inset:10px 6px 4px}
-.km-acc{margin-top:14px;border-top:1px solid rgba(255,255,255,.1)}
-.km-it{border-bottom:1px solid rgba(255,255,255,.1)}
-.km-it summary{list-style:none;cursor:pointer;display:grid!important;justify-content:stretch!important;grid-template-columns:minmax(0,1fr) 20px;column-gap:12px;row-gap:3px;padding:14px 0;align-items:center}
-.km-it summary::-webkit-details-marker{display:none}
-.km-it summary::after{content:'';grid-column:2;grid-row:1/span 2;width:9px;height:9px;border-right:2px solid #8792A3;border-bottom:2px solid #8792A3;transform:rotate(45deg);justify-self:center;margin-top:-4px;transition:transform .2s}
-.km-it[open] summary::after{transform:rotate(225deg);margin-top:4px;border-color:#5AAEF2}
-.km-t{grid-column:1;grid-row:1;font-size:16px;font-weight:600;color:#EEF2F7}.km-it[open] .km-t{color:#5AAEF2}
-.km-s{grid-column:1;grid-row:2;font-size:14px;line-height:1.45;color:#8792A3}
-.km-bd{display:flex;flex-direction:column;gap:2px;padding:0 0 14px}
-.km-bd>a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;background:#131E33;color:#EEF2F7!important;font-weight:600;font-size:15px;margin-top:6px}
-.km-pb{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}.km-pb .km-price{font-size:20px}.km-pb .btn{width:auto!important;min-height:44px}
-.km-x{display:none}.km-all-on .km-x{display:block}
-.km-more{width:100%;min-height:46px;margin-top:12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#EEF2F7;font:600 15px 'Inter',system-ui,sans-serif;cursor:pointer}
-.km-m .km-unsure{display:block;margin-top:16px}.km-m .km-all{margin-top:16px}
+.km-rail{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;padding:14px 16px 4px;scrollbar-width:none}
+.km-rail::-webkit-scrollbar{display:none}
+.km-cd{flex:0 0 68%;scroll-snap-align:start;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border-radius:14px;background:#131E33;border:1px solid rgba(255,255,255,.08);color:#EEF2F7;font-family:inherit;cursor:pointer;min-height:112px}
+.km-cd b{font-size:16px;font-weight:600;line-height:1.25}.km-cd span{font-size:13.5px;line-height:1.45;color:#8792A3}
+.km-cd[aria-expanded=true]{border-color:#0071BC;background:#0F2A4A}.km-cd[aria-expanded=true] b{color:#5AAEF2}
+.km-pn{margin-top:12px;padding:16px;border-radius:14px;background:#131E33;border:1px solid rgba(0,113,188,.5);display:flex;flex-direction:column;gap:8px}
+.km-pn[hidden]{display:none}
+.km-pn-h{display:flex;justify-content:space-between;align-items:center;gap:12px}.km-pn-h b{font-size:17px}
+.km-x{width:32px;height:32px;border:0;border-radius:50%;background:rgba(255,255,255,.08);position:relative;cursor:pointer;flex:none}
+.km-x::before,.km-x::after{content:'';position:absolute;left:50%;top:50%;width:13px;height:2px;background:#A9B4C2;transform:translate(-50%,-50%) rotate(45deg)}.km-x::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.km-pn>a{display:flex;align-items:center;min-height:44px;margin-top:2px;border:1px solid rgba(255,255,255,.06);padding:0 14px;border-radius:10px;background:#0B1424;color:#EEF2F7!important;font-weight:600;font-size:15px}
+.km-pb{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}.km-pb .km-price{font-size:20px}.km-pb .btn{width:auto!important;min-height:44px}
+.km-m .km-unsure{display:block;margin-top:14px}.km-m .km-all{margin-top:16px}
 .vt-brands h2{font:800 clamp(24px,2.4vw,32px)/1.15 'Geologica',system-ui,sans-serif;letter-spacing:-.01em;margin:0;max-width:760px}
 .vt-brands ul{list-style:none;margin:22px 0 0!important;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .vt-brands li{padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font-size:15px;font-weight:500;color:#D5DCE5;white-space:nowrap}
@@ -999,6 +977,22 @@ def light_css(css):
     return '\n'.join(out)
 
 
+def footer_contacts(kk):
+    """Footer: address, phone and hours in three columns, the way viton.kz ends its pages."""
+    i = 1 if kk else 0
+    t = lambda ru, k: (ru, k)[i]
+    col = lambda h, body: f'<div class="fc-col"><span class="fc-h">{h}</span>{body}</div>'
+    return ('<div class="ft-ct" id="contacts">'
+            + col(t('Адрес', 'Мекенжай'), f'<span>{t("Алматы, ул. Аносова, 91, 1 этаж", "Алматы, Аносов к-сі, 91, 1 қабат")}</span>'
+                  f'<span class="fc-m">{t("мкр Тастак-3, остановка «Розыбакиева»", "Тастақ-3 ш/а, «Розыбакиев» аялдамасы")}</span>'
+                  f'<a href="https://2gis.kz/almaty/firm/70000001104923303">{t("Маршрут в 2ГИС", "2ГИС-те бағыт")}</a>')
+            + col(t('Запись', 'Жазылу'), '<a class="num fc-tel" href="tel:+77474956165">+7 747 495 61 65</a>'
+                  f'<a href="https://wa.me/77474956165">{t("Написать в WhatsApp", "WhatsApp-қа жазу")}</a>')
+            + col(t('Часы', 'Жұмыс уақыты'), f'<span>{t("Ежедневно 09:30–19:00", "Күн сайын 09:30–19:00")}</span>'
+                  f'<span class="fc-m">{t("Оплата картой и наличными", "Карта және қолма-қол төлем")}</span>')
+            + '</div>')
+
+
 def prefix(doc):
     """Serve the whole v2 build under /v2/: rewrite root-relative links and assets."""
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
@@ -1008,4 +1002,5 @@ def prefix(doc):
     bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
+    doc = doc.replace('<div class="ft-bot">', footer_contacts(kk) + '<div class="ft-bot">', 1)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
