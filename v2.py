@@ -740,9 +740,7 @@ def insert_map(soup, name, lang, url_for, wa):
             if h.get_text(' ', strip=True) in STORY_END:
                 after = h.find_parent('section')
                 break
-        mapsec = [c for c in new.contents if getattr(c, 'name', None)][-1]
         (after or soup.find('section', class_='ft-sec')).insert_after(new)
-        mapsec.insert_after(BeautifulSoup(case_block(lang, url_for, phone), 'html.parser'))
         # «С чем приезжают» lists the same services: the map covers it now
         for h in soup.find_all('h2'):
             if h.get_text(' ', strip=True) in SERVICES_H2:
