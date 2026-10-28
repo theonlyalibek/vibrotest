@@ -393,19 +393,32 @@ def to_dots(soup):
         del rail['data-rail']
 
 
-def brand_chips(soup, phone):
-    """Phone home: the brand list as a line of names, the way the desktop page shows it."""
-    if not phone:
-        return
+BRANDS = {
+    'h': ('Работаем с японскими, корейскими, европейскими и китайскими машинами',
+          'Жапон, корей, еуропа және қытай көліктерімен жұмыс істейміз'),
+    'cn': ('Li Auto', 'Zeekr', 'Geely', 'Chery', 'Changan', 'Omoda', 'MG', 'Deepal'),
+    'rest': ('Toyota', 'Lexus', 'Subaru', 'Honda', 'Hyundai', 'Kia', 'BMW', 'Mercedes-Benz', 'Audi', 'Volkswagen', 'Škoda', 'Volvo'),
+    'more': ('и другие', 'және басқалар'),
+    'no': ('Грузовые и спецтехнику не обслуживаем.', 'Жүк көліктері мен арнайы техниканы қабылдамаймыз.'),
+    'faq': ('Легковые, кроссоверы, джипы и пикапы, в том числе китайские. Грузовые и спецтехнику не берём.',
+            'Жеңіл көліктер, кроссоверлер, джиптер мен пикаптар, оның ішінде қытайлық. Жүк көліктері мен арнайы техниканы қабылдамаймыз.'),
+}
+
+
+def brand_chips(soup, lang, phone):
+    """Home: the brand list as one compact block of chips, Chinese cars first; no year limit anywhere."""
+    i = 0 if lang == 'ru' else 1
     for p in soup.find_all('p'):
-        t = p.get_text(' ', strip=True)
-        if 'Toyota' in t and 'Lexus' in t:
-            names = [x.strip() for x in t.split(',')]
-            p.replace_with(BeautifulSoup('<p class="brands">' + ', '.join(html.escape(x.replace('-', '\u2011')) for x in names) + '</p>', 'html.parser'))
-        elif 'Li Auto' in t and 'Geely' in t:
-            head, _, rest = t.partition(':')
-            names = [x.strip() for x in rest.split(',')]
-            p.replace_with(BeautifulSoup(f'<p class="brands-h">{html.escape(head)}</p><p class="brands">' + ', '.join(html.escape(x.replace('-', '\u2011')) for x in names) + '</p>', 'html.parser'))
+        if '2010' in p.get_text():
+            p.string = BRANDS['faq'][i]
+    sec = next((p.find_parent('section') for p in soup.find_all('p') if 'Li Auto' in p.get_text()), None)
+    if sec is None:
+        return
+    chip = lambda n, cn=False: f'<li{" class=\"cn\"" if cn else ""}>{html.escape(n)}</li>'
+    sec.replace_with(BeautifulSoup(
+        f'<section class="vt-brands" style="padding: {"8px 16px 40px" if phone else "0 0 110px"}"><div class="{"" if phone else "w"}">'
+        f'<h2>{BRANDS["h"][i]}</h2><ul>' + ''.join(chip(n, True) for n in BRANDS['cn']) + ''.join(chip(n) for n in BRANDS['rest'])
+        + f'<li class="more">{BRANDS["more"][i]}</li></ul><p>{BRANDS["no"][i]}</p></div></section>', 'html.parser'))
 
 # ---------- the stand page: what you get, when not to drive, the questions competitors leave open ----------
 
@@ -645,6 +658,13 @@ def one_tone(soup, lang):
 VT_CSS = """
 .psub{color:#8792A3!important}
 .mh-r .st,.dh-tel .st{display:none!important}
+.vt-brands h2{font:800 clamp(24px,2.4vw,32px)/1.15 'Geologica',system-ui,sans-serif;letter-spacing:-.01em;margin:0;max-width:760px}
+.vt-brands ul{list-style:none;margin:22px 0 0!important;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.vt-brands li{padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font-size:15px;font-weight:500;color:#D5DCE5;white-space:nowrap}
+.vt-brands li.cn{border-color:rgba(90,174,242,.45);color:#EEF2F7;background:rgba(0,113,188,.12)}
+.vt-brands li.more{border-style:dashed;color:#8792A3}
+.vt-brands p{margin:16px 0 0!important;font-size:14px;color:#8792A3}
+@media (max-width:899px){.vt-brands h2{font-size:22px}.vt-brands ul{margin-top:16px!important;gap:6px}.vt-brands li{padding:6px 11px;font-size:13.5px}}
 .prow .plink{color:#EEF2F7!important;border-bottom-color:rgba(238,242,247,.25)}
 @media (max-width:899px){.bb{position:fixed;left:0;right:0}footer,.ft{padding-bottom:110px!important}}
 .topbar{background:#080E1A;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:#A9B4C2}
@@ -693,6 +713,11 @@ CSS += VT_CSS
 
 def insert_map(soup, name, lang, url_for, wa):
     """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
+    # the address block sits right above the booking form: its own «Записаться» button only repeats the form
+    if soup.find('form', attrs={'data-book': True}):
+        for route in soup.find_all('a', href=re.compile(r'2gis\.kz/almaty/firm/')):
+            for b in route.parent.find_all('a', class_='btn', recursive=False):
+                b.decompose()
     if name not in ('Main.dc.html', 'Mobile.dc.html'):
         if name in ('svc-vibrostand.dc.html', 'Mobile-service.dc.html'):
             vibro_page(soup, lang, name == 'Mobile-service.dc.html')
@@ -723,7 +748,8 @@ def insert_map(soup, name, lang, url_for, wa):
     home = name in ('Main.dc.html', 'Mobile.dc.html')
     phone = name == 'Mobile.dc.html'
     to_dots(soup)
-    brand_chips(soup, phone)
+    if home:
+        brand_chips(soup, lang, phone)
     new = BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html', 'symptom' if name == 'Main.dc.html' else '', prices=not home), 'html.parser')
     if home:
         anchor.extract()
