@@ -507,6 +507,39 @@ def _sec_by_h2(soup, titles):
     return None
 
 
+ACT = {
+    'title': ('Акт диагностики', 'Диагностика актісі'),
+    'addr': ('Алматы, Аносова 91', 'Алматы, Аносов 91'),
+    'meta': ((('Дата', 'Күні'), '27.10.2026'), (('Автомобиль', 'Көлік'), 'Toyota Camry 70'),
+             (('Год выпуска', 'Шығарылған жылы'), '2021'), (('Пробег', 'Жүрісі'), ('45 800 км', '45 800 км'))),
+    'sheet': ('Диагностический лист', 'Диагностикалық парақ'),
+    'cols': (('№', '№'), ('Узел', 'Түйін'), ('Статус', 'Мәртебе'), ('Работа, ₸', 'Жұмыс, ₸')),
+    'price': ('3 000', '3 000', '3 000', '10 000', '', '', ''),
+    'total': ('Срочно, работа', 'Шұғыл, жұмыс'),
+    'parts': ('Запчасти по накладной, цену называем до ремонта', 'Бөлшектер жүкқұжат бойынша, бағасын жөндеуге дейін айтамыз'),
+    'sign': (('Мастер', 'Шебер'), ('Клиент', 'Клиент')),
+}
+
+
+def act_html(i, label):
+    """The sample handed over after the stand, laid out like the shop's printed act, with the three urgency marks."""
+    A = ACT
+    meta = ''.join(f'<div><span>{k[i]}</span><b>{v if isinstance(v, str) else v[i]}</b></div>' for k, v in A['meta'])
+    rows = ''.join(f'<tr><td class="num">{n}</td><td>{r[i][1]}{f"<em>, {r[i][2]}</em>" if r[i][2] else ""}</td>'
+                   f'<td><span class="ft-st {r[i][0]}">{label[r[i][0]]}</span></td><td class="num">{A["price"][n - 1] or "—"}</td></tr>'
+                   for n, r in enumerate(V['rows'], 1))
+    head = ''.join(f'<th>{c[i]}</th>' for c in A['cols'])
+    sign = ''.join(f'<div><span>{s[i]}</span><i></i></div>' for s in A['sign'])
+    return (f'<figure class="vt-act"><div class="act-top"><img src="/img/logo-ink.png" alt="VibroTest.kz" width="142" height="40" loading="lazy">'
+            f'<span>{A["addr"][i]}<br><span class="num">+7 747 495 61 65</span></span></div>'
+            f'<h3>{A["title"][i]}</h3><div class="act-meta">{meta}</div>'
+            f'<div class="act-band">{A["sheet"][i]}</div>'
+            f'<div class="act-tw"><table><thead><tr>{head}</tr></thead><tbody>{rows}</tbody>'
+            f'<tfoot><tr><td colspan="3">{A["total"][i]}</td><td class="num">6 000</td></tr></tfoot></table></div>'
+            f'<p class="act-parts">{A["parts"][i]}</p><div class="act-sign">{sign}</div>'
+            f'<figcaption>{V["paper_cap"][i]}</figcaption></figure>')
+
+
 def vibro_page(soup, lang, phone):
     from urllib.parse import quote
     i = 0 if lang == 'ru' else 1
@@ -515,7 +548,7 @@ def vibro_page(soup, lang, phone):
     label = {k: n for (k, n), _ in legend}
     rows = ''.join(f'<li class="ft-row"><span class="ft-st {r[i][0]}">{label[r[i][0]]}</span>'
                    f'<span>{r[i][1]}{f"<em>, {r[i][2]}</em>" if r[i][2] else ""}</span></li>' for r in V['rows'])
-    paper = (f'<div class="ft-get vt-paper"><h3>{V["paper_h"][i]}</h3><ul>{rows}</ul><p>{V["paper_cap"][i]}</p></div>')
+    paper = act_html(i, label)
     stop = ''.join(f'<li>{x[i]}</li>' for x in V['stop'])
     if phone:
         get = (f'<section class="sec"><h2 class="hd h2">{V["get_h"][i]}</h2><p class="vt-p">{V["get_p"][i]}</p>'
@@ -581,6 +614,25 @@ def one_tone(soup, lang):
 VT_CSS = """
 .vt-legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:12px 14px;align-items:baseline;font-size:15px;line-height:1.55;color:#A9B4C2}
 .vt-legend li{display:contents}.vt-legend .ft-st,.vt-paper .ft-st{white-space:nowrap}
+.vt-act{margin:0;background:#FFFFFF;color:#111827;border-radius:6px;padding:28px 28px 22px;box-shadow:0 18px 50px rgba(0,0,0,.35);font-size:14px}
+.act-top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:14px;border-bottom:2px solid #111827}
+.act-top img{height:34px;width:auto;display:block}.act-top>span{text-align:right;font-size:12px;line-height:1.5;color:#374151}
+.vt-act h3{font:700 19px 'Geologica',system-ui,sans-serif;text-align:center;margin:16px 0 12px;color:#111827}
+.act-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid #111827;border-bottom:0}
+.act-meta div{display:flex;justify-content:space-between;gap:8px;padding:6px 10px;border-bottom:1px solid #111827;font-size:13px}
+.act-meta div:nth-child(odd){border-right:1px solid #111827}.act-meta span{color:#4B5563}.act-meta b{font-weight:600}
+.act-band{margin-top:14px;padding:6px 10px;border:1px solid #111827;border-bottom:0;background:#EEF1F4;text-align:center;font-weight:700;font-size:13px}
+.act-tw{overflow-x:auto}.vt-act table{width:100%;border-collapse:collapse;font-size:13px;min-width:420px}
+.vt-act th,.vt-act td{border:1px solid #111827;padding:6px 8px;text-align:left;vertical-align:middle}
+.vt-act th{font-weight:600;background:#F8F9FA}.vt-act td:first-child,.vt-act th:first-child{width:30px;text-align:center}
+.vt-act td:last-child,.vt-act th:last-child{text-align:right;white-space:nowrap}
+.vt-act em{font-style:normal;color:#6B7280}.vt-act .ft-st{min-width:0;padding:2px 9px;font-size:12px;white-space:nowrap}
+.vt-act tfoot td{font-weight:700;text-align:right}
+.act-parts{margin:10px 0 0;font-size:12.5px;color:#4B5563}
+.act-sign{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px}
+.act-sign div{display:flex;align-items:flex-end;gap:8px;font-size:12.5px;color:#4B5563}.act-sign i{flex:1;border-bottom:1px solid #111827;height:14px}
+.vt-act figcaption{margin-top:16px;padding-top:10px;border-top:1px dashed #C9CFD6;font-size:12px;color:#6B7280}
+.mv .vt-act{padding:18px 12px 16px}.mv .vt-act table{min-width:0;font-size:12.5px}.mv .vt-act th,.mv .vt-act td{padding:5px 5px}.mv .vt-act .ft-st{font-size:11px;padding:2px 6px;white-space:normal;text-align:center;display:inline-block;line-height:1.25}.mv .vt-act td:first-child,.mv .vt-act th:first-child{width:22px}.mv .act-meta{grid-template-columns:minmax(0,1fr)}.mv .act-meta div:nth-child(odd){border-right:0}
 .vt-paper{padding:28px 30px}.vt-paper .ft-row{font-size:15px}.vt-paper em{font-style:normal;color:#5B6576}
 .vt-stop{list-style:none;margin:0;padding:0;border-top:1px solid rgba(255,255,255,.1)}
 .vt-stop li{position:relative;padding:20px 0 20px 28px;border-bottom:1px solid rgba(255,255,255,.1);font-size:17px;line-height:1.5;color:#D5DCE5}
