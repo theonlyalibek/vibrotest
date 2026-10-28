@@ -469,9 +469,9 @@ def merge_contacts(soup, phone):
             rows.insert_after(acts)
         wrap = soup.new_tag('div', attrs={'class': 'w', 'id': 'contacts', 'style': 'margin-top: 56px'})
         cols[1]['style'] = 'display: flex; flex-direction: column; gap: 18px'
-        m = cols[1].find('div', style=re.compile('height: 460px'))
+        m = cols[1].find('div', style=re.compile(r'height: [^;]*460px'))
         if m:
-            m['style'] = m['style'].replace('height: 460px', 'height: 340px')
+            m['style'] = re.sub(r'height: [^;]*460px\)?', 'height: 340px', m['style'])
         wrap.append(cols[1])
         book.find(class_='g2').insert_after(wrap)
     addr.decompose()
