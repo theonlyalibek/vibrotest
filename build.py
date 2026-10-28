@@ -835,6 +835,8 @@ def page(lang, board, base, noindex, pages_meta):
                       'author': {'@type': 'Person', 'name': 'Виктор Новиков', 'jobTitle': 'основатель VibroTest' if lang == 'ru' else 'VibroTest негізін қалаушы'},
                       'publisher': {'@id': f'{base}/#vibrotest'}, 'about': {'@id': f'{base}/#vibrotest'}})
         graph.append(org_schema(base, lang))
+        if V2:
+            graph += V2.videos(board, base, lang)
         crumbs += [{'@type': 'ListItem', 'position': 2, 'name': u['crumb_blog'], 'item': f'{base}/{lang}/blog/'},
                    {'@type': 'ListItem', 'position': 3, 'name': h1t, 'item': url}]
     if kind != 'home':

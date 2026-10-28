@@ -55,6 +55,21 @@ def copy_media(out):
     shutil.copytree(ROOT / 'media', out / 'media', dirs_exist_ok=True)
 
 
+VIDEOS = {'art-lixiang-l7.dc.html': (
+    ('lixiang-l7-do', ('LiXiang L7 до ремонта: подвеска снизу', 'LiXiang L7 жөндеуге дейін: аспа астынан')),
+    ('lixiang-l7-osmotr', ('LiXiang L7 до ремонта: рычаги и стойки', 'LiXiang L7 жөндеуге дейін: рычагтар мен тіректер')),
+    ('lixiang-l7-reyka', ('LiXiang L7: реставрация рулевой рейки', 'LiXiang L7: рульдік рейканы қалпына келтіру')),
+    ('lixiang-l7-rychagi', ('LiXiang L7: старые и новые рычаги, установка', 'LiXiang L7: ескі және жаңа рычагтар, орнату')))}
+
+
+def videos(board, base, lang):
+    """VideoObject entries for an article's own workshop videos."""
+    day = art_date(board)
+    return [{'@type': 'VideoObject', 'name': t[lang == 'kk'], 'description': t[lang == 'kk'],
+             'thumbnailUrl': f'{base}/media/{v}.jpg', 'contentUrl': f'{base}/media/{v}.mp4',
+             'uploadDate': day, 'publisher': {'@id': f'{base}/#vibrotest'}} for v, t in VIDEOS.get(board, ())]
+
+
 def art_date(board):
     return next((a['date'] for a in ARTICLES if a['board'] == board), None)
 
@@ -540,6 +555,35 @@ def act_html(i, label):
             f'<figcaption>{V["paper_cap"][i]}</figcaption></figure>')
 
 
+CASE = {
+    'board': 'art-lixiang-l7.dc.html',
+    'eyebrow': ('Из наших работ', 'Біздің жұмыстардан'),
+    'h': ('LiXiang L7: стенд нашёл износ в четырёх местах', 'LiXiang L7: стенд төрт жерден тозу тапты'),
+    'p': ('Верхние и нижние рычаги, рулевая рейка, тяги и наконечники. Рейку отреставрировали, остальное заменили. Контрольный прогон на стенде после ремонта: стуков нет.',
+          'Жоғарғы және төменгі рычагтар, рульдік рейка, тартқыштар мен ұштықтар. Рейка қалпына келтірілді, қалғаны ауыстырылды. Жөндеуден кейін стендте бақылау тексеруі: тықыл жоқ.'),
+    'pics': (('lixiang-l7-osmotr', ('Подвеска LiXiang L7 снизу до ремонта', 'LiXiang L7 аспасы жөндеуге дейін астынан')),
+             ('lixiang-l7-hero', ('Рулевая рейка LiXiang L7 на верстаке во время реставрации', 'LiXiang L7 рульдік рейкасы қалпына келтіру кезінде үстелде')),
+             ('lixiang-l7-rychagi', ('Старые и новые рычаги LiXiang L7', 'LiXiang L7 ескі және жаңа рычагтары'))),
+    'link': ('Смотреть кейс с видео', 'Видеосы бар кейсті қарау'),
+}
+
+
+def case_block(lang, url_for, phone=False, small=False):
+    """A real job from the shop, with its own frames: on the home page and on the pages for the parts it touched."""
+    i = 0 if lang == 'ru' else 1
+    pics = CASE['pics'] if not small else CASE['pics'][1:]
+    imgs = ''.join(f'<img src="/media/{f}.jpg" alt="{a[i]}" loading="lazy">' for f, a in pics)
+    pad = '40px 16px 0' if phone else 'clamp(54px, 8.33vw, 120px) 0 0'
+    return (f'<section class="vt-case{" sm" if small else ""}" style="padding: {pad}"><div class="{"" if phone else "w"}">'
+            f'<div class="vc-in"><div class="vc-tx"><span class="vc-eb">{CASE["eyebrow"][i]}</span>'
+            f'<h2 class="hd">{CASE["h"][i]}</h2><p>{CASE["p"][i]}</p>'
+            f'<a class="lnk" href="{url_for(lang, CASE["board"])}">{CASE["link"][i]}</a></div>'
+            f'<div class="vc-pics">{imgs}</div></div></div></section>')
+
+
+CASE_PAGES = ('svc-steering-rack.dc.html', 'l-rychagi.dc.html', 'l-tyagi.dc.html', 'svc-suspension.dc.html')
+
+
 def vibro_page(soup, lang, phone):
     from urllib.parse import quote
     i = 0 if lang == 'ru' else 1
@@ -612,8 +656,16 @@ def one_tone(soup, lang):
 
 
 VT_CSS = """
+.psub{color:#8792A3!important}
 .vt-legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:12px 14px;align-items:baseline;font-size:15px;line-height:1.55;color:#A9B4C2}
 .vt-legend li{display:contents}.vt-legend .ft-st,.vt-paper .ft-st{white-space:nowrap}
+.vt-case .vc-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,4vw,56px);align-items:center;padding:clamp(22px,3vw,40px);border-radius:20px;background:#11161E;border:1px solid rgba(255,255,255,.08)}
+.vc-tx{display:flex;flex-direction:column;gap:14px}.vc-eb{font-size:13px;font-weight:600;color:#5AAEF2}
+.vt-case h2{font-size:clamp(24px,2.6vw,36px);line-height:1.1;font-weight:800;margin:0;color:#FFFFFF}
+.vt-case p{margin:0;font-size:16px;line-height:1.6;color:#A9B4C2}.vt-case .lnk{font-weight:600;font-size:15px}
+.vc-pics{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:10px}.vt-case.sm .vc-pics{grid-template-columns:1.6fr 1fr}
+.vc-pics img{width:100%;height:300px;object-fit:cover;border-radius:12px;display:block;background:#0A0D12}
+@media (max-width:899px){.vt-case .vc-in{grid-template-columns:minmax(0,1fr)}.vc-pics img{height:200px}}
 .vt-act{margin:0;background:#FFFFFF;color:#111827;border-radius:6px;padding:28px 28px 22px;box-shadow:0 18px 50px rgba(0,0,0,.35);font-size:14px}
 .act-top{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-bottom:14px;border-bottom:2px solid #111827}
 .act-top img{height:34px;width:auto;display:block}.act-top>span{text-align:right;font-size:12px;line-height:1.5;color:#374151}
@@ -653,6 +705,14 @@ def insert_map(soup, name, lang, url_for, wa):
             vibro_page(soup, lang, name == 'Mobile-service.dc.html')
         if name == 'Blog.dc.html':
             blog_cards(soup, lang, url_for)
+        if name in CASE_PAGES:
+            faq = _sec_by_h2(soup, {'Частые вопросы', 'Жиі қойылатын сұрақтар', 'Вопросы и ответы', _KK.get('Вопросы и ответы', '')})
+            blk = BeautifulSoup(case_block(lang, url_for, small=True), 'html.parser')
+            if faq:
+                faq.insert_before(blk)
+            else:
+                secs = soup.find_all('section')
+                (secs[-1].insert_before if len(secs) > 1 else secs[0].insert_after)(blk)
         if name == 'Services.dc.html':
             h1 = soup.find('h1')
             lead = h1.find_next('p') if h1 else None
@@ -694,7 +754,9 @@ def insert_map(soup, name, lang, url_for, wa):
             if h.get_text(' ', strip=True) in STORY_END:
                 after = h.find_parent('section')
                 break
+        mapsec = [c for c in new.contents if getattr(c, 'name', None)][-1]
         (after or soup.find('section', class_='ft-sec')).insert_after(new)
+        mapsec.insert_after(BeautifulSoup(case_block(lang, url_for, phone), 'html.parser'))
         # «С чем приезжают» lists the same services: the map covers it now
         for h in soup.find_all('h2'):
             if h.get_text(' ', strip=True) in SERVICES_H2:
