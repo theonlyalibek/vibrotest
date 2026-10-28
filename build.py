@@ -974,6 +974,8 @@ def main():
         shutil.rmtree(out)
     out.mkdir(parents=True)
     prep_images(out)
+    if V2:
+        V2.copy_media(out)
     shutil.copytree(ROOT / 'fonts', out / 'fonts', ignore=shutil.ignore_patterns('*.css'))
     ico = Image.open(ROOT / 'img' / 'logo-blue.png')
     metas = []

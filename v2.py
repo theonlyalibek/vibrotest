@@ -49,6 +49,12 @@ def pages():
     return out
 
 
+def copy_media(out):
+    """Real photos and videos from the shop, served only by the v2 build."""
+    import shutil
+    shutil.copytree(ROOT / 'media', out / 'media', dirs_exist_ok=True)
+
+
 def art_date(board):
     return next((a['date'] for a in ARTICLES if a['board'] == board), None)
 
@@ -68,6 +74,11 @@ def blog_cards(soup, lang, url_for):
         img['src'] = img['src'].replace(old, a['img'])
         img['srcset'] = img['srcset'].replace(old, a['img'])
         img['alt'] = a['alt'] if lang == 'ru' else _KK.get(a['alt'], a['alt'])
+        if a.get('src'):
+            img['src'] = a['src']
+            img['alt'] = a['alt2'][i]
+            for k in ('srcset', 'sizes'):
+                img.attrs.pop(k, None)
         c.find(class_='meta').string = f"{a['cat'][i] or _KK.get(a['cat'][0], a['cat'][0])} · {a['min']} минут"
         c.h3.string = a['h1'][i]
         first.insert_before(c)
@@ -783,4 +794,4 @@ def prefix(doc):
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
     for a, b in NAVY:
         doc = re.sub(a, b, doc, flags=re.I)
-    return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
+    return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
