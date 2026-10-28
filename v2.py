@@ -798,7 +798,7 @@ VT_CSS = """
 .mh-r .st,.dh-tel .st{display:none!important}
 .ft-arts{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,.06)}
 .ft-arts>div{margin-top:10px;columns:3;column-gap:40px}.ft-arts a{display:block;break-inside:avoid;padding:4px 0;font-size:14px;color:#A9B4C2}.ft-arts a:hover{color:#EEF2F7}
-@media (max-width:899px){.ft-arts>div{columns:1}}
+@media (max-width:899px){.ft-arts,.ft-ct,.ft-bot{display:none!important}}
 .toc{margin:8px 0 4px!important;padding:20px 24px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:#0F1829}
 .toc b{display:block;font-size:15px;margin-bottom:8px;color:#EEF2F7}.toc ol{margin:0!important;padding-left:20px!important;display:flex;flex-direction:column;gap:6px}
 .toc a{color:#5AAEF2;font-size:15px}
