@@ -118,6 +118,36 @@ def link_rows(soup, current):
         first.append(a)
 
 
+def services_list(soup, lang):
+    """«Услуги»: each row leads to its service page; the prices live there, next to the full description."""
+    more = ('Подробнее', 'Толығырақ')[lang != 'ru']
+    for row in soup.select('.prow'):
+        card = row.find_parent(class_='card')
+        link = row.find('a', class_='plink')
+        lnk = card.find('a', class_='lnk') if card else None
+        href = link['href'] if link else (lnk['href'] if lnk else None)
+        for x in row.select('.num, .pbook'):
+            x.decompose()
+        if not href:
+            continue
+        if link:
+            link.unwrap()
+        row.append(BeautifulSoup(f'<a class="pgo" href="{href}">{more}<span aria-hidden="true"> →</span></a>', 'html.parser'))
+        row['class'] = row.get('class', []) + ['prow-go']
+    h1 = soup.find('h1')
+    lead = h1.find_next('p') if h1 else None
+    if lead:
+        lead.string = SVC_LEAD[lang != 'ru']
+    # the «start here» card: name and what you get, the price is on its page
+    for num in soup.find_all('span', class_='num'):
+        if num.find_parent('section') is (h1.find_parent('section') if h1 else None):
+            num.decompose()
+
+
+SVC_LEAD = ('Выберите услугу: на её странице цена работы, как мы её делаем и ответы на частые вопросы. Запчасти считаем отдельно, точную сумму мастер называет после диагностики.',
+            'Қызметті таңдаңыз: оның бетінде жұмыс бағасы, қалай істейтініміз және жиі сұрақтарға жауап бар. Қосалқы бөлшектер бөлек, нақты соманы шебер диагностикадан кейін айтады.')
+
+
 # ---------- «Где стучит?» ----------
 
 T2 = {
@@ -852,6 +882,8 @@ VT_CSS = """
 .vt-brands p{margin:16px 0 0!important;font-size:14px;color:#8792A3}
 @media (max-width:899px){.vt-brands h2{font-size:22px}.vt-brands ul{margin-top:16px!important;gap:6px}.vt-brands li{padding:6px 11px;font-size:13.5px}}
 .prow .plink{color:#EEF2F7!important;border-bottom-color:rgba(238,242,247,.25)}
+.prow-go{grid-template-columns:minmax(0,1fr) auto!important}
+.pgo{font-size:15px;font-weight:600;color:#5AAEF2!important;white-space:nowrap;text-decoration:none}.pgo:hover{color:#8CC8FF!important}
 @media (max-width:899px){.bb{position:fixed;left:0;right:0}footer,.ft{padding-bottom:110px!important}}
 .topbar{background:#080E1A;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:#A9B4C2}
 .tb-in{max-width:1280px;margin:0 auto;padding:7px 48px;display:flex;gap:24px}
@@ -922,10 +954,7 @@ def insert_map(soup, name, lang, url_for, wa):
                 secs = soup.find_all('section')
                 (secs[-1].insert_before if len(secs) > 1 else secs[0].insert_after)(blk)
         if name == 'Services.dc.html':
-            h1 = soup.find('h1')
-            lead = h1.find_next('p') if h1 else None
-            if lead:
-                lead.append(ASOF[0 if lang == 'ru' else 1])
+            services_list(soup, lang)
         one_tone(soup, lang)
     anchor = None
     if name in ('Main.dc.html', 'Mobile.dc.html'):
@@ -994,6 +1023,12 @@ def insert_map(soup, name, lang, url_for, wa):
         theme_home(soup, phone)
     else:
         anchor.insert_after(new)
+        if name == 'Services.dc.html':
+            i = 0 if lang == 'ru' else 1
+            for x in soup.select('.km-price'):
+                x.decompose()
+            for t in soup.find_all(string=T2['sub'][i]):
+                t.replace_with(T2['sub_home'][i])
 
 
 # ---------- home: light paper between the dark moments (hero, the car map, the booking form) ----------
@@ -1136,12 +1171,25 @@ def footer_mobile(doc, kk, lg, arts):
             f'<a href="/{lg}/privacy/">{t("Политика конфиденциальности", "Құпиялылық саясаты")}</a></div></div>')
 
 
+SVC_NAMES = [('Услуги и цены на ремонт ходовой в Алматы', 'Услуги по ремонту ходовой в Алматы'),
+             ('Услуги и цены на ремонт ходовой', 'Услуги по ремонту ходовой'),
+             ('Цена работы «от», запчасти отдельно. Точную сумму мастер называет после диагностики, до начала ремонта. Цены на октябрь 2026. Алматы, Аносова 91.',
+              'Диагностика на вибростенде, рулевые рейки, подвеска, ступицы и ШРУС, тормоза, радиаторы и двигатель. Цены и подробности на странице каждой услуги. Алматы, Аносова 91.'),
+             ('Алматыда жүріс бөлігін жөндеу қызметтері мен бағалары', 'Алматыда жүріс бөлігін жөндеу қызметтері'),
+             ('Жүріс бөлігін жөндеу қызметтері мен бағалары', 'Жүріс бөлігін жөндеу қызметтері'),
+             ('Жұмыс бағасы «бастап», қосалқы бөлшектер бөлек. Нақты соманы шебер диагностикадан кейін, жөндеу басталғанға дейін айтады. Алматы, Аносов 91.',
+              'Вибростендте диагностика, рульдік рейкалар, аспа, күпшек және ШРУС, тежегіштер, радиаторлар және қозғалтқыш. Бағалар мен толық сипаттама әр қызмет бетінде. Алматы, Аносов 91.'),
+             ('>Услуги и цены<', '>Услуги<'), ('>Қызметтер мен бағалар<', '>Қызметтер<')]
+
+
 def prefix(doc):
     """Serve the whole v2 build under /v2/: rewrite root-relative links and assets."""
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
     for a, b in NAVY:
         doc = re.sub(a, b, doc, flags=re.I)
     kk = '<html lang="kk"' in doc[:400]
+    for a, b in SVC_NAMES:
+        doc = doc.replace(a, b)
     bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
