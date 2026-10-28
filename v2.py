@@ -286,6 +286,13 @@ JS = r'''
   [].forEach.call(btns,function(x){x.setAttribute('aria-pressed',x.getAttribute('data-node')===id?'true':'false')});
   [].forEach.call(panels,function(p){p.hidden=p.getAttribute('data-panel')!==id})})});
 });
+[].forEach.call(document.querySelectorAll('[data-km-m]'),function(km){
+ var its=[].slice.call(km.querySelectorAll('.km-it')),dots=km.querySelectorAll('.km-dot'),more=km.querySelector('.km-more');
+ its.forEach(function(d){d.addEventListener('toggle',function(){if(!d.open){if(!its.some(function(x){return x.open}))[].forEach.call(dots,function(b){b.setAttribute('aria-pressed','false')});return}
+  its.forEach(function(x){if(x!==d)x.open=false});
+  [].forEach.call(dots,function(b){b.setAttribute('aria-pressed',b.getAttribute('data-node')===d.getAttribute('data-node')?'true':'false')})})});
+ if(more)more.addEventListener('click',function(){km.classList.add('km-all-on');more.remove()});
+});
 // carousels with dots: the active dot follows the swipe
 [].forEach.call(document.querySelectorAll('[data-dots]'),function(r){var d=r.parentNode.querySelector('.dots');if(!d)return;var dots=d.children;
  r.addEventListener('scroll',function(){var w=r.children[0].getBoundingClientRect().width+12,k=Math.min(dots.length-1,Math.round(r.scrollLeft/w));
@@ -302,6 +309,32 @@ JS = r'''
   if(b.offsetParent!==null||getComputedStyle(b).display!=='none')io.observe(b)});
 })();
 '''
+
+
+def km_phone(lang, url_for, wa, sid, prices, dots, head, tail):
+    """Phones: the drawing on top, then a short list of parts; a tapped row opens in place, five rows show first."""
+    i = 0 if lang == 'ru' else 1
+    from urllib.parse import quote
+    items = []
+    for n, (key, x, y, title, text, price, links) in enumerate(NODES):
+        t = html.escape(title[i])
+        rows = ''.join(f'<a href="{url_for(lang, b)}">{html.escape(l[i])}</a>' for b, *l in links)
+        msg = quote(T2['wa'][i].replace('{x}', title[i].lower() if lang == 'ru' else title[i]), safe='')
+        extra = ''
+        if prices:
+            p = f'{price:,}'.replace(',', ' ') + ' ₸'
+            extra = f'<div class="km-pb"><span class="km-price">{T2["from"][i].format(p=p)}</span><a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a></div>'
+        items.append(f'<details class="km-it{" km-x" if n >= 5 else ""}" data-node="{key}"><summary><span class="km-t">{t}</span>'
+                     f'<span class="km-s">{html.escape(text[i])}</span></summary><div class="km-bd">{rows}{extra}</div></details>')
+    more = ('Показать все узлы', 'Барлық түйіндерді көрсету')[i]
+    dots_off = ''.join(dots).replace('aria-pressed="true"', 'aria-pressed="false"')
+    return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec km-m" data-km-m style="padding: 48px 16px 24px"><div>'
+            f'<div class="km-hd"><h2>{T2["h"][i]}</h2></div>'
+            f'<div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{dots_off}</div></div>'
+            f'<div class="km-acc">{"".join(items)}<button type="button" class="km-more">{more}</button></div>'
+            f'<span class="km-unsure">{head}? <a href="{url_for(lang, "svc-vibrostand.dc.html")}">{tail.strip()}</a></span>'
+            + ('' if prices else f'<a class="km-all" href="{url_for(lang, "Services.dc.html")}">{T2["all"][i]}</a>')
+            + '</div></section>')
 
 
 def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
@@ -323,6 +356,8 @@ def knock_map(lang, url_for, wa, phone=False, sid='', prices=True):
                       f'<div class="km-links">{rows}</div>' + (f'<a class="btn btn-p" href="{wa}?text={msg}">{T2["book"][i]}</a>' if prices else '') + '</div>')
     unsure = T2['unsure'][i]
     head, tail = unsure.rsplit('?', 1) if '?' in unsure else ('', unsure)
+    if phone:
+        return km_phone(lang, url_for, wa, sid, prices, dots, head, tail)
     return (f'<section{f' id="{sid}"' if sid else ''} class="km-sec" data-km style="padding: {"56px 16px 16px" if phone else "120px 0 0"}"><div class="{"" if phone else "w"}">'
             f'<div class="km-hd"><h2>{T2["h"][i]}</h2><p>{T2["sub" if prices else "sub_home"][i]}</p></div>'
             f'<div class="km"><div><div class="km-fig" role="group" aria-label="{T2["aria"][i]}">{CAR}<div class="km-dots">{"".join(dots)}</div></div>'
@@ -403,6 +438,43 @@ BRANDS = {
     'faq': ('Легковые, кроссоверы, джипы и пикапы, в том числе китайские. Грузовые и спецтехнику не берём.',
             'Жеңіл көліктер, кроссоверлер, джиптер мен пикаптар, оның ішінде қытайлық. Жүк көліктері мен арнайы техниканы қабылдамаймыз.'),
 }
+
+
+def merge_contacts(soup, phone):
+    """Home: the booking form and the «Ждём на Аносова» block become one section, address next to the form."""
+    book = soup.find(id='book')
+    addr = book.find_next_sibling('section') if book else None
+    if addr is None:
+        return
+    if phone:
+        ps = addr.find_all('p', recursive=False)
+        intro = book.find('p')
+        for p in reversed(ps):
+            intro.insert_after(p)
+        form = book.find('form')
+        for el in reversed([c for c in addr.find_all(recursive=False) if c.name != 'h2']):
+            form.insert_after(el)
+    else:
+        cols = addr.select('.g2 > div')
+        h2 = cols[0].find('h2')
+        rows = h2.find_next_sibling('div')
+        acts = rows.find_next_sibling('div')
+        for row in rows.find_all('div', recursive=False):
+            if row.find('a', href=re.compile('wa\\.me')):
+                row.decompose()
+        ol = book.find('ol')
+        if ol:
+            ol.replace_with(rows)
+        if acts:
+            rows.insert_after(acts)
+        wrap = soup.new_tag('div', attrs={'class': 'w', 'id': 'contacts', 'style': 'margin-top: 56px'})
+        cols[1]['style'] = 'display: flex; flex-direction: column; gap: 18px'
+        m = cols[1].find('div', style=re.compile('height: 460px'))
+        if m:
+            m['style'] = m['style'].replace('height: 460px', 'height: 340px')
+        wrap.append(cols[1])
+        book.find(class_='g2').insert_after(wrap)
+    addr.decompose()
 
 
 def brand_chips(soup, lang, phone):
@@ -618,7 +690,7 @@ def vibro_page(soup, lang, phone):
                 li.string = x[i]
                 when.find('ul').append(li)
         when.insert_after(BeautifulSoup(stop_sec, 'html.parser'))
-    dets = soup.find_all('details')
+    dets = [d for d in soup.find_all('details') if 'km-it' not in (d.get('class') or [])]
     if dets:
         for q, a in V['faq']:
             dets[-1].parent.append(_faq_item(dets[-1], q[i], a[i]))
@@ -658,6 +730,22 @@ def one_tone(soup, lang):
 VT_CSS = """
 .psub{color:#8792A3!important}
 .mh-r .st,.dh-tel .st{display:none!important}
+.km-m .km-hd{margin-bottom:16px}
+.km-m .km-fig{padding:10px 6px 4px}.km-m .km-dots{inset:10px 6px 4px}
+.km-acc{margin-top:14px;border-top:1px solid rgba(255,255,255,.1)}
+.km-it{border-bottom:1px solid rgba(255,255,255,.1)}
+.km-it summary{list-style:none;cursor:pointer;display:grid!important;justify-content:stretch!important;grid-template-columns:minmax(0,1fr) 20px;column-gap:12px;row-gap:3px;padding:14px 0;align-items:center}
+.km-it summary::-webkit-details-marker{display:none}
+.km-it summary::after{content:'';grid-column:2;grid-row:1/span 2;width:9px;height:9px;border-right:2px solid #8792A3;border-bottom:2px solid #8792A3;transform:rotate(45deg);justify-self:center;margin-top:-4px;transition:transform .2s}
+.km-it[open] summary::after{transform:rotate(225deg);margin-top:4px;border-color:#5AAEF2}
+.km-t{grid-column:1;grid-row:1;font-size:16px;font-weight:600;color:#EEF2F7}.km-it[open] .km-t{color:#5AAEF2}
+.km-s{grid-column:1;grid-row:2;font-size:14px;line-height:1.45;color:#8792A3}
+.km-bd{display:flex;flex-direction:column;gap:2px;padding:0 0 14px}
+.km-bd>a{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;background:#131E33;color:#EEF2F7!important;font-weight:600;font-size:15px;margin-top:6px}
+.km-pb{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px}.km-pb .km-price{font-size:20px}.km-pb .btn{width:auto!important;min-height:44px}
+.km-x{display:none}.km-all-on .km-x{display:block}
+.km-more{width:100%;min-height:46px;margin-top:12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#EEF2F7;font:600 15px 'Inter',system-ui,sans-serif;cursor:pointer}
+.km-m .km-unsure{display:block;margin-top:16px}.km-m .km-all{margin-top:16px}
 .vt-brands h2{font:800 clamp(24px,2.4vw,32px)/1.15 'Geologica',system-ui,sans-serif;letter-spacing:-.01em;margin:0;max-width:760px}
 .vt-brands ul{list-style:none;margin:22px 0 0!important;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .vt-brands li{padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font-size:15px;font-weight:500;color:#D5DCE5;white-space:nowrap}
@@ -750,6 +838,7 @@ def insert_map(soup, name, lang, url_for, wa):
     to_dots(soup)
     if home:
         brand_chips(soup, lang, phone)
+        merge_contacts(soup, phone)
     new = BeautifulSoup(knock_map(lang, url_for, wa, name == 'Mobile.dc.html', 'symptom' if name == 'Main.dc.html' else '', prices=not home), 'html.parser')
     if home:
         anchor.extract()
@@ -784,18 +873,8 @@ def insert_map(soup, name, lang, url_for, wa):
             for t in soup.find_all(string=lambda x: x and x.strip() in (ru, _KK.get(ru, ru))):
                 t.replace_with(t.replace(t.strip(), pair[i]))
         if phone:
-            # reviews read as a short list, not one more carousel
-            rail = soup.find(attrs={'data-dots': True})
-            if rail:
-                del rail['data-dots']
-                rail['class'] = ['stack']
-                for extra in rail.find_all(recursive=False)[3:]:
-                    extra.decompose()
-                d = rail.parent.find(class_='dots')
-                if d:
-                    d.decompose()
             # the price question, answered with a link: prices live on the services page
-            faq = soup.find('details')
+            faq = next((d for d in soup.find_all('details') if 'km-it' not in (d.get('class') or [])), None)
             if faq:
                 q, a, link = PRICE_FAQ[i]
                 faq.parent.append(BeautifulSoup(
