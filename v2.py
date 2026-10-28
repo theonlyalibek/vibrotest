@@ -232,12 +232,12 @@ CSS = '''
 .km-dot{width:14px;height:14px;margin:-7px 0 0 -7px;font-size:0}.km-dot::before{inset:2px;box-shadow:none;opacity:.55}.km-dot::after{display:none}
 .km-dot[aria-pressed=true]{width:30px;height:30px;margin:-15px 0 0 -15px;font-size:11px}.km-dot[aria-pressed=true]::before{inset:5px;opacity:1;background:#FFFFFF;box-shadow:0 0 0 6px rgba(0,113,188,.35)}
 .km-dot[aria-pressed=true]::after{display:block;inset:5px}
-.km-list{gap:8px;margin-top:14px}
-.km-chip{min-height:44px;padding:0 16px;font-size:15px}.km-chip b{font-size:13px}
+.km-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.km-chip{min-height:40px;padding:6px 10px;font-size:13.5px;line-height:1.2;justify-content:center;text-align:center;border-radius:10px}.km-chip b{font-size:13px}
 .km-swipe{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:#6F7B8B}
-.km-side{margin-top:14px}
+.km-side{margin-top:12px}
 .km-panel{padding:22px 20px;gap:12px}.km-panel h3{font-size:22px}.km-price{font-size:24px}.km-panel .btn{width:100%}
-.km-unsure{margin-top:14px;font-size:14px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
+.km-unsure{margin-top:12px;font-size:14px}.km-hd{margin-bottom:18px}.km-hd p{font-size:15px}}
 
 .ft-card{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:64px;align-items:start}
 .ft-main{display:flex;flex-direction:column;gap:22px}
