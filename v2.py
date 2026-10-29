@@ -1131,6 +1131,7 @@ VT_CSS = """
 .mh-r .st,.dh-tel .st{display:none!important}
 .ft-arts{margin-top:28px;padding-top:24px;border-top:1px solid rgba(255,255,255,.06)}
 .ft-arts>div{margin-top:10px;columns:3;column-gap:40px}.ft-arts a{display:block;break-inside:avoid;padding:4px 0;font-size:14px;color:#A9B4C2}.ft-arts a:hover{color:#EEF2F7}
+aside[style*="sticky"]{top:109px!important}
 @media (max-width:899px){.ft-arts,.ft-ct,.ft-bot{display:none!important}}
 .ftm{display:none}
 @media (max-width:899px){.ftm{display:block;margin-top:14px}.ft-top nav{display:none!important}
