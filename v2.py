@@ -894,7 +894,49 @@ def price(board, lang, p):
 
 def meta(board, lang, t, desc, price=None):
     t, desc = _meta(board, lang, t, desc, price)
-    return short_title(t), desc
+    i = lang != 'ru'
+    return TITLE.get(board, {}).get(i) or short_title(t), DESC.get(board, ('', ''))[i] or desc
+
+
+# search shows about 140–160 characters: the short ones say what we do, the symptom and the price
+DESC = {
+    'Services.dc.html': ('Ремонт подвески, рулевых реек, тормозов и ШРУС, диагностика ходовой на вибростенде и двигателя сканером. Цены «от» на каждой странице. Алматы, Аносова 91.', ''),
+    'Blog.dc.html': ('Статьи мастера Виктора Новикова: откуда стук в подвеске, когда менять амортизаторы и детали, как проверить машину перед покупкой. Алматы, Аносова 91.', ''),
+    'svc-steering-rack.dc.html': (
+        'Стук, люфт или течь рулевой рейки: ремонт и реставрация механических, гидравлических и электрических реек. От 80 000 ₸. Алматы, Аносова 91.',
+        'Рульдегі тықыл, саңылау немесе ағу: механикалық, гидравликалық және электрлік рейкаларды жөндеу және қалпына келтіру. 80 000 ₸ бастап. Алматы, Аносов 91.'),
+    'svc-suspension.dc.html': ('Стук, скрип или увод в сторону: меняем рычаги, сайлентблоки, стойки стабилизатора, амортизаторы и опорные чашки. От 3 000 ₸. Алматы, Аносова 91.', ''),
+    'svc-brakes.dc.html': (
+        'Скрип, биение в руль или педаль, длинный тормозной путь: замена тормозных колодок и дисков. От 5 000 ₸, запчасти отдельно. Алматы, Аносова 91.',
+        'Сықыр, рульге немесе педальға соғу, ұзақ тежелу жолы: тежегіш қалыптары мен дискілерін ауыстыру. 5 000 ₸ бастап, бөлшектер бөлек. Алматы, Аносов 91.'),
+    'svc-cooling.dc.html': ('', 'Антифриз ағады, қозғалтқыш қызады немесе пеш суық жел үрлейді: радиаторды, келте құбырлар мен шлангтарды ауыстырамыз. 3 000 ₸ бастап. Алматы, Аносов 91.'),
+    'svc-engine.dc.html': ('Загорелся Check Engine, двигатель троит или машина потеряла тягу: компьютерная диагностика двигателя сканером. От 5 000 ₸. Алматы, Аносова 91.', ''),
+    'art-before-buying.dc.html': ('Как проверить ходовую подержанной машины перед покупкой: что посмотреть самому, а что покажут вибростенд и сканер двигателя. Алматы, Аносова 91.', ''),
+    'l-saylentbloki.dc.html': ('Сайлентблоки рычагов, подрамника и плавающие сайлентблоки задней подвески: стук и скрип на кочках. Замена от 3 000 ₸. Алматы, Аносова 91.', ''),
+    'l-amortizatory.dc.html': ('', 'Амортизаторлар, тірек кеселері мен тірек подшипниктерін ауыстыру: машина тербеліп, кедір-бұдырда соқса. 10 000 ₸ бастап. Алматы, Аносов 91.'),
+    'l-stabilizator.dc.html': (
+        'Мелкий стук в подвеске на кочках чаще всего дают стойки и втулки стабилизатора. Замена от 3 000 ₸, запчасти отдельно. Алматы, Аносова 91.',
+        'Аспадағы ұсақ тықылдың ең жиі себебі стабилизатор тіректері мен втулкалары. Ауыстыру 3 000 ₸ бастап, бөлшектер бөлек. Алматы, Аносов 91.'),
+    'l-rychagi.dc.html': ('', 'Сайлентблоктары мен шар тірегі бар алдыңғы және артқы рычагтарды ауыстыру: кедір-бұдырдағы тықылдың жиі себебі. 5 000 ₸ бастап. Алматы, Аносов 91.'),
+    'l-tyagi.dc.html': ('', 'Рульдегі тықылды көбіне рейка емес, тартқыштар немесе ұштықтар береді. Оларды ауыстыру 3 000 ₸ бастап, бөлшектер бөлек. Алматы, Аносов 91.'),
+    'l-stupica.dc.html': ('', 'Жылдамдықпен бірге күшейетін гуіл көбіне күпшек подшипнигінен шығады. Подшипникті ауыстыру 10 000 ₸ бастап, бөлшектер бөлек. Алматы, Аносов 91.'),
+    'l-pered-pokupkoy.dc.html': (
+        'Перед покупкой подержанной машины: ходовая на вибростенде и двигатель сканером за один приезд, заключение на руки. От 12 000 ₸. Алматы, Аносова 91.',
+        'Пайдаланылған көлікті сатып алар алдында: бір келгенде жүріс бөлігі вибростендте, қозғалтқыш сканермен тексеріледі. 12 000 ₸ бастап. Алматы, Аносов 91.'),
+    'art-gul.dc.html': (
+        'Гул, который растёт вместе со скоростью, чаще всего дают подшипник ступицы или шины. Разбираем, как отличить одно от другого. Алматы, Аносова 91.',
+        'Жылдамдықпен бірге күшейетін гуілді көбіне күпшек подшипнигі немесе шиналар береді. Біреуін екіншісінен қалай ажыратуға болады. Алматы, Аносов 91.'),
+    'art-amortizatory.dc.html': (
+        'Амортизатор изнашивается постепенно, и водитель привыкает. 7 признаков износа, которые можно заметить самому, и когда пора менять. Алматы, Аносова 91.',
+        'Амортизатор біртіндеп тозады, жүргізуші оған үйреніп кетеді. Өзіңіз байқай алатын тозудың 7 белгісі және ауыстыру уақыты. Алматы, Аносов 91.'),
+    'contacts.dc.html': ('', 'VibroTest: Алматы, Аносов 91, Тастақ-3 ш/а. Күн сайын 09:30–19:00. Вибростендте жүріс бөлігін диагностикалау және аспаны жөндеу, WhatsApp арқылы жазылу.'),
+}
+# Kazakh titles the shortener cannot cut without losing the meaning
+TITLE = {
+    'art-rack.dc.html': {True: 'Рульдік рейканы қалпына келтіру ме, ауыстыру ма?'},
+    'art-lixiang-l7.dc.html': {True: 'LiXiang L7 кейсі: рычагтар, рейка, тартқыштар мен ұштықтар'},
+    'art-skrip.dc.html': {True: 'Кедір-бұдырда аспа сықырлайды: себебін қалай табу керек'},
+}
 
 
 def short_title(t, n=60):
@@ -1242,6 +1284,26 @@ section.lt.lt-white{background:linear-gradient(180deg,#0B1220 0,#FFFFFF 72px,#FF
 """
 
 
+ENTRANCE = (('Вход в VibroTest на Аносова, 91: синяя вывеска VIBROTEST.KZ, рядом Viton и Lixiangshop',
+             'Ищите синюю вывеску VIBROTEST.KZ: она слева, рядом с Viton и Lixiangshop, на первом этаже.'),
+            ('Аносов, 91-дегі VibroTest кіреберісі: көк VIBROTEST.KZ маңдайшасы, қасында Viton және Lixiangshop',
+             'Көк VIBROTEST.KZ маңдайшасын іздеңіз: ол сол жақта, Viton мен Lixiangshop қасында, бірінші қабатта.'))
+
+
+def entrance_photo(soup, lang):
+    """Contacts: the real storefront, so people recognise the place from the street."""
+    alt, cap = ENTRANCE[lang != 'ru']
+    grid = soup.find('h1').find_next('div', class_='g2')
+    if grid is None:
+        return
+    grid.insert_after(BeautifulSoup(
+        f'<figure style="margin: 8px 0 0; display: flex; flex-direction: column; gap: 12px">'
+        f'<img src="/img/ph-vhod-800.webp" srcset="/img/ph-vhod-800.webp 800w, /img/ph-vhod-1600.webp 1280w" '
+        f'sizes="(max-width: 1100px) 100vw, 1100px" width="1280" height="960" alt="{alt}" loading="lazy" decoding="async" '
+        f'style="width: 100%; height: auto; border-radius: 18px; display: block">'
+        f'<figcaption style="font-size: 15px; color: #A9B4C2">{cap}</figcaption></figure>', 'html.parser'))
+
+
 def insert_map(soup, name, lang, url_for, wa):
     """Home: replaces the «Что беспокоит?» picker (one tool, not two). Services: right after the hero."""
     if name.startswith(('svc-', 'l-')) or name in PHONE_HERO:
@@ -1255,6 +1317,8 @@ def insert_map(soup, name, lang, url_for, wa):
         body = soup.find('article', class_='art')
         if body is not None and body.find_parent('section') is not None:
             lighten(body.find_parent('section'), 'white')
+    elif name == 'contacts.dc.html':
+        entrance_photo(soup, lang)
     elif name.startswith(('svc-', 'l-')) or name == 'Mobile-service.dc.html':
         service_extras(soup, 'svc-vibrostand.dc.html' if name == 'Mobile-service.dc.html' else name, lang, url_for)
     # the address block sits right above the booking form: its own «Записаться» button only repeats the form
@@ -1514,6 +1578,39 @@ SVC_NAMES = [('Услуги и цены на ремонт ходовой в Ал
              ('Көлік дөңгелектерімен платформаларға кіреді.', 'Көлікті көтергішпен көтеріп, дөңгелектерімен стенд платформаларына қояды.')]
 
 
+_DIMS = {}
+
+
+def _dims(src):
+    """Intrinsic size of a built image, read from its source file (None when it is not ours)."""
+    if src not in _DIMS:
+        from PIL import Image
+        m = re.match(r'/img/(?:(ph-)?([a-z0-9-]+?))(?:-(\d+))?\.(?:webp|jpg|png)$', src)
+        f = None
+        if src.startswith('/media/'):
+            f = ROOT / src.lstrip('/')
+        elif m:
+            f = ROOT / 'img' / ('svc/' if m.group(1) else '') / (m.group(2) + '.jpg')
+        try:
+            w, h = Image.open(f).size
+            n = int(m.group(3)) if m and m.group(3) else w
+            _DIMS[src] = (min(n, w), round(h * min(n, w) / w))
+        except Exception:
+            _DIMS[src] = None
+    return _DIMS[src]
+
+
+def img_dims(doc):
+    """width/height on the cropped photos (their CSS sets both sides), so the browser reserves the box before loading."""
+    def one(m):
+        tag = m.group(0)
+        if ' width=' in tag or not ('class="cover"' in tag or '/media/' in tag):
+            return tag
+        d = _dims(re.search(r'src="([^"]+)"', tag).group(1))
+        return tag if d is None else tag[:4] + f' width="{d[0]}" height="{d[1]}"' + tag[4:]
+    return re.sub(r'<img [^>]*>', one, doc)
+
+
 def prefix(doc):
     """Serve the whole v2 build under /v2/: rewrite root-relative links and assets."""
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
@@ -1526,9 +1623,10 @@ def prefix(doc):
     alt = PH['svc-vibrostand'][kk]
     doc = re.sub(r'<img [^>]*/img/vt-01-[^>]*>', lambda m: re.sub(r'alt="[^"]*"', f'alt="{alt}"', m.group(0)).replace('/img/vt-01-', '/img/ph-svc-vibrostand-'), doc)
     doc = doc.replace('/img/vt-01.jpg', '/img/ph-svc-vibrostand.jpg')
+    doc = img_dims(doc)
     # the frames are tall and crop the 3:2 photo, so half the screen is not enough pixels: take the large file on desktop
     # (the blog's small cards keep their own sizes)
-    doc = re.sub(r'<img [^>]*/img/ph-[^>]*>', lambda m: m.group(0) if '240px' in m.group(0) else re.sub(r'sizes="[^"]*"', 'sizes="(max-width: 900px) 150vw, 1600px"', m.group(0)), doc)
+    doc = re.sub(r'<img [^>]*/img/ph-[^>]*>', lambda m: m.group(0) if '240px' in m.group(0) or 'ph-vhod' in m.group(0) else re.sub(r'sizes="[^"]*"', 'sizes="(max-width: 900px) 150vw, 1600px"', m.group(0)), doc)
     bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
