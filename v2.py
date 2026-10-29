@@ -1324,6 +1324,8 @@ def prefix(doc):
     alt = PH['svc-vibrostand'][kk]
     doc = re.sub(r'<img [^>]*/img/vt-01-[^>]*>', lambda m: re.sub(r'alt="[^"]*"', f'alt="{alt}"', m.group(0)).replace('/img/vt-01-', '/img/ph-svc-vibrostand-'), doc)
     doc = doc.replace('/img/vt-01.jpg', '/img/ph-svc-vibrostand.jpg')
+    # the frames are tall and crop the 3:2 photo, so half the screen is not enough pixels: take the large file on desktop
+    doc = re.sub(r'<img [^>]*/img/ph-[^>]*>', lambda m: re.sub(r'sizes="[^"]*"', 'sizes="(max-width: 900px) 150vw, 1600px"', m.group(0)), doc)
     bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
