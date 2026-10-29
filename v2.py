@@ -53,11 +53,40 @@ def pages():
     return out
 
 
+ICONS = (32, 96, 180, 192, 512)
+ICON_LINKS = ('<link rel="icon" href="/img/favicon.ico" sizes="48x48">'
+              '<link rel="icon" href="/img/icon-32.png" type="image/png" sizes="32x32">'
+              '<link rel="icon" href="/img/icon-96.png" type="image/png" sizes="96x96">'
+              '<link rel="apple-touch-icon" href="/img/icon-180.png">'
+              '<link rel="manifest" href="/img/site.webmanifest"><meta name="theme-color" content="#0B1220">')
+
+
 def copy_media(out):
     """Real photos and videos from the shop, served only by the v2 build."""
     import shutil
     shutil.copytree(ROOT / 'media', out / 'media', dirs_exist_ok=True)
     from PIL import Image
+    # the full icon set: the mark (left square of the logo) on a dark tile, as the root build draws favicon.png
+    logo = Image.open(ROOT / 'img' / 'logo-blue.png').convert('RGBA')
+    mark = logo.crop((0, 0, logo.height, logo.height))
+    (out / 'img').mkdir(parents=True, exist_ok=True)
+
+    def tile(size):
+        t = Image.new('RGBA', (size, size), (10, 13, 18, 255))
+        m = mark.resize((round(size * .8), round(size * .8)), Image.LANCZOS)
+        t.alpha_composite(m, ((size - m.width) // 2, (size - m.height) // 2))
+        return t
+    face = Image.open(ROOT / 'img' / 'author' / 'viktor-novikov.jpg').convert('RGB')
+    face.save(out / 'img' / 'viktor-novikov.jpg', 'JPEG', quality=86)
+    for w in (96, 192):
+        face.resize((w, w), Image.LANCZOS).save(out / 'img' / f'viktor-novikov-{w}.webp', 'WEBP', quality=82)
+    for size in ICONS:
+        tile(size).save(out / 'img' / f'icon-{size}.png', optimize=True)
+    tile(48).save(out / 'img' / 'favicon.ico', sizes=[(16, 16), (32, 32), (48, 48)])
+    (out / 'img' / 'site.webmanifest').write_text(json.dumps({
+        'name': 'VibroTest.kz', 'short_name': 'VibroTest', 'start_url': PREFIX + '/ru/', 'display': 'browser',
+        'background_color': '#0B1220', 'theme_color': '#0B1220',
+        'icons': [{'src': f'{PREFIX}/img/icon-{n}.png', 'sizes': f'{n}x{n}', 'type': 'image/png'} for n in (192, 512)]}), encoding='utf-8')
     for p in sorted((ROOT / 'img' / 'svc').glob('*.jpg')):
         im = Image.open(p).convert('RGB')
         for w in (800, 1600):
@@ -659,8 +688,19 @@ def patch_graph(graph, base, lang):
         graph.append({'@type': 'Person', '@id': pid, 'name': 'Виктор Новиков',
                       'jobTitle': 'основатель VibroTest и Viton.kz' if lang == 'ru' else 'VibroTest және Viton.kz негізін қалаушы',
                       'worksFor': [{'@id': f'{base}/#vibrotest'}, {'@type': 'AutoRepair', 'name': 'Viton.kz', 'url': 'https://viton.kz/ru/'}],
-                      'knowsAbout': ['диагностика ходовой', 'вибростенд', 'ремонт подвески', 'рулевое управление', 'чистка форсунок']})
+                      'knowsAbout': ['диагностика ходовой', 'вибростенд', 'ремонт подвески', 'рулевое управление', 'чистка форсунок'],
+                      'image': f'{base}/img/viktor-novikov.jpg', 'description': VIKTOR[lang != 'ru'],
+                      'sameAs': ['https://viton.kz/ru/'],
+                      'subjectOf': {'@type': 'NewsArticle', 'url': TENGRI, 'publisher': {'@type': 'Organization', 'name': 'Tengrinews.kz'}}})
     return graph
+
+
+# what viton.kz itself says about its founder
+VIKTOR = ('Основатель Viton.kz и VibroTest, предприниматель из Алматы. В автосфере с 16 лет: был помощником мастера в автосервисе, '
+          'потом продавал запчасти. В 2018 году запустил чистку форсунок Viton, затем сеть автосервисов и диагностику ходовой на вибростенде.',
+          'Viton.kz және VibroTest негізін қалаушы, Алматыдан шыққан кәсіпкер. Автосалада 16 жасынан: автосервисте шебердің көмекшісі болған, '
+          'кейін қосалқы бөлшек сатқан. 2018 жылы Viton форсунка тазалауын ашты, кейін автосервис желісін және вибростендте жүріс бөлігін диагностикалауды іске қосты.')
+TENGRI = 'https://tengrinews.kz/tengriautouseful/avtomobili-lomayutsya-iz-za-benzina-mogut-kazahstantsyi-607224/'
 
 
 def merge_contacts(soup, phone):
@@ -759,6 +799,24 @@ def price(board, lang, p):
 
 
 def meta(board, lang, t, desc, price=None):
+    t, desc = _meta(board, lang, t, desc, price)
+    return short_title(t), desc
+
+
+def short_title(t, n=60):
+    """Search shows about 60 characters: drop the address, the brand, then the price, before the words people search for."""
+    if len(t) > n:
+        t = re.sub(r', Аносова? 91$', '', t).replace('Алматыда вибростендте жүріс бөлігін диагностикалау', 'Алматыда жүріс бөлігін вибростендте тексеру')
+    if len(t) > n:
+        t = t.removesuffix(' — VibroTest')
+    if len(t) > n:
+        t = t.replace(', 25–40 минут', '')
+    if len(t) > n:
+        t = re.sub(r',? (от [\d ]+ ₸|[\d ]+ ₸ бастап)', '', t)
+    return t
+
+
+def _meta(board, lang, t, desc, price=None):
     m = META.get(board)
     if m:
         return m[0 if lang == 'ru' else 1]
@@ -1036,7 +1094,18 @@ VT_CSS = """
 """
 CSS += VT_CSS
 CSS += """
+.lt p,.lt li,.lt .ans{color:#3A4556!important}
+.lt .toc{background:#F1F4F7!important;border-color:#DDE3EA!important}.lt .toc b{color:#0F1722!important}.lt .toc a{color:#0067AC!important}
+.lt .readmore li,.lt .artlist li{border-color:rgba(15,23,34,.12)!important}.lt .readmore a,.lt .artlist a{color:#0F1722!important}
+.lt p a,.lt li a{color:#0067AC!important}
 .mph{display:none}
+.mh-r{gap:8px!important}
+.mlsw{display:inline-flex;height:32px;padding:3px;border-radius:10px;background:rgba(255,255,255,.08)}
+.mlsw a{display:inline-flex;align-items:center;padding:0 9px;border-radius:7px;font-size:12px;font-weight:800;color:#8A96A8;text-decoration:none}
+.mlsw a[aria-current]{background:#FFFFFF;color:#0B1220}
+.mrb{width:40px;height:40px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);color:#FFFFFF}
+.mrb:hover{color:#FFFFFF}
+@media (max-width:360px){.mh .logo img{height:26px;width:auto}.mlsw a{padding:0 7px}}
 @media (max-width:899px){
 .mph{display:block;position:relative;height:300px;margin:calc(-1 * clamp(18px, 2.78vw, 40px)) 0 4px;overflow:hidden;background:#131E33}
 .mph img{width:100%;height:100%;object-fit:cover;display:block}
@@ -1054,6 +1123,10 @@ def insert_map(soup, name, lang, url_for, wa):
         hero_photo(soup, name, lang)
     if any(x[0] == name for x in ALL_ARTS):
         article_extras(soup, name, lang, url_for, wa)
+        # long reading on white paper, the title stays on navy (owner's choice: light articles only)
+        body = soup.find('article', class_='art')
+        if body is not None and body.find_parent('section') is not None:
+            lighten(body.find_parent('section'), 'white')
     elif name.startswith(('svc-', 'l-')) or name == 'Mobile-service.dc.html':
         service_extras(soup, 'svc-vibrostand.dc.html' if name == 'Mobile-service.dc.html' else name, lang, url_for)
     # the address block sits right above the booking form: its own «Записаться» button only repeats the form
@@ -1335,6 +1408,22 @@ def prefix(doc):
     doc = doc.replace('<div class="ft-bot">', f'<div class="ft-arts"><span class="fc-h">{"Пайдалы" if kk else "Полезное"}</span><div>{arts}</div></div>'
                       + footer_contacts(kk) + '<div class="ft-bot">', 1)
     doc = doc.replace('<div class="ft-bot">', footer_mobile(doc, kk, lg, arts) + '<div class="ft-bot">', 1)
+    # phone header as on viton.kz: language switch and a call button next to the menu
+    sw = re.search(r'<span class="lang">(<a [^>]*>РУС</a>)<span aria-hidden="true">\|</span>(<a [^>]*>ҚАЗ</a>)</span>', doc)
+    if sw:
+        call = ('<a class="mrb" href="tel:+77474956165" aria-label="' + ('Қоңырау шалу' if kk else 'Позвонить') + '">'
+                '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg></a>')
+        doc = doc.replace('<a href="#menu" data-menu="open" class="ib"', f'<span class="mlsw">{sw.group(1)}{sw.group(2)}</span>{call}<a href="#menu" data-menu="open" class="ib"', 1)
+    doc = re.sub(r'<span style="width: (\d+)px; height: \1px; border-radius: 50%;[^"]*">ВН</span>',
+                 lambda m: f'<img src="/img/viktor-novikov-96.webp" alt="Виктор Новиков" width="{m.group(1)}" height="{m.group(1)}" '
+                           f'loading="lazy" decoding="async" style="width: {m.group(1)}px; height: {m.group(1)}px; border-radius: 50%; object-fit: cover; flex: none">', doc)
+    doc = doc.replace('<link rel="icon" href="/favicon.png" type="image/png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">', ICON_LINKS, 1)
+    # the first screen's photo starts loading with the fonts, before the parser reaches it
+    hero = re.search(r'<img [^>]*fetchpriority="high"[^>]*>', doc)
+    if hero:
+        a = lambda k: (re.search(rf' {k}="([^"]*)"', hero.group(0)) or [None, ''])[1]
+        doc = doc.replace('</head>', f'<link rel="preload" as="image" href="{a("src")}" imagesrcset="{a("srcset")}" imagesizes="{a("sizes")}" fetchpriority="high"></head>', 1)
     # hreflang with the region, as the search engines read it best
     doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
