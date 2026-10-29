@@ -1320,6 +1320,10 @@ def prefix(doc):
     kk = '<html lang="kk"' in doc[:400]
     for a, b in SVC_NAMES:
         doc = doc.replace(a, b)
+    # the old stand picture (a wheel on a floor platform) is not our stand: show the real one, two units under a lifted car
+    alt = PH['svc-vibrostand'][kk]
+    doc = re.sub(r'<img [^>]*/img/vt-01-[^>]*>', lambda m: re.sub(r'alt="[^"]*"', f'alt="{alt}"', m.group(0)).replace('/img/vt-01-', '/img/ph-svc-vibrostand-'), doc)
+    doc = doc.replace('/img/vt-01.jpg', '/img/ph-svc-vibrostand.jpg')
     bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
