@@ -7,6 +7,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 from v2_svc import SVC
 from v2_art import ART, DO_H
+from v2_art_more import MORE
 
 ROOT = Path(__file__).resolve().parent
 LANDINGS = json.loads((ROOT / 'i18n' / 'v2-pages.json').read_text(encoding='utf-8'))
@@ -587,6 +588,8 @@ def art_more(soup, art, c, i):
     fh = next((h for h in art.find_all('h2', recursive=False) if h.get_text(' ', strip=True) in faq_h), None)
     plan = BeautifulSoup(f'<h2>{DO_H[i]}</h2><ol class="doit">' + ''.join(f'<li>{e(x[i])}</li>' for x in c['do']) + '</ol>', 'html.parser')
     if fh is not None:
+        for h, paras in c.get('sec', ()):
+            fh.insert_before(BeautifulSoup(f'<h2>{e(h[i])}</h2>' + ''.join(f'<p>{e(p[i])}</p>' for p in paras), 'html.parser'))
         fh.insert_before(plan)
     box = next((d.parent for d in art.find_all('details')), None)
     if box is None:
@@ -604,7 +607,11 @@ def article_extras(soup, name, lang, url_for, wa):
     if art is None or me is None:
         return
     if name in ART:
-        art_more(soup, art, ART[name], i)
+        c = dict(ART[name])
+        if name in MORE:
+            c['faq'] = c['faq'] + MORE[name]['faq']
+            c['sec'] = MORE[name]['sec']
+        art_more(soup, art, c, i)
     hs = [h for h in art.find_all('h2', recursive=False)]
     if len(hs) >= 3:
         for n, h in enumerate(hs, 1):
