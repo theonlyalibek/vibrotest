@@ -138,6 +138,18 @@ def hero_photo(soup, name, lang):
 
 PHONE_HERO = ('Mobile.dc.html', 'Mobile-service.dc.html')
 
+# each article gets the illustration of the service it leads to, so no two cards share a picture
+ART_PH = {'art-knock.dc.html': 'l-stabilizator', 'art-yama.dc.html': 'l-rychagi', 'art-gul.dc.html': 'l-stupica',
+          'art-amortizatory.dc.html': 'l-amortizatory', 'art-uvodit.dc.html': 'svc-suspension', 'art-hrust.dc.html': 'l-shrus',
+          'art-tormoza.dc.html': 'svc-brakes', 'art-skrip.dc.html': 'l-saylentbloki', 'art-stand-vs-lift.dc.html': 'svc-vibrostand',
+          'art-steering-knock.dc.html': 'l-tyagi', 'art-rack.dc.html': 'svc-steering-rack', 'art-before-buying.dc.html': 'l-pered-pokupkoy'}
+
+
+def set_ph(img, stem, lang):
+    img['src'] = f'/img/ph-{stem}-800.webp'
+    img['srcset'] = f'/img/ph-{stem}-800.webp 800w, /img/ph-{stem}-1600.webp 1600w'
+    img['alt'] = PH[stem][lang != 'ru']
+
 
 VIDEOS = {'art-lixiang-l7.dc.html': (
     ('lixiang-l7-do', ('LiXiang L7 до ремонта: подвеска снизу', 'LiXiang L7 жөндеуге дейін: аспа астынан')),
@@ -181,6 +193,81 @@ def blog_cards(soup, lang, url_for):
         c.find(class_='meta').string = f"{a['cat'][i] or _KK.get(a['cat'][0], a['cat'][0])} · {a['min']} минут"
         c.h3.string = a['h1'][i]
         first.insert_before(c)
+
+
+BLOG = {'eyebrow': ('Полезное, статьи мастера', 'Пайдалы, шебер мақалалары'),
+        'h1': (('Полезное', 'о ходовой'), ('Жүріс бөлігі туралы', 'пайдалы')),
+        'lead': ('Разбираем частые вопросы клиентов: откуда стук, когда менять детали и как не переплатить. Пишет Виктор Новиков, основатель VibroTest.',
+                 'Клиенттердің жиі сұрақтарын талдаймыз: тықыл қайдан шығады, бөлшектерді қашан ауыстыру керек және артық төлемеудің жолы. VibroTest негізін қалаушы Виктор Новиков жазады.'),
+        'all': ('Все', 'Барлығы')}
+
+
+def _art_lead(board, lang):
+    """The article's first paragraph, the same line its page and meta description open with."""
+    src = ROOT / 'src' / board
+    if not src.exists():
+        return ''
+    h1 = BeautifulSoup(src.read_text(encoding='utf-8'), 'html.parser').find('h1')
+    p = h1.find_next('p') if h1 else None
+    t = re.sub(r'\s+', ' ', p.get_text(' ', strip=True)) if p else ''
+    return t if lang == 'ru' else (_KK.get(t) or KK_EXTRA.get(t) or '')
+
+
+def blog_page(soup, lang):
+    """«Полезное» as on viton.kz: a navy title, then every article as a card on white, with topic filters."""
+    i = 0 if lang == 'ru' else 1
+    e = html.escape
+    secs = [x for x in soup.find_all('section') if x.find_parent('section') is None]
+    cards = [a for a in soup.select('a.card') if '/blog/' in a.get('href', '')]
+    if len(secs) < 2 or not cards:
+        return
+    by_slug = {x[1]: x[0] for x in ALL_ARTS}
+    items = []
+    for a in cards:
+        img = a.find('img')
+        meta = a.find(class_='meta')
+        h = a.find(['h2', 'h3'])
+        slug = a['href'].rstrip('/').rsplit('/', 1)[-1]
+        p = a.find('p')
+        lead = p.get_text(' ', strip=True) if p else _art_lead(by_slug.get(slug, ''), lang)
+        m = re.sub(r'\s*·\s*', ', ', meta.get_text(' ', strip=True)) if meta else ''
+        m = re.sub(r'\b([234]) минут\b', r'\1 минуты', m) if lang == 'ru' else m
+        items.append((a['href'], img, m, m.split(',')[0].strip(), h.get_text(' ', strip=True) if h else '', lead))
+    cats = []
+    for it in items:
+        if it[3] and it[3] not in cats:
+            cats.append(it[3])
+    chips = f'<a href="#" role="button" data-cat="" aria-pressed="true">{BLOG["all"][i]}</a>' + ''.join(
+        f'<a href="#" role="button" data-cat="{e(c)}" aria-pressed="false">{e(c)}</a>' for c in cats)
+
+    def card(href, img, meta, cat, title, lead):
+        im = ''
+        if img is not None:
+            img = BeautifulSoup(str(img), 'html.parser').img
+            for k in ('fetchpriority',):
+                img.attrs.pop(k, None)
+            img['loading'] = 'lazy'
+            if by_slug.get(href.rstrip('/').rsplit('/', 1)[-1]) in ART_PH:
+                set_ph(img, ART_PH[by_slug[href.rstrip('/').rsplit('/', 1)[-1]]], lang)
+            if img.get('srcset'):
+                img['sizes'] = '(max-width: 899px) 240px, 640px'
+            im = f'<div class="bc-ph">{img}</div>'
+        return (f'<a class="bc" href="{href}" data-cat="{e(cat)}">{im}<div class="bc-tx"><span class="bc-m">{e(meta)}</span>'
+                f'<h3>{e(title)}</h3>' + (f'<p>{e(lead)}</p>' if lead else '') + '</div></a>')
+    h1a, h1b = BLOG['h1'][i]
+    hero = (f'<section class="bh"><div class="w"><div class="bh-l"><div class="bh-e"><span></span>{BLOG["eyebrow"][i]}</div>'
+            f'<h1 class="hd">{h1a}<br><span>{h1b}</span></h1></div><p>{BLOG["lead"][i]}</p></div></section>')
+    body = (f'<section class="lt lt-white bw"><div class="w"><div class="bf">{chips}</div>'
+            f'<div class="bg">' + ''.join(card(*it) for it in items) + '</div></div></section>')
+    secs[0].replace_with(BeautifulSoup(hero, 'html.parser'))
+    for x in secs[1:]:
+        x.decompose()
+    main_div = soup.find(class_='dv') or soup
+    main_div.append(BeautifulSoup(body + BLOG_JS, 'html.parser'))
+
+
+BLOG_JS = """<script>(function(){var b=document.querySelectorAll('.bf>a');b.forEach(function(x){x.addEventListener('click',function(e){e.preventDefault();var k=x.dataset.cat;
+b.forEach(function(y){y.setAttribute('aria-pressed',y===x?'true':'false')});document.querySelectorAll('.bg>.bc').forEach(function(a){a.classList.toggle('bf-off',!!k&&a.dataset.cat!==k)})})})})();</script>"""
 
 
 def link_rows(soup, current):
@@ -1101,12 +1188,42 @@ VT_CSS = """
 """
 CSS += VT_CSS
 CSS += """
-section.lt.lt-white{background:linear-gradient(180deg,#0B1220 0,#5E6573 60px,#E9ECF0 150px,#FFFFFF 220px,#FFFFFF calc(100% - 220px),#E9ECF0 calc(100% - 150px),#5E6573 calc(100% - 60px),#0B1220 100%)!important;padding-top:clamp(120px,12vw,170px)!important;padding-bottom:clamp(140px,14vw,200px)!important}
+section.lt.lt-white{background:linear-gradient(180deg,#0B1220 0,#5E6573 60px,#E9ECF0 150px,#FFFFFF 220px,#FFFFFF calc(100% - 220px),#E9ECF0 calc(100% - 150px),#5E6573 calc(100% - 60px),#0B1220 100%) #FFFFFF!important;padding-top:clamp(120px,12vw,170px)!important;padding-bottom:clamp(140px,14vw,200px)!important}
 .lt p,.lt li,.lt .ans{color:#3A4556!important}
 .lt .toc{background:#F1F4F7!important;border-color:#DDE3EA!important}.lt .toc b{color:#0F1722!important}.lt .toc a{color:#0067AC!important}
 .lt .readmore li,.lt .artlist li{border-color:rgba(15,23,34,.12)!important}.lt .readmore a,.lt .artlist a{color:#0F1722!important}
 .lt p a,.lt li a{color:#0067AC!important}
 .mph{display:none}
+.bh{padding:clamp(40px,5vw,72px) 0 clamp(24px,3vw,40px)!important}
+.bh .w{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;flex-wrap:wrap}
+.bh-l{display:flex;flex-direction:column;gap:24px;max-width:760px}
+.bh-e{display:inline-flex;align-items:center;gap:12px;color:#6FB9FF;font-size:14px;font-weight:600}.bh-e span{width:28px;height:1px;background:#0290FE}
+.bh h1{font-size:clamp(44px,5.6vw,80px)!important;line-height:.98!important;letter-spacing:-.03em;font-weight:800;margin:0}.bh h1 span{color:#0290FE}
+.bh p{font-size:18px;line-height:1.6;color:#AEB8C7;max-width:440px;margin:0}
+.bw .w{display:flex;flex-direction:column;gap:40px}
+.bf{display:flex;gap:10px;flex-wrap:wrap}
+.bf>a{padding:10px 18px;border-radius:999px;font-size:14px;font-weight:700;border:1px solid #CFD6E1;color:#0B1220!important;min-height:44px;display:inline-flex;align-items:center;text-decoration:none}
+.bf>a[aria-pressed="true"]{background:#0B1220;border-color:#0B1220;color:#FFFFFF!important}
+.bf-off{display:none!important}
+.bg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.bc{display:flex;flex-direction:column;overflow:hidden;border-radius:20px;border:1px solid #E3E8EF;background:#FFFFFF;color:#0B1220!important;text-decoration:none;transition:box-shadow .2s,transform .2s}
+.bc:hover{box-shadow:0 14px 34px rgba(11,18,32,.1);transform:translateY(-2px)}
+.bc-ph{height:240px;background:#E4E6E9}.bc-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.bc-tx{padding:28px;display:flex;flex-direction:column;gap:10px;flex:1}
+.bc-m{font-size:13px;color:#5B6577!important;font-weight:500}
+.bc h3{font-size:21px;line-height:1.3;font-weight:700;margin:0;color:#0B1220}
+.bc p{font-size:15px;line-height:1.6;color:#5B6577!important;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+@media (max-width:899px){
+.bh .w{gap:20px}.bh p{font-size:17px}
+.bf{flex-wrap:nowrap;overflow-x:auto;margin:0 -16px;padding:0 16px 2px;scrollbar-width:none}.bf::-webkit-scrollbar{display:none}.bf>a{flex:none}
+.bw .w{gap:24px}
+.bg{grid-template-columns:1fr;gap:10px}
+.bc{flex-direction:row;align-items:stretch;border-radius:16px}
+.bc-ph{width:108px;height:auto;min-height:108px;flex:none}
+.bc-tx{padding:12px 14px;gap:4px}
+.bc h3{font-size:15px}.bc-m{font-size:12px}
+.bc p{font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+}
 .mh-r{gap:8px!important}
 .mlsw{display:inline-flex;height:32px;padding:3px;border-radius:10px;background:rgba(255,255,255,.08)}
 .mlsw a{display:inline-flex;align-items:center;padding:0 9px;border-radius:7px;font-size:12px;font-weight:800;color:#8A96A8;text-decoration:none}
@@ -1131,6 +1248,9 @@ def insert_map(soup, name, lang, url_for, wa):
         hero_photo(soup, name, lang)
     if any(x[0] == name for x in ALL_ARTS):
         article_extras(soup, name, lang, url_for, wa)
+        cover = soup.find('img', class_='cover')
+        if name in ART_PH and cover is not None:
+            set_ph(cover, ART_PH[name], lang)
         # long reading on white paper, the title stays on navy (owner's choice: light articles only)
         body = soup.find('article', class_='art')
         if body is not None and body.find_parent('section') is not None:
@@ -1147,6 +1267,7 @@ def insert_map(soup, name, lang, url_for, wa):
             vibro_page(soup, lang, name == 'Mobile-service.dc.html')
         if name == 'Blog.dc.html':
             blog_cards(soup, lang, url_for)
+            blog_page(soup, lang)
         if name in CASE_PAGES:
             faq = _sec_by_h2(soup, {'Частые вопросы', 'Жиі қойылатын сұрақтар', 'Вопросы и ответы', _KK.get('Вопросы и ответы', '')})
             blk = BeautifulSoup(case_block(lang, url_for, small=True), 'html.parser')
@@ -1406,7 +1527,8 @@ def prefix(doc):
     doc = re.sub(r'<img [^>]*/img/vt-01-[^>]*>', lambda m: re.sub(r'alt="[^"]*"', f'alt="{alt}"', m.group(0)).replace('/img/vt-01-', '/img/ph-svc-vibrostand-'), doc)
     doc = doc.replace('/img/vt-01.jpg', '/img/ph-svc-vibrostand.jpg')
     # the frames are tall and crop the 3:2 photo, so half the screen is not enough pixels: take the large file on desktop
-    doc = re.sub(r'<img [^>]*/img/ph-[^>]*>', lambda m: re.sub(r'sizes="[^"]*"', 'sizes="(max-width: 900px) 150vw, 1600px"', m.group(0)), doc)
+    # (the blog's small cards keep their own sizes)
+    doc = re.sub(r'<img [^>]*/img/ph-[^>]*>', lambda m: m.group(0) if '240px' in m.group(0) else re.sub(r'sizes="[^"]*"', 'sizes="(max-width: 900px) 150vw, 1600px"', m.group(0)), doc)
     bar = (f'<div class="topbar"><div class="tb-in"><span>{"Алматы, Аносов к-сі 91" if kk else "Алматы, Аносова 91"}</span>'
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
