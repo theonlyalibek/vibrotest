@@ -963,12 +963,15 @@ def main():
     ap.add_argument('--base', default='https://vibrotest.kz')
     ap.add_argument('--noindex', action='store_true')
     ap.add_argument('--v2', action='store_true', help='build the v2 preview (served under /v2/)')
+    ap.add_argument('--root', action='store_true', help='with --v2: serve v2 from the site root (hosting)')
     a = ap.parse_args()
     out = Path(a.out)
     global KK, V2
     KK = json.loads((ROOT / 'i18n' / 'kk.json').read_text(encoding='utf-8'))
     if a.v2:
         import v2 as V2
+        if a.root:
+            V2.PREFIX = ''
         KK.update({k: v for k, v in V2.KK_EXTRA.items() if k not in KK})
         PAGES.update(V2.pages())
         V2.patch_ui(UI)
