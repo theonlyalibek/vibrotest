@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /map/
+
+Sitemap: https://vibrotest.kz/sitemap.xml

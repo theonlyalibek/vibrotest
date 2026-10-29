@@ -1,0 +1,15 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Карта 2ГИС · VibroTest, Аносова 91</title>
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#151B24;font:14px system-ui,sans-serif}iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;display:block}
+.nf{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;height:100%}.nf a{color:#5AAEF2;font-weight:700}</style></head><body>
+<div class="nf" id="nf"><a href="https://2gis.kz/almaty/firm/70000001104923303" target="_top">Открыть VibroTest, Аносова 91 в 2ГИС</a><a href="https://2gis.kz/almaty/center/76.884787,43.251485/zoom/16/routeTab/rsType/car/to/76.884787,43.251485" target="_top">Найти проезд</a></div>
+<script>
+// 2GIS "firmsonmap" widget. It only renders between 500x400 and 1200x1000 px,
+// so on a narrow phone it is drawn at 500 px wide and scaled down to fit the frame.
+(function(){var o={pos:{lat:43.251485,lon:76.884787,zoom:16},opt:{city:'almaty'},org:'70000001104923303'},f=null;
+function fit(){var w=document.documentElement.clientWidth||window.innerWidth,h=document.documentElement.clientHeight||window.innerHeight;if(!w||!h)return false;
+ var tw=Math.min(1200,Math.max(500,w)),k=w/tw,th=Math.min(1000,Math.max(400,Math.round(h/k)));
+ if(!f){f=document.createElement('iframe');f.title='Карта 2ГИС';f.onload=function(){document.getElementById('nf').style.display='none'};
+  f.src='https://widgets.2gis.com/widget?type=firmsonmap&options='+encodeURIComponent(JSON.stringify(o));document.body.appendChild(f)}
+ f.style.width=tw+'px';f.style.height=th+'px';f.style.transform='scale('+k+')';return true}
+if(!fit()){var t=setInterval(function(){if(fit())clearInterval(t)},100)}window.addEventListener('resize',fit);window.addEventListener('load',fit)})();
+</script></body></html>
