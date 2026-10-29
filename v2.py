@@ -10,6 +10,11 @@ from v2_art import ART, DO_H
 from v2_art_more import MORE
 
 ROOT = Path(__file__).resolve().parent
+# WhatsApp: the chat opens with a ready first line, the way viton.kz does it
+WA_MSG = ('Здравствуйте! Пишу с сайта VIBROTEST.KZ. Хочу записаться.',
+          'Сәлеметсіз бе! VIBROTEST.KZ сайтынан жазып отырмын. Жазылғым келеді.')
+WA_STAND = ('Здравствуйте! Пишу с сайта VIBROTEST.KZ. Хочу записаться на диагностику на вибростенде.',
+            'Сәлеметсіз бе! VIBROTEST.KZ сайтынан жазып отырмын. Вибростендте диагностикаға жазылғым келеді.')
 LANDINGS = json.loads((ROOT / 'i18n' / 'v2-pages.json').read_text(encoding='utf-8'))
 KK_EXTRA = json.loads((ROOT / 'i18n' / 'kk-v2.json').read_text(encoding='utf-8'))
 # SEO articles written by tools/v2_articles.py
@@ -596,7 +601,7 @@ F = {
     'cap': ('Так выглядит заключение.', 'Қорытынды осылай көрінеді.'),
     'book': ('Записаться на диагностику', 'Диагностикаға жазылу'),
     'more': ('Как работает стенд', 'Стенд қалай жұмыс істейді'),
-    'msg': ('Здравствуйте! Хочу записаться на диагностику на вибростенде.', 'Сәлеметсіз бе! Вибростендте диагностикаға жазылғым келеді.'),
+    'msg': WA_STAND,
     'alt': ('Колесо автомобиля на платформе вибростенда VibroTest', 'VibroTest вибростенд платформасындағы көлік дөңгелегі'),
 }
 
@@ -859,13 +864,10 @@ V = {
             (('Что написать при записи?', 'Жазылғанда не жазу керек?'),
              ('Марку и год машины, пробег и когда стучит: на кочках, в повороте, при торможении, на холодную. По марке и году скажем точную цену.',
               'Көліктің маркасы мен жылын, жүрісін және қашан тықылдайтынын: кедір-бұдырда, бұрылыста, тежегенде, суық күйде. Маркасы мен жылы бойынша нақты бағасын айтамыз.'))),
-    'wa': ('Здравствуйте! Хочу на диагностику на вибростенде.\nМашина и год: \nПробег: \nКогда стучит: ',
-           'Сәлеметсіз бе! Вибростендте диагностикаға жазылғым келеді.\nКөлік және жылы: \nЖүрісі: \nҚашан тықылдайды: '),
+    'wa': WA_STAND,
 }
 
 # the header and bottom-bar booking message: a short form, so the first reply can already name a price
-WA_MSG = ('Здравствуйте! Хочу записаться в VibroTest на Аносова 91.\nМашина и год: \nЧто беспокоит: ',
-          'Сәлеметсіз бе! Аносов 91-дегі VibroTest-ке жазылғым келеді.\nКөлік және жылы: \nНе мазалайды: ')
 META = {
     'svc-vibrostand.dc.html': (
         ('Диагностика ходовой на вибростенде в Алматы — от 7 000 ₸, 25–40 минут',
@@ -1611,6 +1613,16 @@ def img_dims(doc):
     return re.sub(r'<img [^>]*>', one, doc)
 
 
+def wa_text(doc, kk):
+    """Every WhatsApp button opens the chat with a first line; on the stand page it already names the stand."""
+    from urllib.parse import quote
+    stand = 'diagnostika-na-vibrostende/">' in doc[:6000]
+    msg = quote((WA_STAND if stand else WA_MSG)[kk], safe='')
+    if stand:
+        doc = doc.replace('?text=' + quote(WA_MSG[kk], safe=''), '?text=' + msg)
+    return re.sub(r'href="(https://wa\.me/\d+)"', lambda m: f'href="{m.group(1)}?text={msg}"', doc)
+
+
 def prefix(doc):
     """Serve the whole v2 build under /v2/: rewrite root-relative links and assets."""
     doc = re.sub(r'<div class="ft-bot">.*?</div>', lambda m: re.sub(r'\s·\s', ', ', m.group(0)), doc, flags=re.S)
@@ -1654,4 +1666,5 @@ def prefix(doc):
         doc = doc.replace('</head>', f'<link rel="preload" as="image" href="{a("src")}" imagesrcset="{a("srcset")}" imagesizes="{a("sizes")}" fetchpriority="high"></head>', 1)
     # hreflang with the region, as the search engines read it best
     doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
+    doc = wa_text(doc, kk)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
