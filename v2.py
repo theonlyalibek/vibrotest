@@ -1101,6 +1101,7 @@ VT_CSS = """
 """
 CSS += VT_CSS
 CSS += """
+section.lt.lt-white{background:linear-gradient(180deg,#0B1220 0,#5E6573 60px,#E9ECF0 150px,#FFFFFF 220px,#FFFFFF calc(100% - 220px),#E9ECF0 calc(100% - 150px),#5E6573 calc(100% - 60px),#0B1220 100%)!important;padding-top:clamp(120px,12vw,170px)!important;padding-bottom:clamp(140px,14vw,200px)!important}
 .lt p,.lt li,.lt .ans{color:#3A4556!important}
 .lt .toc{background:#F1F4F7!important;border-color:#DDE3EA!important}.lt .toc b{color:#0F1722!important}.lt .toc a{color:#0067AC!important}
 .lt .readmore li,.lt .artlist li{border-color:rgba(15,23,34,.12)!important}.lt .readmore a,.lt .artlist a{color:#0F1722!important}
