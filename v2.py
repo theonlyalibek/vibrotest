@@ -8,8 +8,12 @@ from bs4 import BeautifulSoup
 from v2_svc import SVC
 from v2_art import ART, DO_H
 from v2_art_more import MORE
+from v2_privacy import PRIVACY
 
 ROOT = Path(__file__).resolve().parent
+# the shop's legal name, as viton.kz shows its own (same owner)
+LEGAL = ('ИП Новиков «VibroTest.kz»', 'ЖК Новиков «VibroTest.kz»')
+IIN = ('ИИН 020317501018', 'ЖСН 020317501018')
 # WhatsApp: the chat opens with a ready first line, the way viton.kz does it
 WA_MSG = ('Здравствуйте! Пишу с сайта VIBROTEST.KZ. Хочу записаться.',
           'Сәлеметсіз бе! VIBROTEST.KZ сайтынан жазып отырмын. Жазылғым келеді.')
@@ -902,6 +906,8 @@ def meta(board, lang, t, desc, price=None):
 
 # search shows about 140–160 characters: the short ones say what we do, the symptom and the price
 DESC = {
+    'privacy.dc.html': ('Как ИП Новиков «VibroTest.kz» собирает, хранит и защищает данные посетителей сайта vibrotest.kz и клиентов автосервиса на Аносова 91.',
+                        'ЖК Новиков «VibroTest.kz» vibrotest.kz сайтына кірушілер мен Аносов 91-дегі автосервис клиенттерінің деректерін қалай жинайды, сақтайды және қорғайды.'),
     'Services.dc.html': ('Ремонт подвески, рулевых реек, тормозов и ШРУС, диагностика ходовой на вибростенде и двигателя сканером. Цены «от» на каждой странице. Алматы, Аносова 91.', ''),
     'Blog.dc.html': ('Статьи мастера Виктора Новикова: откуда стук в подвеске, когда менять амортизаторы и детали, как проверить машину перед покупкой. Алматы, Аносова 91.', ''),
     'svc-steering-rack.dc.html': (
@@ -935,6 +941,7 @@ DESC = {
 }
 # Kazakh titles the shortener cannot cut without losing the meaning
 TITLE = {
+    'privacy.dc.html': {False: 'Политика обработки персональных данных — VibroTest', True: 'Дербес деректерді өңдеу саясаты — VibroTest'},
     'art-rack.dc.html': {True: 'Рульдік рейканы қалпына келтіру ме, ауыстыру ма?'},
     'art-lixiang-l7.dc.html': {True: 'LiXiang L7 кейсі: рычагтар, рейка, тартқыштар мен ұштықтар'},
     'art-skrip.dc.html': {True: 'Кедір-бұдырда аспа сықырлайды: себебін қалай табу керек'},
@@ -1133,6 +1140,7 @@ VT_CSS = """
 .fm-g{border-top:1px solid rgba(255,255,255,.08);margin:0!important}.fm-g:last-of-type{border-bottom:1px solid rgba(255,255,255,.08)}
 .fm-g summary{display:flex!important;align-items:center;justify-content:space-between;padding:17px 0!important;font-size:16px;font-weight:600;color:#EEF2F7;cursor:pointer;list-style:none}
 .fm-g summary::-webkit-details-marker{display:none}
+.fm-a{display:block;padding:17px 0;font-size:16px;font-weight:600;color:#EEF2F7!important;border-bottom:1px solid rgba(255,255,255,.08)}
 .fm-g summary i{position:relative;width:14px;height:14px;flex:none}
 .fm-g summary i:before,.fm-g summary i:after{content:"";position:absolute;left:0;top:6px;width:14px;height:2px;border-radius:1px;background:#A9B4C2;transition:transform .2s}
 .fm-g summary i:after{transform:rotate(90deg)}.fm-g[open] summary i:after{transform:rotate(0)}
@@ -1286,6 +1294,42 @@ section.lt.lt-white{background:linear-gradient(180deg,#0B1220 0,#FFFFFF 72px,#FF
 """
 
 
+MAP_NOTE = ('Карта 2ГИС на сайте загружается только после нажатия «Показать карту». После этого 2ГИС может получить технические данные браузера по своим правилам.',
+            'Сайттағы 2ГИС картасы «Картаны көрсету» батырмасын басқаннан кейін ғана жүктеледі. Содан кейін 2ГИС өз ережелері бойынша браузердің техникалық деректерін алуы мүмкін.')
+
+
+def privacy_page(soup, lang):
+    """The full personal data policy, the same document viton.kz publishes, under VibroTest's name."""
+    i = lang != 'ru'
+    h1, lead, secs = PRIVACY[lang]
+    head = soup.find('h1')
+    if head is None:
+        return
+    head.string = h1
+    crumb = head.find_previous('nav')
+    if crumb is not None:
+        crumb.find_all('span')[-1].string = ('Политика данных', 'Деректер саясаты')[i]
+    p = head.find_next_sibling('p')
+    body = p.find_next_sibling('div') if p is not None else None
+    if p is None or body is None:
+        return
+    p.string = lead
+    txt = 'margin-top: 10px; font-size: 16px; line-height: 1.65; color: #A9B4C2'
+    out = [f'<p style="font-size: 14px; color: #8A96A6">{("Редакция от 29.10.2026", "29.10.2026 редакциясы")[i]}</p>']
+    for n, (h, blocks) in enumerate(secs):
+        part = f'<div><h2 class="hd" style="font-size: 24px; font-weight: 700">{html.escape(h)}</h2>'
+        for kind, val in blocks:
+            if kind == 'ul':
+                part += f'<ul style="{txt}; padding-left: 20px; display: flex; flex-direction: column; gap: 6px">' + ''.join(f'<li>{html.escape(x)}</li>' for x in val) + '</ul>'
+            else:
+                part += f'<p style="{txt}">{html.escape(val)}</p>'
+        if n == 5:
+            part += f'<p style="{txt}">{MAP_NOTE[i]}</p>'
+        out.append(part + '</div>')
+    body.clear()
+    body.append(BeautifulSoup(''.join(out), 'html.parser'))
+
+
 ENTRANCE = (('Вход в VibroTest на Аносова, 91: синяя вывеска VIBROTEST.KZ, рядом Viton и Lixiangshop',
              'Ищите синюю вывеску VIBROTEST.KZ: она слева, рядом с Viton и Lixiangshop, на первом этаже.'),
             ('Аносов, 91-дегі VibroTest кіреберісі: көк VIBROTEST.KZ маңдайшасы, қасында Viton және Lixiangshop',
@@ -1321,6 +1365,8 @@ def insert_map(soup, name, lang, url_for, wa):
             lighten(body.find_parent('section'), 'white')
     elif name == 'contacts.dc.html':
         entrance_photo(soup, lang)
+    elif name == 'privacy.dc.html':
+        privacy_page(soup, lang)
     elif name.startswith(('svc-', 'l-')) or name == 'Mobile-service.dc.html':
         service_extras(soup, 'svc-vibrostand.dc.html' if name == 'Mobile-service.dc.html' else name, lang, url_for)
     # the address block sits right above the booking form: its own «Записаться» button only repeats the form
@@ -1553,9 +1599,10 @@ def footer_mobile(doc, kk, lg, arts):
             '<a class="num fm-tel" href="tel:+77474956165">+7 747 495 61 65</a>'
             f'<span class="fc-m">{t("Ежедневно 09:30–19:00", "Күн сайын 09:30–19:00")}</span></div>'
             + grp(t('Услуги', 'Қызметтер'), svc) + grp(t('Полезное', 'Пайдалы'), arts)
-            + grp(t('Разделы', 'Бөлімдер'), menu.group(1) if menu else '')
-            + f'<div class="fm-bot"><span>© 2026 VibroTest.kz</span><span>{t("Алматы, Аносова 91", "Алматы, Аносов к-сі 91")}</span>'
-            f'<a href="/{lg}/privacy/">{t("Политика конфиденциальности", "Құпиялылық саясаты")}</a></div></div>')
+            + f'<a class="fm-a" href="/{lg}/contacts/">{t("Контакты", "Байланыс")}</a>'
+            + f'<div class="fm-bot"><span>© 2026 VibroTest.kz</span><span>{LEGAL[kk]}</span><span>{IIN[kk]}</span>'
+            f'<a href="/{lg}/privacy/">{t("Политика данных", "Деректер саясаты")}</a>'
+            f'<a href="https://viton.kz/{lg}/">{t("Viton.kz: чистка форсунок, по соседству", "Viton.kz: форсунка тазалау, көршілес")}</a></div></div>')
 
 
 SVC_NAMES = [('Услуги и цены на ремонт ходовой в Алматы', 'Услуги по ремонту ходовой в Алматы'),
@@ -1643,7 +1690,7 @@ def prefix(doc):
            f'<span>{"Күн сайын 09:30–19:00" if kk else "Ежедневно 09:30–19:00"}</span></div></div>')
     doc = doc.replace('<header class="dh d-only">', bar + '<header class="dh d-only">', 1)
     lg = 'kk' if kk else 'ru'
-    doc = re.sub(r'(<div class="ft-bot">.*?)(</div>)', lambda m: m.group(1) + f'<a href="/{lg}/privacy/">{"Құпиялылық саясаты" if kk else "Политика конфиденциальности"}</a>' + m.group(2), doc, count=1, flags=re.S)
+    doc = re.sub(r'(<div class="ft-bot">.*?)(</div>)', lambda m: m.group(1) + f'<span>{LEGAL[kk]}, {IIN[kk]}</span><a href="/{lg}/privacy/">{"Деректер саясаты" if kk else "Политика данных"}</a>' + m.group(2), doc, count=1, flags=re.S)
     arts = ''.join(f'<a href="/{lg}/blog/{x[1]}/">{html.escape(x[2][1 if kk else 0])}</a>' for x in ALL_ARTS)
     doc = doc.replace('<div class="ft-bot">', f'<div class="ft-arts"><span class="fc-h">{"Пайдалы" if kk else "Полезное"}</span><div>{arts}</div></div>'
                       + footer_contacts(kk) + '<div class="ft-bot">', 1)
