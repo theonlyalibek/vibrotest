@@ -151,7 +151,8 @@ PHONE_HERO = ('Mobile.dc.html', 'Mobile-service.dc.html')
 ART_PH = {'art-knock.dc.html': 'l-stabilizator', 'art-yama.dc.html': 'l-rychagi', 'art-gul.dc.html': 'l-stupica',
           'art-amortizatory.dc.html': 'l-amortizatory', 'art-uvodit.dc.html': 'svc-suspension', 'art-hrust.dc.html': 'l-shrus',
           'art-tormoza.dc.html': 'svc-brakes', 'art-skrip.dc.html': 'l-saylentbloki', 'art-stand-vs-lift.dc.html': 'svc-vibrostand',
-          'art-steering-knock.dc.html': 'l-tyagi', 'art-rack.dc.html': 'svc-steering-rack', 'art-before-buying.dc.html': 'l-pered-pokupkoy'}
+          'art-steering-knock.dc.html': 'l-tyagi', 'art-rack.dc.html': 'svc-steering-rack', 'art-before-buying.dc.html': 'l-pered-pokupkoy',
+          'art-check-engine.dc.html': 'svc-engine', 'art-antifriz.dc.html': 'svc-cooling'}
 
 
 def set_ph(img, stem, lang):
@@ -906,7 +907,19 @@ def meta(board, lang, t, desc, price=None):
 
 # search shows about 140–160 characters: the short ones say what we do, the symptom and the price
 DESC = {
-    'art-gde-proverit.dc.html': ('Где проверить ходовую в Алматы: подъёмник, вибростенд или тест-драйв, что находит каждый и сколько стоит. Вибростенд в VibroTest от 7 000 ₸, 25–40 минут, Аносова 91.',
+    'art-podveska-ceny.dc.html': ('Цены на ремонт подвески в Алматы: стабилизатор, сайлентблоки и наконечники от 3 000 ₸, рычаги от 5 000 ₸, амортизаторы от 10 000 ₸. Аносова 91.',
+                                  'Алматыда аспаны жөндеу бағалары: стабилизатор тіректері, сайлентблоктар мен ұштықтар 3 000 ₸-ден, рычагтар 5 000 ₸-ден, амортизаторлар 10 000 ₸-ден. Аносов 91.'),
+    'art-sharovaya.dc.html': ('Как понять, что шаровая опора изношена: стук на ямах, скрип, люфт колеса. Можно ли ездить и сколько стоит замена в Алматы, от 5 000 ₸. VibroTest, Аносова 91.',
+                              'Шар тірегінің тозғанын қалай білуге болады: шұңқырдағы тықыл, сықыр, дөңгелек саңылауы. Алматыда ауыстыру 5 000 ₸-ден. VibroTest, Аносов 91.'),
+    'art-saylentbloki.dc.html': ('Когда менять сайлентблоки: признаки износа, сколько служат, сайлентблок или рычаг целиком. Замена в Алматы от 3 000 ₸. VibroTest, Аносова 91.',
+                                 'Сайлентблоктарды қашан ауыстыру керек: тозу белгілері, қызмет мерзімі, сайлентблок па, рычаг па. Алматыда ауыстыру 3 000 ₸-ден. VibroTest, Аносов 91.'),
+    'art-kolodki.dc.html': ('Когда менять тормозные колодки и диски: сроки, признаки износа, почему в Алматы тормоза стираются быстрее. Замена от 5 000 ₸ за ось. VibroTest, Аносова 91.',
+                            'Тежегіш қалыптары мен дискілерін қашан ауыстыру керек: мерзімдер, тозу белгілері. Бір оське ауыстыру 5 000 ₸-ден. VibroTest, Аносов 91.'),
+    'art-check-engine.dc.html': ('Горит или мигает Check Engine: можно ли ехать, частые причины и почему нельзя просто стереть ошибку. Диагностика двигателя в Алматы от 5 000 ₸, Аносова 91.',
+                                 'Check Engine жанып тұр немесе жыпылықтайды: жүруге бола ма, жиі себептері. Алматыда қозғалтқыш диагностикасы 5 000 ₸-ден, Аносов 91.'),
+    'art-antifriz.dc.html': ('Течёт антифриз или греется двигатель: что делать сразу, где обычно течёт и сколько стоит ремонт в Алматы. Патрубки от 3 000 ₸, радиатор от 10 000 ₸. Аносова 91.',
+                             'Антифриз ағады немесе қозғалтқыш қызады: бірден не істеу керек, әдетте қай жерден ағады. Патрубоктар 3 000 ₸-ден, радиатор 10 000 ₸-ден. Аносов 91.'),
+    'art-gde-proverit.dc.html': ('Где проверить ходовую в Алматы: подъёмник, вибростенд или тест-драйв, что находит каждый и сколько стоит. Вибростенд в VibroTest от 7 000 ₸, Аносова 91.',
                                  'Алматыда жүріс бөлігін қайда тексеруге болады: көтергіш, вибростенд немесе тест-драйв, әрқайсысы нені табады және қанша тұрады. VibroTest-те вибростенд 7 000 ₸-ден, 25–40 минут.'),
     'privacy.dc.html': ('Как ИП Новиков «VibroTest.kz» собирает, хранит и защищает данные посетителей сайта vibrotest.kz и клиентов автосервиса на Аносова 91.',
                         'ЖК Новиков «VibroTest.kz» vibrotest.kz сайтына кірушілер мен Аносов 91-дегі автосервис клиенттерінің деректерін қалай жинайды, сақтайды және қорғайды.'),
@@ -943,6 +956,8 @@ DESC = {
 }
 # Kazakh titles the shortener cannot cut without losing the meaning
 TITLE = {
+    'art-gde-proverit.dc.html': {True: 'Алматыда жүріс бөлігін қайда тексеру керек және бағасы'},
+    'art-check-engine.dc.html': {True: 'Check Engine жанып тұр: не істеу керек, диагностика бағасы'},
     'privacy.dc.html': {False: 'Политика обработки персональных данных — VibroTest', True: 'Дербес деректерді өңдеу саясаты — VibroTest'},
     'art-rack.dc.html': {True: 'Рульдік рейканы қалпына келтіру ме, ауыстыру ма?'},
     'art-lixiang-l7.dc.html': {True: 'LiXiang L7 кейсі: рычагтар, рейка, тартқыштар мен ұштықтар'},
@@ -1717,4 +1732,5 @@ def prefix(doc):
     # hreflang with the region, as the search engines read it best
     doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
     doc = wa_text(doc, kk)
+    doc = doc.replace('<meta property="og:image"', '<meta name="twitter:card" content="summary_large_image"><meta property="og:image"', 1)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)

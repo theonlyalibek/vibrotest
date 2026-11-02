@@ -1,5 +1,124 @@
 [
  {
+  "board": "art-podveska-ceny.dc.html",
+  "slug": "skolko-stoit-remont-podveski-almaty",
+  "date": "2026-11-02",
+  "img": "vt-08",
+  "alt": "Мастер собирает амортизаторную стойку на верстаке",
+  "h1": [
+   "Сколько стоит ремонт подвески в Алматы",
+   "Алматыда аспаны жөндеу қанша тұрады"
+  ],
+  "cat": [
+   "Подвеска",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "svc-suspension.dc.html",
+   "svc-vibrostand.dc.html",
+   "l-rychagi.dc.html"
+  ]
+ },
+ {
+  "board": "art-sharovaya.dc.html",
+  "slug": "sharovaya-opora-priznaki-iznosa",
+  "date": "2026-11-02",
+  "img": "vt-05",
+  "alt": "Детали подвески и привода на тёмном фоне",
+  "h1": [
+   "Шаровая опора: признаки износа и цена замены",
+   "Шар тірегі: тозу белгілері және ауыстыру бағасы"
+  ],
+  "cat": [
+   "Подвеска",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "l-rychagi.dc.html",
+   "svc-suspension.dc.html"
+  ]
+ },
+ {
+  "board": "art-saylentbloki.dc.html",
+  "slug": "kogda-menyat-saylentbloki",
+  "date": "2026-11-02",
+  "img": "vt-02",
+  "alt": "Мастер ставит датчики шума на рычаг подвески",
+  "h1": [
+   "Когда менять сайлентблоки и сколько это стоит",
+   "Сайлентблоктарды қашан ауыстыру керек және қанша тұрады"
+  ],
+  "cat": [
+   "Подвеска",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "l-saylentbloki.dc.html",
+   "l-rychagi.dc.html"
+  ]
+ },
+ {
+  "board": "art-kolodki.dc.html",
+  "slug": "kogda-menyat-kolodki-i-diski",
+  "date": "2026-11-02",
+  "img": "vt-07",
+  "alt": "Мастер держит тормозной диск с суппортом",
+  "h1": [
+   "Когда менять тормозные колодки и диски",
+   "Тежегіш қалыптары мен дискілерін қашан ауыстыру керек"
+  ],
+  "cat": [
+   "Тормоза",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "svc-brakes.dc.html"
+  ]
+ },
+ {
+  "board": "art-check-engine.dc.html",
+  "slug": "gorit-check-engine-chto-delat",
+  "date": "2026-11-02",
+  "img": "vt-05",
+  "alt": "Детали подвески и привода на тёмном фоне",
+  "h1": [
+   "Горит Check Engine: что делать и сколько стоит диагностика",
+   "Check Engine жанып тұр: не істеу керек және диагностика бағасы"
+  ],
+  "cat": [
+   "Двигатель",
+   "Қозғалтқыш"
+  ],
+  "min": 5,
+  "svc": [
+   "svc-engine.dc.html",
+   "l-pered-pokupkoy.dc.html"
+  ]
+ },
+ {
+  "board": "art-antifriz.dc.html",
+  "slug": "techet-antifriz-chto-delat",
+  "date": "2026-11-02",
+  "img": "vt-05",
+  "alt": "Детали подвески и привода на тёмном фоне",
+  "h1": [
+   "Течёт антифриз или греется двигатель: что делать",
+   "Антифриз ағады немесе қозғалтқыш қызады: не істеу керек"
+  ],
+  "cat": [
+   "Охлаждение",
+   "Салқындату"
+  ],
+  "min": 5,
+  "svc": [
+   "svc-cooling.dc.html"
+  ]
+ },
+ {
   "board": "art-gde-proverit.dc.html",
   "slug": "gde-proverit-hodovuyu-almaty",
   "date": "2026-11-02",
