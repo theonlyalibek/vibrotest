@@ -1,5 +1,31 @@
 [
  {
+  "board": "art-gde-proverit.dc.html",
+  "slug": "gde-proverit-hodovuyu-almaty",
+  "date": "2026-11-02",
+  "img": "vt-00",
+  "alt": "Кроссовер на вибростенде в боксе VibroTest",
+  "h1": [
+   "Где проверить ходовую в Алматы и сколько это стоит",
+   "Алматыда жүріс бөлігін қайда тексеруге болады және қанша тұрады"
+  ],
+  "cat": [
+   "Диагностика",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "svc-vibrostand.dc.html",
+   "l-pered-pokupkoy.dc.html",
+   "art-stand-vs-lift.dc.html"
+  ],
+  "src": "/img/ph-vhod-1600.webp",
+  "alt2": [
+   "Вход в VibroTest на ул. Аносова, 91 в Алматы",
+   "Алматыдағы Аносов к-сі, 91 мекенжайындағы VibroTest кіреберісі"
+  ]
+ },
+ {
   "board": "art-lixiang-l7.dc.html",
   "slug": "keys-lixiang-l7-podveska-i-rulevoe",
   "date": "2026-10-28",
