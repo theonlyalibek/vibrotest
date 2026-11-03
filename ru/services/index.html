@@ -444,7 +444,7 @@ a[href^="tel:"]{white-space:nowrap}
 <h1 class="hd" style="font-size: clamp(35px, 4.84vw, 62px); line-height: 1.02; font-weight: 800">Услуги по ремонту ходовой</h1>
 <p style="font-size: 19px; line-height: 1.6; color: #A9B4C2; max-width: 560px">Выберите услугу: на её странице цена работы, как мы её делаем и ответы на частые вопросы. Запчасти считаем отдельно, точную сумму мастер называет после диагностики.</p>
 <div style="display: flex; align-items: center; gap: 28px; flex-wrap: wrap">
-<a class="btn btn-p" href="#book">Записаться</a>
+<a class="btn btn-p" href="https://wa.me/77474956165?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9F%D0%B8%D1%88%D1%83%20%D1%81%20%D1%81%D0%B0%D0%B9%D1%82%D0%B0%20VIBROTEST.KZ.%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B0%D1%82%D1%8C%D1%81%D1%8F.">Записаться</a>
 <a class="lnk" href="/ru/#symptom">Подобрать по симптому</a>
 </div>
 </div>
@@ -615,10 +615,6 @@ if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&'IntersectionObserve
 [].forEach.call(document.querySelectorAll('[data-dots]'),function(r){var d=r.parentNode.querySelector('.dots');if(!d)return;var dots=d.children;
  r.addEventListener('scroll',function(){var w=r.children[0].getBoundingClientRect().width+(parseFloat(getComputedStyle(r).columnGap)||12),k=r.scrollLeft>=r.scrollWidth-r.clientWidth-4?dots.length-1:Math.min(dots.length-1,Math.round(r.scrollLeft/w));
   [].forEach.call(dots,function(s,j){s.classList.toggle('on',j===k)});r.parentNode.classList.toggle('at-end',k===dots.length-1)},{passive:true})});
-// the bottom «Записаться» opens the three-field form when the page has one
-(function(){var b=document.querySelector('.bb .mbtn');if(!b)return;b.addEventListener('click',function(e){
- var f=[].filter.call(document.querySelectorAll('form[data-book]'),function(x){return x.offsetParent!==null})[0];if(!f)return;
- e.preventDefault();f.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){var i=f.querySelector('input,select');if(i)i.focus({preventScroll:true})},500)})})();
 // phones: the bottom «Записаться / звонок» bar steps aside while another booking button is on screen
 (function(){var bb=document.querySelector('.bb');if(!bb||!('IntersectionObserver' in window))return;
  var seen=new Set(),io=new IntersectionObserver(function(es){es.forEach(function(e){e.intersectionRatio>=.5?seen.add(e.target):seen.delete(e.target)});
