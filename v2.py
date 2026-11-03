@@ -510,10 +510,6 @@ JS = r'''
 [].forEach.call(document.querySelectorAll('[data-dots]'),function(r){var d=r.parentNode.querySelector('.dots');if(!d)return;var dots=d.children;
  r.addEventListener('scroll',function(){var w=r.children[0].getBoundingClientRect().width+(parseFloat(getComputedStyle(r).columnGap)||12),k=r.scrollLeft>=r.scrollWidth-r.clientWidth-4?dots.length-1:Math.min(dots.length-1,Math.round(r.scrollLeft/w));
   [].forEach.call(dots,function(s,j){s.classList.toggle('on',j===k)});r.parentNode.classList.toggle('at-end',k===dots.length-1)},{passive:true})});
-// the bottom «Записаться» opens the three-field form when the page has one
-(function(){var b=document.querySelector('.bb .mbtn');if(!b)return;b.addEventListener('click',function(e){
- var f=[].filter.call(document.querySelectorAll('form[data-book]'),function(x){return x.offsetParent!==null})[0];if(!f)return;
- e.preventDefault();f.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(function(){var i=f.querySelector('input,select');if(i)i.focus({preventScroll:true})},500)})})();
 // phones: the bottom «Записаться / звонок» bar steps aside while another booking button is on screen
 (function(){var bb=document.querySelector('.bb');if(!bb||!('IntersectionObserver' in window))return;
  var seen=new Set(),io=new IntersectionObserver(function(es){es.forEach(function(e){e.intersectionRatio>=.5?seen.add(e.target):seen.delete(e.target)});
@@ -1685,6 +1681,7 @@ def wa_text(doc, kk):
     msg = quote((WA_STAND if stand else WA_MSG)[kk], safe='')
     if stand:
         doc = doc.replace('?text=' + quote(WA_MSG[kk], safe=''), '?text=' + msg)
+    doc = doc.replace('href="#book"', 'href="https://wa.me/77474956165"')
     return re.sub(r'href="(https://wa\.me/\d+)"', lambda m: f'href="{m.group(1)}?text={msg}"', doc)
 
 
