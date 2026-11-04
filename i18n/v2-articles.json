@@ -1,5 +1,47 @@
 [
  {
+  "board": "art-zima.dc.html",
+  "slug": "podgotovka-hodovoy-k-zime",
+  "date": "2026-11-04",
+  "img": "vt-00",
+  "alt": "Кроссовер на вибростенде в боксе VibroTest",
+  "h1": [
+   "Подготовка ходовой к зиме: что проверить до холодов",
+   "Жүріс бөлігін қысқа дайындау: суыққа дейін нені тексеру керек"
+  ],
+  "cat": [
+   "Подвеска",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "svc-vibrostand.dc.html",
+   "svc-brakes.dc.html",
+   "svc-suspension.dc.html"
+  ]
+ },
+ {
+  "board": "art-kitaycy.dc.html",
+  "slug": "hodovaya-kitayskogo-avto",
+  "date": "2026-11-04",
+  "img": "vt-10",
+  "alt": "Привод и ступица снизу автомобиля, мастер проверяет люфт",
+  "h1": [
+   "Ходовая китайского авто: что проверять на LiXiang, Zeekr, Haval",
+   "Қытай көлігінің жүріс бөлігі: LiXiang, Zeekr, Haval-да нені тексеру керек"
+  ],
+  "cat": [
+   "Диагностика",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "art-lixiang-l7.dc.html",
+   "svc-vibrostand.dc.html",
+   "svc-steering-rack.dc.html"
+  ]
+ },
+ {
   "board": "art-podveska-ceny.dc.html",
   "slug": "skolko-stoit-remont-podveski-almaty",
   "date": "2026-11-02",
