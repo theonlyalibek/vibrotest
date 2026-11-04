@@ -1674,6 +1674,15 @@ def img_dims(doc):
     return re.sub(r'<img [^>]*>', one, doc)
 
 
+# Yandex.Metrika (counter 114067267), as given by the owner
+YM_HEAD = ('<script>(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();'
+           'for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}'
+           'k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})'
+           "(window,document,'script','https://mc.yandex.ru/metrika/tag.js?id=114067267','ym');"
+           "ym(114067267,'init',{ssr:true,webvisor:true,clickmap:true,ecommerce:\"dataLayer\",referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});</script>")
+YM_BODY = '<noscript><div><img src="https://mc.yandex.ru/watch/114067267" style="position:absolute;left:-9999px" alt=""></div></noscript>'
+
+
 def wa_text(doc, kk):
     """Every WhatsApp button opens the chat with a first line; on the stand page it already names the stand."""
     from urllib.parse import quote
@@ -1730,4 +1739,7 @@ def prefix(doc):
     doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
     doc = wa_text(doc, kk)
     doc = doc.replace('<meta property="og:image"', '<meta name="twitter:card" content="summary_large_image"><meta property="og:image"', 1)
+    if '</head>' in doc and 'mc.yandex.ru' not in doc:
+        doc = doc.replace('</head>', YM_HEAD + '</head>', 1)
+        doc = re.sub(r'(<body[^>]*>)', lambda m: m.group(1) + YM_BODY, doc, count=1)
     return re.sub(r'(?<=["\'(\s,=])/(ru|kk|img|media|fonts|map|favicon\.png|apple-touch-icon\.png)(?=[/"\'\s)?#,])', PREFIX + r'/\1', doc)
