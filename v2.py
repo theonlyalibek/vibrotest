@@ -796,7 +796,7 @@ def patch_graph(graph, base, lang):
             used = True
     if used:
         # the neighbour at the same address: engine, injectors, heater flushing, air conditioning
-        viton = {'@type': 'AutoRepair', '@id': 'https://viton.kz/#viton', 'name': 'Viton.kz', 'url': f'https://viton.kz/{lang}/',
+        viton = {'@type': 'AutoRepair', '@id': 'https://viton.kz/#anosova', 'name': 'Viton.kz', 'url': f'https://viton.kz/{lang}/',
                  'telephone': '+77474956165', 'founder': {'@id': pid},
                  'description': ('Сервис по двигателю на том же адресе, что VibroTest: чистка форсунок, компьютерная диагностика двигателя, замер компрессии, промывка печки, заправка кондиционера.'
                                  if lang == 'ru' else 'VibroTest-пен бір мекенжайдағы қозғалтқыш сервисі: форсунка тазалау, қозғалтқышты компьютерлік диагностикалау, компрессияны өлшеу, пешті жуу, кондиционерге фреон толтыру.'),
@@ -807,10 +807,10 @@ def patch_graph(graph, base, lang):
         graph.append(viton)
         graph.append({'@type': 'Person', '@id': pid, 'name': 'Виктор Новиков',
                       'jobTitle': 'основатель VibroTest и Viton.kz' if lang == 'ru' else 'VibroTest және Viton.kz негізін қалаушы',
-                      'worksFor': [{'@id': f'{base}/#vibrotest'}, {'@id': 'https://viton.kz/#viton'}],
+                      'worksFor': [{'@id': f'{base}/#vibrotest'}, {'@id': 'https://viton.kz/#anosova'}],
                       'knowsAbout': ['диагностика ходовой', 'вибростенд', 'ремонт подвески', 'рулевое управление', 'чистка форсунок'],
                       'image': f'{base}/img/viktor-novikov.jpg', 'description': VIKTOR[lang != 'ru'],
-                      'sameAs': ['https://viton.kz/ru/'],
+                      'sameAs': ['https://viton.kz/ru/', 'https://viton.kz/#viktor'],
                       'subjectOf': {'@type': 'NewsArticle', 'url': TENGRI, 'publisher': {'@type': 'Organization', 'name': 'Tengrinews.kz'}}})
     return graph
 
