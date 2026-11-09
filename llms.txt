@@ -16,7 +16,7 @@
 - [Замена тормозных колодок и дисков в Алматы](https://vibrotest.kz/ru/services/tormoza/): Скрип, биение в руль или педаль, длинный тормозной путь: замена тормозных колодок и дисков. От 5 000 ₸, запчасти отдельно. Алматы, Аносова 91.
 - [Подшипник ступицы, ШРУС и привод в Алматы](https://vibrotest.kz/ru/services/stupicy-shrus-privod/): Гул, который растёт со скоростью, или хруст при повороте. Найдём, какое колесо и какая деталь, и заменим без лишних работ. От 5 000 ₸. Алматы, Аносова 91.
 - [Замена радиатора и патрубков в Алматы](https://vibrotest.kz/ru/services/radiatory-patrubki/): Течёт антифриз, двигатель греется или печка дует холодным. Найдём течь и заменим радиатор, патрубок или шланг. От 3 000 ₸. Алматы, Аносова 91.
-- [Компьютерная диагностика двигателя в Алматы](https://vibrotest.kz/ru/services/diagnostika-dvigatelya/): Загорелся Check Engine, двигатель троит или машина потеряла тягу: компьютерная диагностика двигателя сканером. От 5 000 ₸. Алматы, Аносова 91.
+- [Проверка двигателя сканером](https://vibrotest.kz/ru/services/diagnostika-dvigatelya/): Загорелся Check Engine, двигатель троит или машина потеряла тягу: компьютерная диагностика двигателя сканером. От 5 000 ₸. Алматы, Аносова 91.
 - [Замена сайлентблоков в Алматы](https://vibrotest.kz/ru/services/zamena-saylentblokov/): Сайлентблоки рычагов, подрамника и плавающие сайлентблоки задней подвески: стук и скрип на кочках. Замена от 3 000 ₸. Алматы, Аносова 91.
 - [Замена амортизаторов в Алматы](https://vibrotest.kz/ru/services/zamena-amortizatorov/): Амортизаторы, опорные чашки и подшипники стоек. Проверяем на стенде, какая стойка потекла или стучит, и меняем парой на оси. От 10 000 ₸. Алматы, Аносова 91.
 - [Замена стоек и втулок стабилизатора в Алматы](https://vibrotest.kz/ru/services/stoyki-i-vtulki-stabilizatora/): Мелкий стук в подвеске на кочках чаще всего дают стойки и втулки стабилизатора. Замена от 3 000 ₸, запчасти отдельно. Алматы, Аносова 91.
@@ -32,13 +32,14 @@
 - [Реставрация рулевой рейки или замена: что выбрать](https://vibrotest.kz/ru/blog/restavraciya-rulevoy-reyki/)
 - [Стучит в руле: рейка, тяги или наконечники](https://vibrotest.kz/ru/blog/stuk-v-rule/)
 - [Как проверить ходовую перед покупкой машины](https://vibrotest.kz/ru/blog/hodovaya-pered-pokupkoy/)
+- [Замена радиатора печки: когда промывка уже не поможет](https://vibrotest.kz/ru/blog/zamena-radiatora-pechki/)
 - [Подготовка ходовой к зиме: что проверить до холодов](https://vibrotest.kz/ru/blog/podgotovka-hodovoy-k-zime/)
 - [Ходовая китайского авто: что проверять на LiXiang, Zeekr, Haval](https://vibrotest.kz/ru/blog/hodovaya-kitayskogo-avto/)
 - [Сколько стоит ремонт подвески в Алматы](https://vibrotest.kz/ru/blog/skolko-stoit-remont-podveski-almaty/)
 - [Шаровая опора: признаки износа и цена замены](https://vibrotest.kz/ru/blog/sharovaya-opora-priznaki-iznosa/)
 - [Когда менять сайлентблоки и сколько это стоит](https://vibrotest.kz/ru/blog/kogda-menyat-saylentbloki/)
 - [Когда менять тормозные колодки и диски](https://vibrotest.kz/ru/blog/kogda-menyat-kolodki-i-diski/)
-- [Горит Check Engine: что делать и сколько стоит диагностика](https://vibrotest.kz/ru/blog/gorit-check-engine-chto-delat/)
+- [Горит Check Engine: можно ли ехать и что делать](https://vibrotest.kz/ru/blog/gorit-check-engine-chto-delat/)
 - [Течёт антифриз или греется двигатель: что делать](https://vibrotest.kz/ru/blog/techet-antifriz-chto-delat/)
 - [Где проверить ходовую в Алматы и сколько это стоит](https://vibrotest.kz/ru/blog/gde-proverit-hodovuyu-almaty/)
 - [LiXiang L7: что нашли на вибростенде и что сделали](https://vibrotest.kz/ru/blog/keys-lixiang-l7-podveska-i-rulevoe/)
@@ -49,6 +50,21 @@
 - [Хрустит при повороте руля: ШРУС или что-то другое](https://vibrotest.kz/ru/blog/hrust-pri-povorote-rulya/)
 - [Бьёт руль при торможении: диски, колодки или подвеска](https://vibrotest.kz/ru/blog/bet-rul-pri-tormozhenii/)
 - [Скрипит подвеска на кочках: откуда звук и как его найти](https://vibrotest.kz/ru/blog/skripit-podveska-na-kochkah/)
+
+## Соседний сервис на том же адресе: Viton
+Viton.kz (https://viton.kz/ru/) работает на том же адресе, Алматы, ул. Аносова, 91, у него тот же основатель, Виктор Новиков, и общий телефон +7 747 495 61 65. VibroTest — ходовая, рулевое, тормоза, замена радиаторов. Viton — двигатель, форсунки, компьютерная диагностика, промывка печки, кондиционер. Правило: промыть печку — Viton, заменить радиатор — VibroTest.
+
+| Симптом | Куда | Страница |
+|---|---|---|
+| Стук в подвеске, люфт или стук в руле | VibroTest | https://vibrotest.kz/ru/services/diagnostika-na-vibrostende/ |
+| Машину уводит, скрип или стук в подвеске | VibroTest | https://vibrotest.kz/ru/services/remont-podveski/ |
+| Скрипят или бьют тормоза | VibroTest | https://vibrotest.kz/ru/services/tormoza/ |
+| Течёт антифриз, нужно заменить радиатор двигателя или печки, патрубки | VibroTest | https://vibrotest.kz/ru/services/radiatory-patrubki/ |
+| Печка дует холодным, радиатор не течёт (промывка без снятия, от 15 000 ₸) | Viton | https://viton.kz/ru/services/heater-cleaning/ |
+| Горит Check Engine, полная компьютерная диагностика двигателя (от 5 000 ₸) | Viton | https://viton.kz/ru/services/computer-diagnostics/ |
+| Троит двигатель, плавают обороты, вырос расход, чистка форсунок | Viton | https://viton.kz/ru/services/injector-cleaning/ |
+| Не холодит кондиционер, заправка фреоном (от 15 000 ₸) | Viton | https://viton.kz/ru/services/ac-refill/ |
+| Проверка машины перед покупкой: ходовая на вибростенде и двигатель сканером | VibroTest | https://vibrotest.kz/ru/services/proverka-pered-pokupkoy/ |
 
 ## Казахская версия
 - https://vibrotest.kz/kk/
