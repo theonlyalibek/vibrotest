@@ -9,6 +9,8 @@ from v2_svc import SVC
 from v2_art import ART, DO_H
 from v2_art_more import MORE
 from v2_privacy import PRIVACY
+import v2_viton
+v2_viton.add_faq(SVC)
 
 ROOT = Path(__file__).resolve().parent
 # the shop's legal name, as viton.kz shows its own (same owner)
@@ -152,7 +154,7 @@ ART_PH = {'art-knock.dc.html': 'l-stabilizator', 'art-yama.dc.html': 'l-rychagi'
           'art-amortizatory.dc.html': 'l-amortizatory', 'art-uvodit.dc.html': 'svc-suspension', 'art-hrust.dc.html': 'l-shrus',
           'art-tormoza.dc.html': 'svc-brakes', 'art-skrip.dc.html': 'l-saylentbloki', 'art-stand-vs-lift.dc.html': 'svc-vibrostand',
           'art-steering-knock.dc.html': 'l-tyagi', 'art-rack.dc.html': 'svc-steering-rack', 'art-before-buying.dc.html': 'l-pered-pokupkoy',
-          'art-check-engine.dc.html': 'svc-engine', 'art-antifriz.dc.html': 'svc-cooling'}
+          'art-check-engine.dc.html': 'svc-engine', 'art-antifriz.dc.html': 'svc-cooling', 'art-pechka-radiator.dc.html': 'svc-cooling'}
 
 
 def set_ph(img, stem, lang):
@@ -750,10 +752,14 @@ def long_text(soup, faq, c, i):
     e = html.escape
     sec = lambda body, last=False: (f'<section class="vt-x svx{" svx-end" if last else ""}" style="padding: clamp(36px, 4.5vw, 64px) 0 {"clamp(45px, 6.94vw, 100px)" if last else "0"}">'
                                     f'<div class="w">{body}</div></section>')
-    (h, paras), (wh, wp), (ch, ci, items), (th, rows) = c['d'], c['w'], c['c'], c['t']
+    (h, paras), (th, rows) = c['d'], c['t']
     out = sec(f'<h2>{e(h[i])}</h2>' + ''.join(f'<p>{e(p[i])}</p>' for p in paras))
-    out += sec(f'<h2>{e(wh[i])}</h2>' + ''.join(f'<p>{e(p[i])}</p>' for p in wp))
-    out += sec(f'<h2>{e(ch[i])}</h2><p>{e(ci[i])}</p><ul class="nohelp">' + ''.join(f'<li>{e(x[i])}</li>' for x in items) + '</ul>')
+    if 'w' in c:
+        wh, wp = c['w']
+        out += sec(f'<h2>{e(wh[i])}</h2>' + ''.join(f'<p>{e(p[i])}</p>' for p in wp))
+    if 'c' in c:
+        ch, ci, items = c['c']
+        out += sec(f'<h2>{e(ch[i])}</h2><p>{e(ci[i])}</p><ul class="nohelp">' + ''.join(f'<li>{e(x[i])}</li>' for x in items) + '</ul>')
     if 'p' in c:
         ph, pi = c['p']
         out += sec(f'<h2>{e(ph[i])}</h2><ul class="nohelp">' + ''.join(f'<li>{e(x[i])}</li>' for x in pi) + '</ul>')
@@ -775,6 +781,7 @@ def patch_graph(graph, base, lang):
     """One Person for Viktor on every page, tied to both of his services; the shop gets its 2GIS map."""
     pid = f'{base}/#viktor'
     used = False
+    addr = None
     for n in graph:
         if n.get('@type') == 'Article' and n.get('author', {}).get('@type') == 'Person':
             n['author'] = {'@id': pid}
@@ -783,11 +790,24 @@ def patch_graph(graph, base, lang):
         if n.get('@type') == 'AutoRepair' and n.get('@id', '').endswith('#vibrotest'):
             n['founder'] = {'@id': pid}
             n['hasMap'] = 'https://2gis.kz/almaty/firm/70000001104923303'
+            n['knowsAbout'] = (['диагностика ходовой на вибростенде', 'ремонт подвески', 'рулевые рейки', 'тормоза', 'ступицы и ШРУС', 'замена радиаторов и патрубков']
+                               if lang == 'ru' else ['вибростендте жүріс бөлігін диагностикалау', 'аспаны жөндеу', 'рульдік рейкалар', 'тежегіштер', 'күпшектер мен ШРУС', 'радиаторлар мен патрубкаларды ауыстыру'])
+            addr = n.get('address')
             used = True
     if used:
+        # the neighbour at the same address: engine, injectors, heater flushing, air conditioning
+        viton = {'@type': 'AutoRepair', '@id': 'https://viton.kz/#viton', 'name': 'Viton.kz', 'url': f'https://viton.kz/{lang}/',
+                 'telephone': '+77474956165', 'founder': {'@id': pid},
+                 'description': ('Сервис по двигателю на том же адресе, что VibroTest: чистка форсунок, компьютерная диагностика двигателя, замер компрессии, промывка печки, заправка кондиционера.'
+                                 if lang == 'ru' else 'VibroTest-пен бір мекенжайдағы қозғалтқыш сервисі: форсунка тазалау, қозғалтқышты компьютерлік диагностикалау, компрессияны өлшеу, пешті жуу, кондиционерге фреон толтыру.'),
+                 'knowsAbout': (['чистка форсунок', 'компьютерная диагностика двигателя', 'замер компрессии', 'промывка печки', 'заправка кондиционера']
+                                if lang == 'ru' else ['форсунка тазалау', 'қозғалтқышты компьютерлік диагностикалау', 'компрессияны өлшеу', 'пешті жуу', 'кондиционерге фреон толтыру'])}
+        if addr:
+            viton['address'] = addr
+        graph.append(viton)
         graph.append({'@type': 'Person', '@id': pid, 'name': 'Виктор Новиков',
                       'jobTitle': 'основатель VibroTest и Viton.kz' if lang == 'ru' else 'VibroTest және Viton.kz негізін қалаушы',
-                      'worksFor': [{'@id': f'{base}/#vibrotest'}, {'@type': 'AutoRepair', 'name': 'Viton.kz', 'url': 'https://viton.kz/ru/'}],
+                      'worksFor': [{'@id': f'{base}/#vibrotest'}, {'@id': 'https://viton.kz/#viton'}],
                       'knowsAbout': ['диагностика ходовой', 'вибростенд', 'ремонт подвески', 'рулевое управление', 'чистка форсунок'],
                       'image': f'{base}/img/viktor-novikov.jpg', 'description': VIKTOR[lang != 'ru'],
                       'sameAs': ['https://viton.kz/ru/'],
@@ -870,6 +890,7 @@ V = {
 
 # the header and bottom-bar booking message: a short form, so the first reply can already name a price
 META = {
+    'svc-engine.dc.html': v2_viton.ENGINE_META,
     'svc-vibrostand.dc.html': (
         ('Диагностика ходовой на вибростенде в Алматы — от 7 000 ₸, 25–40 минут',
          'Стенд раскачивает подвеску под нагрузкой, датчики шума показывают, какой узел стучит. 25–40 минут, заключение на руки. От 7 000 ₸. Алматы, Аносова 91.'),
@@ -915,8 +936,10 @@ DESC = {
                                  'Сайлентблоктарды қашан ауыстыру керек: тозу белгілері, қызмет мерзімі, сайлентблок па, рычаг па. Алматыда ауыстыру 3 000 ₸-ден. VibroTest, Аносов 91.'),
     'art-kolodki.dc.html': ('Когда менять тормозные колодки и диски: сроки, признаки износа, почему в Алматы тормоза стираются быстрее. Замена от 5 000 ₸ за ось. VibroTest, Аносова 91.',
                             'Тежегіш қалыптары мен дискілерін қашан ауыстыру керек: мерзімдер, тозу белгілері. Бір оське ауыстыру 5 000 ₸-ден. VibroTest, Аносов 91.'),
-    'art-check-engine.dc.html': ('Горит или мигает Check Engine: можно ли ехать, частые причины и почему нельзя просто стереть ошибку. Диагностика двигателя в Алматы от 5 000 ₸, Аносова 91.',
-                                 'Check Engine жанып тұр немесе жыпылықтайды: жүруге бола ма, жиі себептері. Алматыда қозғалтқыш диагностикасы 5 000 ₸-ден, Аносов 91.'),
+    'art-check-engine.dc.html': ('Горит или мигает Check Engine: можно ли ехать, частые причины и почему нельзя просто стереть ошибку. Полная диагностика двигателя — в Viton на Аносова 91.',
+                                 'Check Engine жанып тұр немесе жыпылықтайды: жүруге бола ма, жиі себептері. Қозғалтқышты толық диагностикалау — Аносов 91-дегі Viton-да.'),
+    'art-pechka-radiator.dc.html': ('Печка дует холодным: когда радиатор печки достаточно промыть, а когда его пора менять. Замена в VibroTest от 10 000 ₸, промывка в Viton от 15 000 ₸. Аносова 91.',
+                                    'Пеш суық үрлейді: радиаторды қашан жуу жеткілікті, қашан ауыстыру керек. VibroTest-те ауыстыру 10 000 ₸-ден, Viton-да жуу 15 000 ₸-ден. Аносов 91.'),
     'art-antifriz.dc.html': ('Течёт антифриз или греется двигатель: что делать сразу, где обычно течёт и сколько стоит ремонт в Алматы. Патрубки от 3 000 ₸, радиатор от 10 000 ₸. Аносова 91.',
                              'Антифриз ағады немесе қозғалтқыш қызады: бірден не істеу керек, әдетте қай жерден ағады. Патрубоктар 3 000 ₸-ден, радиатор 10 000 ₸-ден. Аносов 91.'),
     'art-gde-proverit.dc.html': ('Где проверить ходовую в Алматы: подъёмник, вибростенд или тест-драйв, что находит каждый и сколько стоит. Вибростенд в VibroTest от 7 000 ₸, Аносова 91.',
@@ -957,7 +980,8 @@ DESC = {
 # Kazakh titles the shortener cannot cut without losing the meaning
 TITLE = {
     'art-gde-proverit.dc.html': {True: 'Алматыда жүріс бөлігін қайда тексеру керек және бағасы'},
-    'art-check-engine.dc.html': {True: 'Check Engine жанып тұр: не істеу керек, диагностика бағасы'},
+    'art-check-engine.dc.html': {True: 'Check Engine жанып тұр: жүруге бола ма, не істеу керек'},
+    'art-pechka-radiator.dc.html': {True: 'Пеш радиаторын ауыстыру: жуу қашан көмектеспейді'},
     'privacy.dc.html': {False: 'Политика обработки персональных данных — VibroTest', True: 'Дербес деректерді өңдеу саясаты — VibroTest'},
     'art-rack.dc.html': {True: 'Рульдік рейканы қалпына келтіру ме, ауыстыру ма?'},
     'art-lixiang-l7.dc.html': {True: 'LiXiang L7 кейсі: рычагтар, рейка, тартқыштар мен ұштықтар'},
@@ -1387,6 +1411,7 @@ def insert_map(soup, name, lang, url_for, wa):
         privacy_page(soup, lang)
     elif name.startswith(('svc-', 'l-')) or name == 'Mobile-service.dc.html':
         service_extras(soup, 'svc-vibrostand.dc.html' if name == 'Mobile-service.dc.html' else name, lang, url_for)
+    v2_viton.apply(soup, name, lang)
     # the address block sits right above the booking form: its own «Записаться» button only repeats the form
     if soup.find('form', attrs={'data-book': True}):
         for route in soup.find_all('a', href=re.compile(r'2gis\.kz/almaty/firm/')):
@@ -1556,6 +1581,7 @@ a[href^="tel:"]{white-space:nowrap}
 .lang{color:#6F7B8B}
 """
 CSS += LIGHT_CSS
+CSS += v2_viton.CSS
 
 
 def light_css(css):

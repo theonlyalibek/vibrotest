@@ -953,6 +953,8 @@ def llms(base, metas):
     lines += [f'- [{m["h1"]}]({base}/ru/{m["path"]}): {m["desc"]}' for m in svc]
     lines += ['', '## Статьи']
     lines += [f'- [{m["h1"]}]({base}/ru/{m["path"]})' for m in art]
+    if V2:
+        lines += V2.v2_viton.llms_section()
     lines += ['', '## Казахская версия', f'- {base}/kk/', '']
     return '\n'.join(lines)
 
