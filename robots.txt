@@ -2,4 +2,18 @@ User-agent: *
 Allow: /
 Disallow: /map/
 
+# AI search and assistants: allowed, the site wants to be cited
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /map/
+
 Sitemap: https://vibrotest.kz/sitemap.xml
