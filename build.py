@@ -1004,6 +1004,11 @@ def main():
     (out / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
                                      + urls + '</urlset>\n', encoding='utf-8')
     robots = ('User-agent: *\nDisallow: /\n' if a.noindex else f'User-agent: *\nAllow: /\nDisallow: /map/\n\nSitemap: {a.base}/sitemap.xml\n')
+    if a.v2 and a.root:  # AI search and assistants named one by one, as on viton.kz
+        ai = ''.join(f'User-agent: {b}\n' for b in ('GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User',
+                                                    'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended'))
+        robots = (f'User-agent: *\nAllow: /\nDisallow: /map/\n\n# AI search and assistants: allowed, the site wants to be cited\n'
+                  f'{ai}Allow: /\nDisallow: /map/\n\nSitemap: {a.base}/sitemap.xml\n')
     (out / 'robots.txt').write_text(robots, encoding='utf-8')
     if a.v2 and a.root:  # IndexNow key for Bing/Yandex on the hosting build
         (out / 'a195c7560e9640499c8eab2e24f7f886.txt').write_text('a195c7560e9640499c8eab2e24f7f886', encoding='utf-8')
