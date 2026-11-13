@@ -1769,6 +1769,8 @@ def prefix(doc):
     doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
     doc = wa_text(doc, kk)
     doc = doc.replace('<meta property="og:image"', '<meta name="twitter:card" content="summary_large_image"><meta property="og:image"', 1)
+    if '<head>' in doc and 'yandex-verification' not in doc:
+        doc = doc.replace('<head>', '<head>\n<meta name="yandex-verification" content="37023c00415f9f2b">', 1)
     if '</head>' in doc and 'mc.yandex.ru' not in doc:
         doc = doc.replace('</head>', YM_HEAD + '</head>', 1)
         doc = re.sub(r'(<body[^>]*>)', lambda m: m.group(1) + YM_BODY, doc, count=1)
