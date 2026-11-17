@@ -54,6 +54,14 @@ CALLOUT = {
         ('Печка не греет: промыть или менять радиатор', 'Пеш жылытпайды: жуу ма, радиаторды ауыстыру ма'), 'blog/pechka-ne-greet-promyt-ili-menyat-radiator/'),
 }
 
+# a second line on a few pages, under the first one
+CALLOUT2 = {
+    'art-lixiang-l7.dc.html': (
+        ('У Li Auto есть и бензиновый двигатель-генератор, и его форсунки тоже загрязняются. Их чистят соседи в Viton на том же адресе.',
+         'Li Auto-да бензин қозғалтқыш-генератор да бар, оның форсункалары да ластанады. Оларды сол мекенжайдағы көршілес Viton тазалайды.'),
+        ('Чистка форсунок Li Auto', 'Li Auto форсункаларын тазалау'), 'blog/chistka-forsunok-li-auto/'),
+}
+
 ENGINE_H1 = ('Проверка двигателя сканером', 'Қозғалтқышты сканермен тексеру')
 ENGINE_META = (('Проверка двигателя сканером, от 5 000 ₸ — VibroTest',
                 'Читаем ошибки двигателя сканером, в том числе вместе с проверкой ходовой перед покупкой. От 5 000 ₸. Полная диагностика двигателя и чистка форсунок — в Viton на том же адресе, Аносова 91.'),
@@ -118,10 +126,14 @@ def apply(soup, name, lang):
     if name in CALLOUT:
         text, link, path = CALLOUT[name]
         nb = BeautifulSoup(f'<p class="vt-nb">{html.escape(text[i])} {_a(i, link, path)}</p>', 'html.parser')
+        nb_p = nb.find('p')
         art = soup.find('article', class_='art')
         if art is not None:
             faq_h = next((h for h in art.find_all('h2', recursive=False) if h.find_next_sibling('div') and h.find_next_sibling('div').find('details')), None)
             (faq_h.insert_before if faq_h else art.append)(nb)
+            if name in CALLOUT2:
+                t2, l2, p2 = CALLOUT2[name]
+                nb_p.insert_after(BeautifulSoup(f'<p class="vt-nb">{html.escape(t2[i])} {_a(i, l2, p2)}</p>', 'html.parser'))
         else:
             faq = next((d.find_parent('section') for d in soup.find_all('details') if 'km-it' not in (d.get('class') or [])), None)
             box = BeautifulSoup(f'<section class="vt-x" style="padding: 0 0 72px"><div class="w">{nb}</div></section>', 'html.parser')
