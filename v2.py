@@ -1651,7 +1651,8 @@ def footer_mobile(doc, kk, lg, arts):
             + f'<a class="fm-a" href="/{lg}/contacts/">{t("Контакты", "Байланыс")}</a>'
             + f'<div class="fm-bot"><span>© 2026 VibroTest.kz</span><span>{LEGAL[kk]}</span><span>{IIN[kk]}</span>'
             f'<a href="/{lg}/privacy/">{t("Политика данных", "Деректер саясаты")}</a>'
-            f'<a href="https://viton.kz/{lg}/">{t("Viton.kz: чистка форсунок, по соседству", "Viton.kz: форсунка тазалау, көршілес")}</a></div></div>')
+            f'<a href="https://viton.kz/{lg}/">{t("Viton.kz: чистка форсунок, по соседству", "Viton.kz: форсунка тазалау, көршілес")}</a>'
+            f'<a href="https://lixiangshop.kz/">{t("Lixiangshop.kz: запчасти Li Auto", "Lixiangshop.kz: Li Auto бөлшектері")}</a></div></div>')
 
 
 SVC_NAMES = [('Услуги и цены на ремонт ходовой в Алматы', 'Услуги по ремонту ходовой в Алматы'),
@@ -1782,6 +1783,9 @@ def prefix(doc):
                 '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 10L10 3M4.5 3H10v5.5"/></svg></a></div>')
         k = doc.rfind('</div></footer>')
         doc = doc[:k] + orda + doc[k:]
+    for viton_txt in ('(чистка форсунок)</span>', '(форсунка тазалау)</span>'):
+        if viton_txt in doc and '</a> (запчасти Li Auto)' not in doc and '</a> (Li Auto бөлшектері)' not in doc:
+            doc = doc.replace(viton_txt, viton_txt[:-7] + (', <a href="https://lixiangshop.kz/">Lixiangshop</a> (запчасти Li Auto)' if not kk else ', <a href="https://lixiangshop.kz/">Lixiangshop</a> (Li Auto бөлшектері)') + '</span>', 1)
     if '<head>' in doc and 'yandex-verification' not in doc:
         doc = doc.replace('<head>', '<head>\n<meta name="yandex-verification" content="37023c00415f9f2b">', 1)
     if '</head>' in doc and 'mc.yandex.ru' not in doc:
