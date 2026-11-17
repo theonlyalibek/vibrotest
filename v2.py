@@ -1584,9 +1584,9 @@ a[href^="tel:"]{white-space:nowrap}
 """
 CSS += LIGHT_CSS
 CSS += v2_viton.CSS
-CSS += ('.orda-w{display:flex;justify-content:center;padding:28px 0 8px}.orda{display:inline-flex;align-items:center;gap:18px;padding:14px 20px 14px 17px;'
-        'border:1.5px solid rgba(255,255,255,.22);border-radius:16px;color:#9A9998;text-decoration:none}.orda:hover{border-color:rgba(255,255,255,.4)}'
-        '.orda-t{display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.2;color:#9A9998}.orda img{display:block}')
+CSS += ('.orda-w{display:flex;padding:20px 0 4px}.orda{display:inline-flex;width:fit-content;align-items:center;gap:10px;padding:8px 12px 8px 10px;'
+        'border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#8A96A8;text-decoration:none}.orda:hover{border-color:rgba(255,255,255,.3)}'
+        '.orda-t{display:flex;flex-direction:column;gap:3px}.orda-t>span{font-size:11px;line-height:1;white-space:nowrap}.orda img{display:block}')
 
 
 def light_css(css):
@@ -1777,10 +1777,10 @@ def prefix(doc):
     doc = doc.replace('<meta property="og:image"', '<meta name="twitter:card" content="summary_large_image"><meta property="og:image"', 1)
     if doc.rstrip().endswith('</html>') and '</div></footer>' in doc and 'orda.digital' not in doc:
         lbl = 'Әзірлеу және дизайн' if kk else 'Разработка и дизайн'
-        orda = (f'<div class="orda-w"><a class="orda" href="https://www.instagram.com/orda.digital/" target="_blank" rel="noopener" aria-label="Orda.digital: {lbl}">'
-                f'<img src="{PREFIX}/img/orda-mark.png" alt="" width="50" height="35" loading="lazy">'
-                f'<span class="orda-t"><span>{lbl}</span><img src="{PREFIX}/img/orda-word.png" alt="Orda.digital" width="137" height="21" loading="lazy"></span>'
-                '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 10L10 3M4.5 3H10v5.5"/></svg></a></div>')
+        orda = (f'<div class="orda-w"><a class="orda" href="https://www.instagram.com/orda.digital/" target="_blank" rel="noopener" aria-label="{lbl}: Orda.digital">'
+                f'<img src="{PREFIX}/img/orda-mark.png" alt="" width="28" height="20" loading="lazy" decoding="async">'
+                f'<span class="orda-t"><span>{lbl}</span><img src="{PREFIX}/img/orda-word.png" alt="Orda.digital" width="85" height="13" loading="lazy" decoding="async"></span>'
+                '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:4px"><path d="M5 19L19 5M8 5h11v11"/></svg></a></div>')
         k = doc.rfind('</div></footer>')
         doc = doc[:k] + orda + doc[k:]
     for viton_txt in ('(чистка форсунок)</span>', '(форсунка тазалау)</span>'):
