@@ -99,6 +99,8 @@ def copy_media(out):
         'name': 'VibroTest.kz', 'short_name': 'VibroTest', 'start_url': PREFIX + '/ru/', 'display': 'browser',
         'background_color': '#0B1220', 'theme_color': '#0B1220',
         'icons': [{'src': f'{PREFIX}/img/icon-{n}.png', 'sizes': f'{n}x{n}', 'type': 'image/png'} for n in (192, 512)]}), encoding='utf-8')
+    for f in ('orda-mark.png', 'orda-word.png'):  # the studio credit in the footer
+        shutil.copy(ROOT / 'img' / f, out / 'img' / f)
     for p in sorted((ROOT / 'img' / 'svc').glob('*.jpg')):
         im = Image.open(p).convert('RGB')
         for w in (800, 1600):
@@ -1582,6 +1584,9 @@ a[href^="tel:"]{white-space:nowrap}
 """
 CSS += LIGHT_CSS
 CSS += v2_viton.CSS
+CSS += ('.orda-w{display:flex;justify-content:center;padding:28px 0 8px}.orda{display:inline-flex;align-items:center;gap:18px;padding:14px 20px 14px 17px;'
+        'border:1.5px solid rgba(255,255,255,.22);border-radius:16px;color:#9A9998;text-decoration:none}.orda:hover{border-color:rgba(255,255,255,.4)}'
+        '.orda-t{display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.2;color:#9A9998}.orda img{display:block}')
 
 
 def light_css(css):
@@ -1769,6 +1774,14 @@ def prefix(doc):
     doc = re.sub(r'(<link rel="alternate" hreflang=")(ru|kk)(")', r'\1\2-KZ\3', doc)
     doc = wa_text(doc, kk)
     doc = doc.replace('<meta property="og:image"', '<meta name="twitter:card" content="summary_large_image"><meta property="og:image"', 1)
+    if doc.rstrip().endswith('</html>') and '</div></footer>' in doc and 'orda.digital' not in doc:
+        lbl = 'Әзірлеу және дизайн' if kk else 'Разработка и дизайн'
+        orda = (f'<div class="orda-w"><a class="orda" href="https://www.instagram.com/orda.digital/" target="_blank" rel="noopener" aria-label="Orda.digital: {lbl}">'
+                f'<img src="{PREFIX}/img/orda-mark.png" alt="" width="50" height="35" loading="lazy">'
+                f'<span class="orda-t"><span>{lbl}</span><img src="{PREFIX}/img/orda-word.png" alt="Orda.digital" width="137" height="21" loading="lazy"></span>'
+                '<svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 10L10 3M4.5 3H10v5.5"/></svg></a></div>')
+        k = doc.rfind('</div></footer>')
+        doc = doc[:k] + orda + doc[k:]
     if '<head>' in doc and 'yandex-verification' not in doc:
         doc = doc.replace('<head>', '<head>\n<meta name="yandex-verification" content="37023c00415f9f2b">', 1)
     if '</head>' in doc and 'mc.yandex.ru' not in doc:
