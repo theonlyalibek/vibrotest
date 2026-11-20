@@ -156,7 +156,8 @@ ART_PH = {'art-knock.dc.html': 'l-stabilizator', 'art-yama.dc.html': 'l-rychagi'
           'art-amortizatory.dc.html': 'l-amortizatory', 'art-uvodit.dc.html': 'svc-suspension', 'art-hrust.dc.html': 'l-shrus',
           'art-tormoza.dc.html': 'svc-brakes', 'art-skrip.dc.html': 'l-saylentbloki', 'art-stand-vs-lift.dc.html': 'svc-vibrostand',
           'art-steering-knock.dc.html': 'l-tyagi', 'art-rack.dc.html': 'svc-steering-rack', 'art-before-buying.dc.html': 'l-pered-pokupkoy',
-          'art-check-engine.dc.html': 'svc-engine', 'art-antifriz.dc.html': 'svc-cooling', 'art-pechka-radiator.dc.html': 'svc-cooling'}
+          'art-check-engine.dc.html': 'svc-engine', 'art-antifriz.dc.html': 'svc-cooling', 'art-pechka-radiator.dc.html': 'svc-cooling',
+          'art-stabilizator.dc.html': 'l-stabilizator'}
 
 
 def set_ph(img, stem, lang):
@@ -926,6 +927,8 @@ def meta(board, lang, t, desc, price=None):
 
 # search shows about 140–160 characters: the short ones say what we do, the symptom and the price
 DESC = {
+    'art-stabilizator.dc.html': ('Мелкий стук на брусчатке на малой скорости: чаще всего стойки или втулки стабилизатора. Как отличить от сайлентблоков, можно ли ездить, замена от 3 000 ₸. Аносова 91.',
+                                 'Тас төсемде ұсақ тықыл: көбіне стабилизатор тіреулері немесе втулкалары. Жүруге бола ма, ауыстыру 3 000 ₸-ден. Аносов 91.'),
     'art-zima.dc.html': ('Что проверить в ходовой перед зимой в Алматы: пыльники, сайлентблоки, амортизаторы, тормоза, подшипники. Таблица узлов и проверка на вибростенде от 7 000 ₸.',
                          'Алматыда қыс алдында жүріс бөлігінде нені тексеру керек: шаңқаптар, сайлентблоктар, амортизаторлар, тежегіштер. Вибростендте тексеру 7 000 ₸-ден.'),
     'art-kitaycy.dc.html': ('Ходовая LiXiang, Zeekr, Haval и других китайских авто: что проверять, почему тяжёлые гибриды нагружают подвеску, как не переплатить. Вибростенд от 7 000 ₸.',

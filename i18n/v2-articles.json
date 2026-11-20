@@ -1,5 +1,26 @@
 [
  {
+  "board": "art-stabilizator.dc.html",
+  "slug": "stuchat-stoyki-stabilizatora",
+  "date": "2026-11-20",
+  "img": "vt-02",
+  "alt": "Мастер ставит датчики шума на рычаг подвески",
+  "h1": [
+   "Стучат стойки стабилизатора: как понять и что делать",
+   "Стабилизатор тіреулері тықылдайды: қалай түсінуге болады және не істеу керек"
+  ],
+  "cat": [
+   "Подвеска",
+   null
+  ],
+  "min": 5,
+  "svc": [
+   "l-stabilizator.dc.html",
+   "svc-vibrostand.dc.html",
+   "svc-suspension.dc.html"
+  ]
+ },
+ {
   "board": "art-pechka-radiator.dc.html",
   "slug": "zamena-radiatora-pechki",
   "date": "2026-11-09",
